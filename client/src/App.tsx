@@ -47,7 +47,7 @@ function App() {
       <footer className="footer">
         <div className="container">
           <p className="text-center text-muted">
-            © 2024 Pricing Calculator - Calcolatrice prezzi con supporto
+            © 2025 LB Pricing Calculator - Calcolatrice prezzi con supporto
             multivaluta
           </p>
         </div>
@@ -57,5 +57,3 @@ function App() {
 }
 
 export default App;
-
-

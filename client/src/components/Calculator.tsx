@@ -83,15 +83,17 @@ const Calculator: React.FC = () => {
     try {
       const currentParams = await pricingApi.getParams();
       setParams(currentParams);
-      
+
       // Aggiorna la selezione del set se i parametri sono già stati caricati
       if (parameterSets.length > 0) {
         const matchingSet = parameterSets.find((set) => {
           return (
             set.purchase_currency === currentParams.purchaseCurrency &&
             set.selling_currency === currentParams.sellingCurrency &&
-            set.quality_control_percent === currentParams.qualityControlPercent &&
-            set.transport_insurance_cost === currentParams.transportInsuranceCost &&
+            set.quality_control_percent ===
+              currentParams.qualityControlPercent &&
+            set.transport_insurance_cost ===
+              currentParams.transportInsuranceCost &&
             set.duty === currentParams.duty &&
             set.exchange_rate === currentParams.exchangeRate &&
             set.italy_accessory_costs === currentParams.italyAccessoryCosts &&
@@ -126,7 +128,8 @@ const Calculator: React.FC = () => {
           set.purchase_currency === currentParams.purchaseCurrency &&
           set.selling_currency === currentParams.sellingCurrency &&
           set.quality_control_percent === currentParams.qualityControlPercent &&
-          set.transport_insurance_cost === currentParams.transportInsuranceCost &&
+          set.transport_insurance_cost ===
+            currentParams.transportInsuranceCost &&
           set.duty === currentParams.duty &&
           set.exchange_rate === currentParams.exchangeRate &&
           set.italy_accessory_costs === currentParams.italyAccessoryCosts &&
@@ -458,8 +461,8 @@ const Calculator: React.FC = () => {
             disabled={loadingParameterSets}
           >
             <option value="">
-              {currentParamsMatchSet 
-                ? "Seleziona un set di parametri..." 
+              {currentParamsMatchSet
+                ? "Seleziona un set di parametri..."
                 : "Parametri personalizzati (non salvati)"}
             </option>
             {parameterSets.map((set) => (
