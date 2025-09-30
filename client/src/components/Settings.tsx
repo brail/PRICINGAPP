@@ -32,16 +32,16 @@ const Settings: React.FC = () => {
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
   const [newParameterSet, setNewParameterSet] = useState({
     description: "",
-    purchaseCurrency: "USD",
-    sellingCurrency: "EUR",
-    qualityControlPercent: 5,
-    transportInsuranceCost: 2.3,
-    duty: 8,
-    exchangeRate: 1.07,
-    italyAccessoryCosts: 1,
-    companyMultiplier: 2.08,
-    retailMultiplier: 2.48,
-    optimalMargin: 25,
+    purchaseCurrency: "",
+    sellingCurrency: "",
+    qualityControlPercent: "",
+    transportInsuranceCost: "",
+    duty: "",
+    exchangeRate: "",
+    italyAccessoryCosts: "",
+    companyMultiplier: "",
+    retailMultiplier: "",
+    optimalMargin: "",
   });
 
   useEffect(() => {
@@ -125,24 +125,44 @@ const Settings: React.FC = () => {
     }
   };
 
+  const resetCreateForm = () => {
+    setNewParameterSet({
+      description: "",
+      purchaseCurrency: "",
+      sellingCurrency: "",
+      qualityControlPercent: "",
+      transportInsuranceCost: "",
+      duty: "",
+      exchangeRate: "",
+      italyAccessoryCosts: "",
+      companyMultiplier: "",
+      retailMultiplier: "",
+      optimalMargin: "",
+    });
+  };
+
   const handleCreateParameterSet = async () => {
     try {
       setSaving(true);
-      await pricingApi.createParameterSet(newParameterSet);
+      
+      // Converti valori vuoti in null o valori di default
+      const parameterSetToCreate = {
+        description: newParameterSet.description,
+        purchaseCurrency: newParameterSet.purchaseCurrency || "USD",
+        sellingCurrency: newParameterSet.sellingCurrency || "EUR",
+        qualityControlPercent: newParameterSet.qualityControlPercent === "" ? 0 : Number(newParameterSet.qualityControlPercent),
+        transportInsuranceCost: newParameterSet.transportInsuranceCost === "" ? 0 : Number(newParameterSet.transportInsuranceCost),
+        duty: newParameterSet.duty === "" ? 0 : Number(newParameterSet.duty),
+        exchangeRate: newParameterSet.exchangeRate === "" ? 1 : Number(newParameterSet.exchangeRate),
+        italyAccessoryCosts: newParameterSet.italyAccessoryCosts === "" ? 0 : Number(newParameterSet.italyAccessoryCosts),
+        companyMultiplier: newParameterSet.companyMultiplier === "" ? 1 : Number(newParameterSet.companyMultiplier),
+        retailMultiplier: newParameterSet.retailMultiplier === "" ? 1 : Number(newParameterSet.retailMultiplier),
+        optimalMargin: newParameterSet.optimalMargin === "" ? 0 : Number(newParameterSet.optimalMargin),
+      };
+      
+      await pricingApi.createParameterSet(parameterSetToCreate);
       setSuccess("Set di parametri creato con successo");
-      setNewParameterSet({
-        description: "",
-        purchaseCurrency: "USD",
-        sellingCurrency: "EUR",
-        qualityControlPercent: 5,
-        transportInsuranceCost: 2.3,
-        duty: 8,
-        exchangeRate: 1.07,
-        italyAccessoryCosts: 1,
-        companyMultiplier: 2.08,
-        retailMultiplier: 2.48,
-        optimalMargin: 25,
-      });
+      resetCreateForm();
       setShowCreateForm(false);
       await loadParameterSets();
     } catch (err: any) {
@@ -481,7 +501,12 @@ const Settings: React.FC = () => {
             <h3>Gestione Set di Parametri</h3>
             <button
               className="btn btn-primary"
-              onClick={() => setShowCreateForm(!showCreateForm)}
+              onClick={() => {
+                if (!showCreateForm) {
+                  resetCreateForm();
+                }
+                setShowCreateForm(!showCreateForm);
+              }}
             >
               {showCreateForm ? "Annulla" : "Crea Nuovo Set"}
             </button>
@@ -624,6 +649,7 @@ const Settings: React.FC = () => {
                         })
                       }
                     >
+                      <option value="">Seleziona valuta</option>
                       {CURRENCIES.map((currency) => (
                         <option key={currency.code} value={currency.code}>
                           {currency.code} - {currency.name}
@@ -644,6 +670,7 @@ const Settings: React.FC = () => {
                         })
                       }
                     >
+                      <option value="">Seleziona valuta</option>
                       {CURRENCIES.map((currency) => (
                         <option key={currency.code} value={currency.code}>
                           {currency.code} - {currency.name}
@@ -663,7 +690,7 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setNewParameterSet({
                           ...newParameterSet,
-                          qualityControlPercent: Number(e.target.value),
+                          qualityControlPercent: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
@@ -682,7 +709,7 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setNewParameterSet({
                           ...newParameterSet,
-                          transportInsuranceCost: Number(e.target.value),
+                          transportInsuranceCost: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
@@ -701,7 +728,7 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setNewParameterSet({
                           ...newParameterSet,
-                          duty: Number(e.target.value),
+                          duty: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
@@ -718,7 +745,7 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setNewParameterSet({
                           ...newParameterSet,
-                          exchangeRate: Number(e.target.value),
+                          exchangeRate: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0.001"
@@ -737,7 +764,7 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setNewParameterSet({
                           ...newParameterSet,
-                          italyAccessoryCosts: Number(e.target.value),
+                          italyAccessoryCosts: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
@@ -756,7 +783,7 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setNewParameterSet({
                           ...newParameterSet,
-                          companyMultiplier: Number(e.target.value),
+                          companyMultiplier: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0.1"
@@ -775,7 +802,7 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setNewParameterSet({
                           ...newParameterSet,
-                          retailMultiplier: Number(e.target.value),
+                          retailMultiplier: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0.1"
@@ -792,7 +819,7 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setNewParameterSet({
                           ...newParameterSet,
-                          optimalMargin: Number(e.target.value),
+                          optimalMargin: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
