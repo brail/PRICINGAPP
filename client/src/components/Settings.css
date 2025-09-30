@@ -420,6 +420,16 @@
   transform: scale(1.1);
 }
 
+.btn-star[data-is-default="true"] {
+  background: #ffc107;
+  color: #fff;
+}
+
+.btn-star[data-is-default="true"]:hover {
+  background: #e0a800;
+  color: #fff;
+}
+
 .btn-danger:disabled {
   background: #6c757d;
   border-color: #6c757d;

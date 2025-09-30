@@ -746,9 +746,7 @@ const Settings: React.FC = () => {
                       style={{ cursor: "pointer" }}
                     >
                       <div className="parameter-set-header">
-                        <h5>
-                          {set.description}
-                        </h5>
+                        <h5>{set.description}</h5>
                         <div className="parameter-set-actions">
                           <button
                             className="btn btn-sm btn-primary"
@@ -787,7 +785,12 @@ const Settings: React.FC = () => {
                               handleSetDefaultParameterSet(set.id);
                             }}
                             disabled={saving}
-                            title={set.is_default ? "Set di parametri predefinito" : "Imposta come predefinito"}
+                            title={
+                              set.is_default
+                                ? "Set di parametri predefinito"
+                                : "Imposta come predefinito"
+                            }
+                            data-is-default={set.is_default ? "true" : "false"}
                           >
                             {set.is_default ? "⭐" : "☆"}
                           </button>
