@@ -134,6 +134,59 @@
   min-width: 80px;
 }
 
+/* Stili per i campi con lock */
+.input-with-lock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input-with-lock .form-input {
+  flex: 1;
+}
+
+.input-with-lock .form-input.locked {
+  background-color: #f8f9fa;
+  border-color: #6c757d;
+  color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.input-with-lock .form-input.locked:focus {
+  border-color: #6c757d;
+  box-shadow: none;
+}
+
+.lock-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.lock-checkbox input[type="checkbox"] {
+  display: none;
+}
+
+.lock-icon {
+  font-size: 18px;
+  color: #6c757d;
+  transition: all 0.2s ease;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.lock-checkbox input[type="checkbox"]:checked + .lock-icon {
+  color: #dc3545;
+  background-color: #f8d7da;
+  transform: scale(1.1);
+}
+
+.lock-checkbox:hover .lock-icon {
+  transform: scale(1.05);
+}
+
 .results-card {
   background: white;
   border-radius: 12px;
@@ -223,6 +276,16 @@
 
   .currency-select {
     width: 100%;
+  }
+
+  .input-with-lock {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .lock-checkbox {
+    justify-content: center;
   }
 
   .results-header {

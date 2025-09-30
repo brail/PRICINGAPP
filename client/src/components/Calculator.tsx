@@ -26,6 +26,9 @@ const Calculator: React.FC = () => {
 
   const [purchasePrice, setPurchasePrice] = useState<string>("");
   const [retailPrice, setRetailPrice] = useState<string>("");
+  const [purchasePriceLocked, setPurchasePriceLocked] =
+    useState<boolean>(false);
+  const [retailPriceLocked, setRetailPriceLocked] = useState<boolean>(false);
   const [mode, setMode] = useState<CalculationMode>("purchase");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
@@ -74,8 +77,10 @@ const Calculator: React.FC = () => {
         params.sellingCurrency
       );
       setCalculation(result);
-      // Aggiorna il campo retail price con il risultato del calcolo
-      setRetailPrice(result.retailPrice.toFixed(2));
+      // Aggiorna il campo retail price con il risultato del calcolo solo se non è bloccato
+      if (!retailPriceLocked) {
+        setRetailPrice(result.retailPrice.toFixed(2));
+      }
     } catch (err) {
       setError("Errore nel calcolo del prezzo di vendita");
     } finally {
@@ -95,8 +100,10 @@ const Calculator: React.FC = () => {
         params.sellingCurrency
       );
       setCalculation(result);
-      // Aggiorna il campo purchase price con il risultato del calcolo
-      setPurchasePrice(result.purchasePrice.toFixed(2));
+      // Aggiorna il campo purchase price con il risultato del calcolo solo se non è bloccato
+      if (!purchasePriceLocked) {
+        setPurchasePrice(result.purchasePrice.toFixed(2));
+      }
     } catch (err) {
       setError("Errore nel calcolo del prezzo di acquisto");
     } finally {
@@ -105,6 +112,7 @@ const Calculator: React.FC = () => {
   };
 
   const handlePurchasePriceChange = (value: string) => {
+    if (purchasePriceLocked) return; // Non modificare se bloccato
     setPurchasePrice(value);
     setMode("purchase");
     // Se c'è un calcolo precedente e l'utente modifica il prezzo di acquisto,
@@ -115,6 +123,7 @@ const Calculator: React.FC = () => {
   };
 
   const handleRetailPriceChange = (value: string) => {
+    if (retailPriceLocked) return; // Non modificare se bloccato
     setRetailPrice(value);
     setMode("selling");
     // Se c'è un calcolo precedente e l'utente modifica il prezzo di vendita,
@@ -161,6 +170,14 @@ const Calculator: React.FC = () => {
     setError("");
   };
 
+  const handlePurchasePriceLockToggle = () => {
+    setPurchasePriceLocked(!purchasePriceLocked);
+  };
+
+  const handleRetailPriceLockToggle = () => {
+    setRetailPriceLocked(!retailPriceLocked);
+  };
+
   // Funzione per determinare il colore del margine basato sulla differenza con il margine ottimale
   const getMarginColor = (
     companyMargin: number,
@@ -205,33 +222,55 @@ const Calculator: React.FC = () => {
             <label className="form-label">
               Prezzo di acquisto ({params.purchaseCurrency})
             </label>
-            <input
-              type="number"
-              className="form-input"
-              value={purchasePrice}
-              onChange={(e) => handlePurchasePriceChange(e.target.value)}
-              onBlur={handlePurchasePriceBlur}
-              onKeyDown={handleKeyPress}
-              placeholder="0.00"
-              step="0.01"
-              min="0"
-            />
+            <div className="input-with-lock">
+              <input
+                type="number"
+                className={`form-input ${purchasePriceLocked ? "locked" : ""}`}
+                value={purchasePrice}
+                onChange={(e) => handlePurchasePriceChange(e.target.value)}
+                onBlur={handlePurchasePriceBlur}
+                onKeyDown={handleKeyPress}
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+                disabled={purchasePriceLocked}
+              />
+              <label className="lock-checkbox">
+                <input
+                  type="checkbox"
+                  checked={purchasePriceLocked}
+                  onChange={handlePurchasePriceLockToggle}
+                />
+                <span className="lock-icon">🔒</span>
+              </label>
+            </div>
           </div>
           <div className="form-group">
             <label className="form-label">
               Prezzo retail ({params.sellingCurrency})
             </label>
-            <input
-              type="number"
-              className="form-input"
-              value={retailPrice}
-              onChange={(e) => handleRetailPriceChange(e.target.value)}
-              onBlur={handleRetailPriceBlur}
-              onKeyDown={handleKeyPress}
-              placeholder="0.00"
-              step="0.01"
-              min="0"
-            />
+            <div className="input-with-lock">
+              <input
+                type="number"
+                className={`form-input ${retailPriceLocked ? "locked" : ""}`}
+                value={retailPrice}
+                onChange={(e) => handleRetailPriceChange(e.target.value)}
+                onBlur={handleRetailPriceBlur}
+                onKeyDown={handleKeyPress}
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+                disabled={retailPriceLocked}
+              />
+              <label className="lock-checkbox">
+                <input
+                  type="checkbox"
+                  checked={retailPriceLocked}
+                  onChange={handleRetailPriceLockToggle}
+                />
+                <span className="lock-icon">🔒</span>
+              </label>
+            </div>
           </div>
         </div>
 
@@ -554,12 +593,12 @@ const Calculator: React.FC = () => {
                       {formatCurrency(
                         isNaN(
                           "purchasePriceRaw" in calculation
-                            ? calculation.purchasePriceRaw
+                            ? (calculation as any).purchasePriceRaw
                             : calculation.purchasePrice
                         )
                           ? 0
                           : "purchasePriceRaw" in calculation
-                          ? calculation.purchasePriceRaw
+                          ? (calculation as any).purchasePriceRaw
                           : calculation.purchasePrice,
                         calculation.purchaseCurrency
                       )}
