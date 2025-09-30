@@ -75,10 +75,19 @@ const initDatabase = () => {
   });
 };
 
+// Funzione per calcolare dinamicamente il companyMultiplier
+const calculateCompanyMultiplier = (optimalMargin) => {
+  if (optimalMargin <= 0 || optimalMargin >= 100) {
+    return 1; // Valore di fallback per margini non validi
+  }
+  return 1 / (1 - optimalMargin / 100);
+};
+
 // Seeding del database con parametri default
 const seedDatabase = () => {
   return new Promise((resolve, reject) => {
     // Parametri default
+    const optimalMargin = 25;
     const defaultParams = {
       description: "Parametri Default",
       purchase_currency: "USD",
@@ -88,9 +97,9 @@ const seedDatabase = () => {
       duty: 8,
       exchange_rate: 1.07,
       italy_accessory_costs: 1,
-      company_multiplier: 2.08,
+      company_multiplier: calculateCompanyMultiplier(optimalMargin),
       retail_multiplier: 2.48,
-      optimal_margin: 25,
+      optimal_margin: optimalMargin,
     };
 
     // Controlla se esiste già un set con descrizione "Parametri Default"

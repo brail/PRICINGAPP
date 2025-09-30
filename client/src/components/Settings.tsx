@@ -213,7 +213,6 @@ const Settings: React.FC = () => {
       errors.push("Costi accessori Italia è obbligatorio");
     }
 
-
     if (
       newParameterSet.retailMultiplier === "" ||
       newParameterSet.retailMultiplier === null ||
@@ -292,7 +291,6 @@ const Settings: React.FC = () => {
     ) {
       errors.push("Costi accessori Italia è obbligatorio");
     }
-
 
     if (
       editingParameterSet?.retail_multiplier === "" ||
@@ -1076,7 +1074,6 @@ const Settings: React.FC = () => {
                       step="0.01"
                     />
                   </div>
-
                 </div>
 
                 <div className="form-row">
@@ -1341,7 +1338,6 @@ const Settings: React.FC = () => {
                       step="0.01"
                     />
                   </div>
-
                 </div>
 
                 <div className="form-row">

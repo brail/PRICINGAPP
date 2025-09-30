@@ -32,7 +32,7 @@ let currentParams = {
   duty: 8,
   exchangeRate: 1.07,
   italyAccessoryCosts: 1,
-  companyMultiplier: 2.08,
+  companyMultiplier: 1.33, // Calcolato dinamicamente da optimalMargin (25%)
   retailMultiplier: 2.48,
   optimalMargin: 25,
 };
@@ -54,7 +54,9 @@ const loadParametersFromDatabase = async () => {
         duty: defaultSet.duty,
         exchangeRate: defaultSet.exchange_rate,
         italyAccessoryCosts: defaultSet.italy_accessory_costs,
-        companyMultiplier: calculateCompanyMultiplier(defaultSet.optimal_margin),
+        companyMultiplier: calculateCompanyMultiplier(
+          defaultSet.optimal_margin
+        ),
         retailMultiplier: defaultSet.retail_multiplier,
         optimalMargin: defaultSet.optimal_margin,
       };
@@ -353,7 +355,9 @@ app.put("/api/params", (req, res) => {
     currentParams.optimalMargin = Math.max(0, Math.min(100, optimalMargin));
 
   // Calcola dinamicamente il companyMultiplier
-  currentParams.companyMultiplier = calculateCompanyMultiplier(currentParams.optimalMargin);
+  currentParams.companyMultiplier = calculateCompanyMultiplier(
+    currentParams.optimalMargin
+  );
 
   res.json(currentParams);
 });
@@ -581,11 +585,9 @@ app.post("/api/parameter-sets/:id/set-default", async (req, res) => {
     const result = await setDefaultParameterSet(id);
     res.json(result);
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        error: "Errore nell'impostazione del set di parametri come default",
-      });
+    res.status(500).json({
+      error: "Errore nell'impostazione del set di parametri come default",
+    });
   }
 });
 
