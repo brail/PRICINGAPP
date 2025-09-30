@@ -30,8 +30,12 @@ const Settings: React.FC = () => {
     null
   );
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
-  const [duplicatingParameterSet, setDuplicatingParameterSet] = useState<any | null>(null);
+  const [duplicatingParameterSet, setDuplicatingParameterSet] = useState<
+    any | null
+  >(null);
   const [duplicateDescription, setDuplicateDescription] = useState<string>("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
+  const [parameterSetToDelete, setParameterSetToDelete] = useState<any | null>(null);
   const [newParameterSet, setNewParameterSet] = useState<{
     description: string;
     purchaseCurrency: string;
@@ -417,17 +421,25 @@ const Settings: React.FC = () => {
     }
   };
 
-  const handleDeleteParameterSet = async (id: number) => {
-    if (
-      !window.confirm("Sei sicuro di voler eliminare questo set di parametri?")
-    ) {
-      return;
-    }
+  const startDeleteParameterSet = (set: any) => {
+    setParameterSetToDelete(set);
+    setShowDeleteConfirm(true);
+  };
+
+  const cancelDeleteParameterSet = () => {
+    setShowDeleteConfirm(false);
+    setParameterSetToDelete(null);
+  };
+
+  const confirmDeleteParameterSet = async () => {
+    if (!parameterSetToDelete) return;
 
     try {
       setSaving(true);
-      await pricingApi.deleteParameterSet(id);
+      await pricingApi.deleteParameterSet(parameterSetToDelete.id);
       setSuccess("Set di parametri eliminato con successo");
+      setShowDeleteConfirm(false);
+      setParameterSetToDelete(null);
       await loadParameterSets();
     } catch (err: any) {
       setError(
@@ -485,15 +497,16 @@ const Settings: React.FC = () => {
     if (!duplicateDescription.trim()) {
       return "Descrizione è obbligatoria";
     }
-    
+
     const existingSet = parameterSets.find(
-      (set) => set.description.toLowerCase() === duplicateDescription.toLowerCase()
+      (set) =>
+        set.description.toLowerCase() === duplicateDescription.toLowerCase()
     );
-    
+
     if (existingSet) {
       return "Una descrizione con questo nome esiste già";
     }
-    
+
     return null;
   };
 
@@ -508,14 +521,15 @@ const Settings: React.FC = () => {
 
     try {
       setSaving(true);
-      
+
       // Crea il nuovo set con tutti i parametri del set originale
       const duplicatedSet = {
         description: duplicateDescription,
         purchaseCurrency: duplicatingParameterSet.purchase_currency,
         sellingCurrency: duplicatingParameterSet.selling_currency,
         qualityControlPercent: duplicatingParameterSet.quality_control_percent,
-        transportInsuranceCost: duplicatingParameterSet.transport_insurance_cost,
+        transportInsuranceCost:
+          duplicatingParameterSet.transport_insurance_cost,
         duty: duplicatingParameterSet.duty,
         exchangeRate: duplicatingParameterSet.exchange_rate,
         italyAccessoryCosts: duplicatingParameterSet.italy_accessory_costs,
@@ -852,7 +866,7 @@ const Settings: React.FC = () => {
                             className="btn btn-sm btn-danger"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleDeleteParameterSet(set.id);
+                              startDeleteParameterSet(set);
                             }}
                             disabled={saving || set.is_default}
                           >
@@ -1155,52 +1169,53 @@ const Settings: React.FC = () => {
               </div>
             )}
 
-              {/* Form per Duplicare Set Esistente */}
-              {duplicatingParameterSet && (
-                <div className="duplicate-parameter-set-form">
-                  <h4>Duplica Set di Parametri</h4>
-                  <p>
-                    Stai duplicando: <strong>{duplicatingParameterSet.description}</strong>
-                  </p>
-                  <div className="form-row">
-                    <label htmlFor="duplicate-description">
-                      Nuova Descrizione *
-                    </label>
-                    <input
-                      type="text"
-                      id="duplicate-description"
-                      value={duplicateDescription}
-                      onChange={(e) => setDuplicateDescription(e.target.value)}
-                      placeholder="Inserisci una descrizione univoca"
-                      className={validateDuplicateDescription() ? "error" : ""}
-                    />
-                    {validateDuplicateDescription() && (
-                      <span className="error-message">
-                        {validateDuplicateDescription()}
-                      </span>
-                    )}
-                  </div>
-                  <div className="form-actions">
-                    <button
-                      className="btn btn-secondary"
-                      onClick={cancelDuplicatingParameterSet}
-                      disabled={saving}
-                    >
-                      Annulla
-                    </button>
-                    <button
-                      className="btn btn-primary"
-                      onClick={handleDuplicateParameterSet}
-                      disabled={saving || !!validateDuplicateDescription()}
-                    >
-                      {saving ? "Duplicazione..." : "Duplica Set"}
-                    </button>
-                  </div>
+            {/* Form per Duplicare Set Esistente */}
+            {duplicatingParameterSet && (
+              <div className="duplicate-parameter-set-form">
+                <h4>Duplica Set di Parametri</h4>
+                <p>
+                  Stai duplicando:{" "}
+                  <strong>{duplicatingParameterSet.description}</strong>
+                </p>
+                <div className="form-row">
+                  <label htmlFor="duplicate-description">
+                    Nuova Descrizione *
+                  </label>
+                  <input
+                    type="text"
+                    id="duplicate-description"
+                    value={duplicateDescription}
+                    onChange={(e) => setDuplicateDescription(e.target.value)}
+                    placeholder="Inserisci una descrizione univoca"
+                    className={validateDuplicateDescription() ? "error" : ""}
+                  />
+                  {validateDuplicateDescription() && (
+                    <span className="error-message">
+                      {validateDuplicateDescription()}
+                    </span>
+                  )}
                 </div>
-              )}
+                <div className="form-actions">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={cancelDuplicatingParameterSet}
+                    disabled={saving}
+                  >
+                    Annulla
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleDuplicateParameterSet}
+                    disabled={saving || !!validateDuplicateDescription()}
+                  >
+                    {saving ? "Duplicazione..." : "Duplica Set"}
+                  </button>
+                </div>
+              </div>
+            )}
 
-              {/* Form per Modificare Set Esistente */}
-              {editingParameterSet && (
+            {/* Form per Modificare Set Esistente */}
+            {editingParameterSet && (
               <div className="edit-parameter-set-form">
                 <h4>
                   Modifica Set di Parametri: {editingParameterSet.description}
@@ -1557,6 +1572,42 @@ const Settings: React.FC = () => {
           </div>
         </div>
       </div> */}
+
+      {/* Dialog di Conferma Eliminazione */}
+      {showDeleteConfirm && parameterSetToDelete && (
+        <div className="modal-overlay">
+          <div className="modal-dialog">
+            <div className="modal-header">
+              <h3>Conferma Eliminazione</h3>
+            </div>
+            <div className="modal-body">
+              <p>
+                Sei sicuro di voler eliminare il set di parametri{" "}
+                <strong>"{parameterSetToDelete.description}"</strong>?
+              </p>
+              <p className="warning-text">
+                ⚠️ Questa azione non può essere annullata.
+              </p>
+            </div>
+            <div className="modal-footer">
+              <button
+                className="btn btn-secondary"
+                onClick={cancelDeleteParameterSet}
+                disabled={saving}
+              >
+                Annulla
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={confirmDeleteParameterSet}
+                disabled={saving}
+              >
+                {saving ? "Eliminazione..." : "Elimina"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
