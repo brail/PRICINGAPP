@@ -739,17 +739,14 @@ const Settings: React.FC = () => {
               ) : (
                 <div className="parameter-sets-grid">
                   {parameterSets.map((set) => (
-                    <div 
-                      key={set.id} 
+                    <div
+                      key={set.id}
                       className="parameter-set-card"
                       onClick={() => toggleCardExpansion(set.id)}
-                      style={{ cursor: 'pointer' }}
+                      style={{ cursor: "pointer" }}
                     >
                       <div className="parameter-set-header">
                         <h5>
-                          {!!set.is_default && (
-                            <span className="default-star">⭐</span>
-                          )}
                           {set.description}
                         </h5>
                         <div className="parameter-set-actions">
@@ -773,18 +770,6 @@ const Settings: React.FC = () => {
                           >
                             Modifica
                           </button>
-                          {!set.is_default && (
-                            <button
-                              className="btn btn-sm btn-warning"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleSetDefaultParameterSet(set.id);
-                              }}
-                              disabled={saving}
-                            >
-                              ⭐ Default
-                            </button>
-                          )}
                           <button
                             className="btn btn-sm btn-danger"
                             onClick={(e) => {
@@ -794,6 +779,17 @@ const Settings: React.FC = () => {
                             disabled={saving || set.is_default}
                           >
                             Elimina
+                          </button>
+                          <button
+                            className="btn btn-sm btn-star"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSetDefaultParameterSet(set.id);
+                            }}
+                            disabled={saving}
+                            title={set.is_default ? "Set di parametri predefinito" : "Imposta come predefinito"}
+                          >
+                            {set.is_default ? "⭐" : "☆"}
                           </button>
                         </div>
                       </div>

@@ -404,6 +404,22 @@
   border-color: #d39e00;
 }
 
+.btn-star {
+  background: transparent;
+  color: #ffc107;
+  border: 1px solid #ffc107;
+  font-size: 16px;
+  padding: 4px 8px;
+  min-width: 32px;
+  transition: all 0.2s ease;
+}
+
+.btn-star:hover {
+  background: #ffc107;
+  color: #fff;
+  transform: scale(1.1);
+}
+
 .btn-danger:disabled {
   background: #6c757d;
   border-color: #6c757d;
