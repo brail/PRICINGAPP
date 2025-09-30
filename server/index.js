@@ -78,12 +78,9 @@ function roundRetailPrice(price) {
   const finalPart = (integerPart % 10) + decimalPart;
 
   if (finalPart >= 0.0 && finalPart <= 2.4) {
-    // Arrotonda alla decina precedente + 0.9
-    return Math.max(9.9, tens - 10 + 0.9);
-  } else if (finalPart >= 2.5 && finalPart <= 4.9) {
-    // Arrotonda alla decina corrente + 4.9
-    return tens + 4.9;
-  } else if (finalPart >= 5.0 && finalPart <= 7.4) {
+    // Arrotonda alla decina precedente + 9.9
+    return Math.max(9.9, tens - 10 + 9.9);
+  } else if (finalPart >= 2.5 && finalPart <= 7.4) {
     // Arrotonda alla decina corrente + 4.9
     return tens + 4.9;
   } else if (finalPart >= 7.5 && finalPart <= 9.9) {

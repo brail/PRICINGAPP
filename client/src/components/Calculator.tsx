@@ -123,6 +123,22 @@ const Calculator: React.FC = () => {
     }
   };
 
+  const handlePurchasePriceBlur = () => {
+    // Formatta il valore con sempre due decimali quando l'utente perde il focus
+    const numericValue = parseFloat(purchasePrice);
+    if (!isNaN(numericValue)) {
+      setPurchasePrice(numericValue.toFixed(2));
+    }
+  };
+
+  const handleRetailPriceBlur = () => {
+    // Formatta il valore con sempre due decimali quando l'utente perde il focus
+    const numericValue = parseFloat(retailPrice);
+    if (!isNaN(numericValue)) {
+      setRetailPrice(numericValue.toFixed(2));
+    }
+  };
+
   const handleCalculate = async () => {
     if (purchasePrice && !isNaN(Number(purchasePrice))) {
       await calculateFromPurchase();
@@ -170,6 +186,7 @@ const Calculator: React.FC = () => {
               className="form-input"
               value={purchasePrice}
               onChange={(e) => handlePurchasePriceChange(e.target.value)}
+              onBlur={handlePurchasePriceBlur}
               onKeyDown={handleKeyPress}
               placeholder="0.00"
               step="0.01"
@@ -185,6 +202,7 @@ const Calculator: React.FC = () => {
               className="form-input"
               value={retailPrice}
               onChange={(e) => handleRetailPriceChange(e.target.value)}
+              onBlur={handleRetailPriceBlur}
               onKeyDown={handleKeyPress}
               placeholder="0.00"
               step="0.01"
