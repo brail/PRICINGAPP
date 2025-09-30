@@ -341,7 +341,8 @@
 }
 
 .new-parameter-set-form,
-.edit-parameter-set-form {
+.edit-parameter-set-form,
+.duplicate-parameter-set-form {
   background: #f8f9fa;
   border: 1px solid #e9ecef;
   border-radius: 8px;
@@ -349,12 +350,27 @@
   margin-bottom: 20px;
 }
 
+.duplicate-parameter-set-form {
+  background: #e3f2fd;
+  border: 1px solid #2196f3;
+}
+
 .new-parameter-set-form h4,
-.edit-parameter-set-form h4 {
+.edit-parameter-set-form h4,
+.duplicate-parameter-set-form h4 {
   color: #333;
   margin-bottom: 16px;
   font-size: 18px;
   font-weight: 600;
+}
+
+.duplicate-parameter-set-form h4 {
+  color: #1976d2;
+}
+
+.duplicate-parameter-set-form p {
+  color: #424242;
+  margin-bottom: 15px;
 }
 
 .form-row {
@@ -428,6 +444,17 @@
 .btn-star[data-is-default="true"]:hover {
   background: #e0a800;
   color: #fff;
+}
+
+.btn-info {
+  background: #17a2b8;
+  color: #fff;
+  border: 1px solid #17a2b8;
+}
+
+.btn-info:hover {
+  background: #138496;
+  border-color: #117a8b;
 }
 
 .btn-danger:disabled {

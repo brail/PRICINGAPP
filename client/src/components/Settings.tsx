@@ -30,6 +30,8 @@ const Settings: React.FC = () => {
     null
   );
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
+  const [duplicatingParameterSet, setDuplicatingParameterSet] = useState<any | null>(null);
+  const [duplicateDescription, setDuplicateDescription] = useState<string>("");
   const [newParameterSet, setNewParameterSet] = useState<{
     description: string;
     purchaseCurrency: string;
@@ -469,6 +471,73 @@ const Settings: React.FC = () => {
     }
   };
 
+  const startDuplicatingParameterSet = (set: any) => {
+    setDuplicatingParameterSet(set);
+    setDuplicateDescription(`${set.description} (Copia)`);
+  };
+
+  const cancelDuplicatingParameterSet = () => {
+    setDuplicatingParameterSet(null);
+    setDuplicateDescription("");
+  };
+
+  const validateDuplicateDescription = () => {
+    if (!duplicateDescription.trim()) {
+      return "Descrizione è obbligatoria";
+    }
+    
+    const existingSet = parameterSets.find(
+      (set) => set.description.toLowerCase() === duplicateDescription.toLowerCase()
+    );
+    
+    if (existingSet) {
+      return "Una descrizione con questo nome esiste già";
+    }
+    
+    return null;
+  };
+
+  const handleDuplicateParameterSet = async () => {
+    const validationError = validateDuplicateDescription();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    if (!duplicatingParameterSet) return;
+
+    try {
+      setSaving(true);
+      
+      // Crea il nuovo set con tutti i parametri del set originale
+      const duplicatedSet = {
+        description: duplicateDescription,
+        purchaseCurrency: duplicatingParameterSet.purchase_currency,
+        sellingCurrency: duplicatingParameterSet.selling_currency,
+        qualityControlPercent: duplicatingParameterSet.quality_control_percent,
+        transportInsuranceCost: duplicatingParameterSet.transport_insurance_cost,
+        duty: duplicatingParameterSet.duty,
+        exchangeRate: duplicatingParameterSet.exchange_rate,
+        italyAccessoryCosts: duplicatingParameterSet.italy_accessory_costs,
+        companyMultiplier: duplicatingParameterSet.company_multiplier,
+        retailMultiplier: duplicatingParameterSet.retail_multiplier,
+        optimalMargin: duplicatingParameterSet.optimal_margin,
+      };
+
+      await pricingApi.createParameterSet(duplicatedSet);
+      setSuccess("Set di parametri duplicato con successo");
+      cancelDuplicatingParameterSet();
+      await loadParameterSets();
+    } catch (err: any) {
+      setError(
+        err.response?.data?.error ||
+          "Errore nella duplicazione del set di parametri"
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const startEditingParameterSet = (parameterSet: any) => {
     setEditingParameterSet({ ...parameterSet });
   };
@@ -748,6 +817,17 @@ const Settings: React.FC = () => {
                       <div className="parameter-set-header">
                         <h5>{set.description}</h5>
                         <div className="parameter-set-actions">
+                          <button
+                            className="btn btn-sm btn-info"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              startDuplicatingParameterSet(set);
+                            }}
+                            disabled={saving}
+                            title="Duplica questo set di parametri"
+                          >
+                            Duplica
+                          </button>
                           <button
                             className="btn btn-sm btn-primary"
                             onClick={(e) => {
@@ -1075,8 +1155,52 @@ const Settings: React.FC = () => {
               </div>
             )}
 
-            {/* Form per Modificare Set Esistente */}
-            {editingParameterSet && (
+              {/* Form per Duplicare Set Esistente */}
+              {duplicatingParameterSet && (
+                <div className="duplicate-parameter-set-form">
+                  <h4>Duplica Set di Parametri</h4>
+                  <p>
+                    Stai duplicando: <strong>{duplicatingParameterSet.description}</strong>
+                  </p>
+                  <div className="form-row">
+                    <label htmlFor="duplicate-description">
+                      Nuova Descrizione *
+                    </label>
+                    <input
+                      type="text"
+                      id="duplicate-description"
+                      value={duplicateDescription}
+                      onChange={(e) => setDuplicateDescription(e.target.value)}
+                      placeholder="Inserisci una descrizione univoca"
+                      className={validateDuplicateDescription() ? "error" : ""}
+                    />
+                    {validateDuplicateDescription() && (
+                      <span className="error-message">
+                        {validateDuplicateDescription()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="form-actions">
+                    <button
+                      className="btn btn-secondary"
+                      onClick={cancelDuplicatingParameterSet}
+                      disabled={saving}
+                    >
+                      Annulla
+                    </button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleDuplicateParameterSet}
+                      disabled={saving || !!validateDuplicateDescription()}
+                    >
+                      {saving ? "Duplicazione..." : "Duplica Set"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Form per Modificare Set Esistente */}
+              {editingParameterSet && (
               <div className="edit-parameter-set-form">
                 <h4>
                   Modifica Set di Parametri: {editingParameterSet.description}
