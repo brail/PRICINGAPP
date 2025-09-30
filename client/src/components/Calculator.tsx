@@ -104,16 +104,18 @@ const Calculator: React.FC = () => {
   const handlePurchasePriceChange = (value: string) => {
     setPurchasePrice(value);
     setMode("purchase");
-    if (value && !isNaN(Number(value))) {
-      calculateFromPurchase();
-    }
   };
 
   const handleRetailPriceChange = (value: string) => {
     setRetailPrice(value);
     setMode("selling");
-    if (value && !isNaN(Number(value))) {
-      calculateFromSelling();
+  };
+
+  const handleCalculate = async () => {
+    if (purchasePrice && !isNaN(Number(purchasePrice))) {
+      await calculateFromPurchase();
+    } else if (retailPrice && !isNaN(Number(retailPrice))) {
+      await calculateFromSelling();
     }
   };
 
@@ -137,10 +139,10 @@ const Calculator: React.FC = () => {
 
       {error && <div className="error">{error}</div>}
 
-      <div className="calculator-grid">
-        {/* Input Prezzo di Acquisto */}
-        <div className="input-card">
-          <h3>Prezzo di Acquisto</h3>
+      {/* Input Unificato */}
+      <div className="input-card">
+        <h3>Calcolo Prezzi</h3>
+        <div className="form-grid">
           <div className="form-group">
             <label className="form-label">
               Prezzo di acquisto ({params.purchaseCurrency})
@@ -155,22 +157,6 @@ const Calculator: React.FC = () => {
               min="0"
             />
           </div>
-          <button
-            className="btn btn-outline"
-            onClick={calculateFromPurchase}
-            disabled={loading || !purchasePrice}
-          >
-            {loading ? (
-              <span className="loading"></span>
-            ) : (
-              "Calcola Prezzo Retail"
-            )}
-          </button>
-        </div>
-
-        {/* Input Prezzo Retail */}
-        <div className="input-card">
-          <h3>Prezzo Retail</h3>
           <div className="form-group">
             <label className="form-label">
               Prezzo retail ({params.sellingCurrency})
@@ -185,18 +171,14 @@ const Calculator: React.FC = () => {
               min="0"
             />
           </div>
-          <button
-            className="btn btn-outline"
-            onClick={calculateFromSelling}
-            disabled={loading || !retailPrice}
-          >
-            {loading ? (
-              <span className="loading"></span>
-            ) : (
-              "Calcola Prezzo Acquisto"
-            )}
-          </button>
         </div>
+        <button
+          className="btn btn-primary"
+          onClick={handleCalculate}
+          disabled={loading || (!purchasePrice && !retailPrice)}
+        >
+          {loading ? <span className="loading"></span> : "Calcola"}
+        </button>
       </div>
 
       {/* Risultati Dettagliati */}
