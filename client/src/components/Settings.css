@@ -30,7 +30,7 @@
 
 .settings-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 24px;
   margin-bottom: 32px;
 }
@@ -198,7 +198,6 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .settings-grid {
-    grid-template-columns: 1fr;
     gap: 16px;
   }
 
@@ -255,4 +254,185 @@
   }
 }
 
+/* Stili per la gestione dei set di parametri */
+.settings-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
 
+.parameter-sets-management {
+  margin-top: 20px;
+}
+
+.parameter-sets-list h4 {
+  color: #333;
+  margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.parameter-sets-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.parameter-set-card {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.parameter-set-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.parameter-set-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.parameter-set-header h5 {
+  color: #333;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  flex: 1;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.default-star {
+  font-size: 14px;
+  color: #ffc107;
+  filter: drop-shadow(0 0 2px rgba(255, 193, 7, 0.5));
+}
+
+.parameter-set-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.parameter-set-actions .btn {
+  padding: 4px 8px;
+  font-size: 12px;
+  min-width: auto;
+}
+
+.parameter-set-details {
+  font-size: 14px;
+  color: #6c757d;
+  line-height: 1.4;
+}
+
+.parameter-set-details p {
+  margin: 4px 0;
+}
+
+.new-parameter-set-form,
+.edit-parameter-set-form {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.new-parameter-set-form h4,
+.edit-parameter-set-form h4 {
+  color: #333;
+  margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e9ecef;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+  min-width: auto;
+}
+
+.btn-danger {
+  background: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c82333;
+  border-color: #bd2130;
+}
+
+.btn-warning {
+  background: #ffc107;
+  color: #212529;
+  border: 1px solid #ffc107;
+}
+
+.btn-warning:hover {
+  background: #e0a800;
+  border-color: #d39e00;
+}
+
+.btn-danger:disabled {
+  background: #6c757d;
+  border-color: #6c757d;
+  opacity: 0.6;
+}
+
+/* Responsive per la gestione dei set di parametri */
+@media (max-width: 768px) {
+  .settings-card-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .parameter-set-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .parameter-set-actions {
+    justify-content: flex-start;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+}

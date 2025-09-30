@@ -315,6 +315,53 @@
   }
 }
 
+/* Stili per il selettore di set di parametri */
+.parameter-set-selector {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.parameter-set-selector .form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.form-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 16px;
+  background: white;
+  color: #495057;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.form-select:disabled {
+  background: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.loading-text {
+  margin-left: 12px;
+  color: #6c757d;
+  font-size: 14px;
+  font-style: italic;
+}
+
 /* Stili per la barra di margine */
 .margin-bar-container {
   margin-top: 16px;

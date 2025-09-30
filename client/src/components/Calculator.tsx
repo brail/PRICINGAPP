@@ -36,10 +36,16 @@ const Calculator: React.FC = () => {
     SellingPriceCalculation | PurchasePriceCalculation | null
   >(null);
   const [showDetails, setShowDetails] = useState<boolean>(false);
+  const [parameterSets, setParameterSets] = useState<any[]>([]);
+  const [selectedParameterSetId, setSelectedParameterSetId] = useState<
+    number | null
+  >(null);
+  const [loadingParameterSets, setLoadingParameterSets] = useState(false);
 
-  // Carica parametri iniziali
+  // Carica parametri iniziali e set di parametri
   useEffect(() => {
     loadParams();
+    loadParameterSets();
   }, []);
 
   const loadParams = async () => {
@@ -48,6 +54,40 @@ const Calculator: React.FC = () => {
       setParams(currentParams);
     } catch (err) {
       setError("Errore nel caricamento dei parametri");
+    }
+  };
+
+  const loadParameterSets = async () => {
+    try {
+      setLoadingParameterSets(true);
+      const sets = await pricingApi.getParameterSets();
+      setParameterSets(sets);
+
+      // Seleziona automaticamente il set "Parametri Default" se esiste
+      const defaultSet = sets.find(
+        (set) => set.description === "Parametri Default"
+      );
+      if (defaultSet) {
+        setSelectedParameterSetId(defaultSet.id);
+      }
+    } catch (err) {
+      setError("Errore nel caricamento dei set di parametri");
+    } finally {
+      setLoadingParameterSets(false);
+    }
+  };
+
+  const handleParameterSetChange = async (parameterSetId: number) => {
+    try {
+      setLoadingParameterSets(true);
+      const result = await pricingApi.loadParameterSet(parameterSetId);
+      setParams(result.params);
+      setSelectedParameterSetId(parameterSetId);
+      setError("");
+    } catch (err) {
+      setError("Errore nel caricamento del set di parametri");
+    } finally {
+      setLoadingParameterSets(false);
     }
   };
 
@@ -326,6 +366,28 @@ const Calculator: React.FC = () => {
       {/* Input Unificato */}
       <div className="input-card">
         <h3>Calcolo Prezzi</h3>
+
+        {/* Selezione Set di Parametri */}
+        <div className="parameter-set-selector">
+          <label className="form-label">Set di Parametri:</label>
+          <select
+            className="form-select"
+            value={selectedParameterSetId || ""}
+            onChange={(e) => handleParameterSetChange(Number(e.target.value))}
+            disabled={loadingParameterSets}
+          >
+            <option value="">Seleziona un set di parametri...</option>
+            {parameterSets.map((set) => (
+              <option key={set.id} value={set.id}>
+                {set.description}
+              </option>
+            ))}
+          </select>
+          {loadingParameterSets && (
+            <span className="loading-text">Caricamento...</span>
+          )}
+        </div>
+
         <div className="form-grid">
           <div className="form-group">
             <label className="form-label">

@@ -23,9 +23,31 @@ const Settings: React.FC = () => {
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
 
+  // Stati per la gestione dei set di parametri
+  const [parameterSets, setParameterSets] = useState<any[]>([]);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingParameterSet, setEditingParameterSet] = useState<any | null>(
+    null
+  );
+  const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
+  const [newParameterSet, setNewParameterSet] = useState({
+    description: "",
+    purchaseCurrency: "USD",
+    sellingCurrency: "EUR",
+    qualityControlPercent: 5,
+    transportInsuranceCost: 2.3,
+    duty: 8,
+    exchangeRate: 1.07,
+    italyAccessoryCosts: 1,
+    companyMultiplier: 2.08,
+    retailMultiplier: 2.48,
+    optimalMargin: 25,
+  });
+
   useEffect(() => {
     loadSettings();
     loadExchangeRates();
+    loadParameterSets();
   }, []);
 
   const loadSettings = async () => {
@@ -93,6 +115,140 @@ const Settings: React.FC = () => {
     return currency ? currency.name : code;
   };
 
+  // Funzioni per la gestione dei set di parametri
+  const loadParameterSets = async () => {
+    try {
+      const sets = await pricingApi.getParameterSets();
+      setParameterSets(sets);
+    } catch (err) {
+      setError("Errore nel caricamento dei set di parametri");
+    }
+  };
+
+  const handleCreateParameterSet = async () => {
+    try {
+      setSaving(true);
+      await pricingApi.createParameterSet(newParameterSet);
+      setSuccess("Set di parametri creato con successo");
+      setNewParameterSet({
+        description: "",
+        purchaseCurrency: "USD",
+        sellingCurrency: "EUR",
+        qualityControlPercent: 5,
+        transportInsuranceCost: 2.3,
+        duty: 8,
+        exchangeRate: 1.07,
+        italyAccessoryCosts: 1,
+        companyMultiplier: 2.08,
+        retailMultiplier: 2.48,
+        optimalMargin: 25,
+      });
+      setShowCreateForm(false);
+      await loadParameterSets();
+    } catch (err: any) {
+      setError(
+        err.response?.data?.error ||
+          "Errore nella creazione del set di parametri"
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleUpdateParameterSet = async () => {
+    if (!editingParameterSet) return;
+
+    try {
+      setSaving(true);
+      await pricingApi.updateParameterSet(
+        editingParameterSet.id,
+        editingParameterSet
+      );
+      setSuccess("Set di parametri aggiornato con successo");
+      setEditingParameterSet(null);
+      await loadParameterSets();
+    } catch (err: any) {
+      setError(
+        err.response?.data?.error ||
+          "Errore nell'aggiornamento del set di parametri"
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteParameterSet = async (id: number) => {
+    if (
+      !window.confirm("Sei sicuro di voler eliminare questo set di parametri?")
+    ) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await pricingApi.deleteParameterSet(id);
+      setSuccess("Set di parametri eliminato con successo");
+      await loadParameterSets();
+    } catch (err: any) {
+      setError(
+        err.response?.data?.error ||
+          "Errore nell'eliminazione del set di parametri"
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleLoadParameterSet = async (id: number) => {
+    try {
+      setSaving(true);
+      const result = await pricingApi.loadParameterSet(id);
+      setParams(result.params);
+      setSuccess("Set di parametri caricato con successo");
+    } catch (err: any) {
+      setError(
+        err.response?.data?.error ||
+          "Errore nel caricamento del set di parametri"
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSetDefaultParameterSet = async (id: number) => {
+    try {
+      setSaving(true);
+      await pricingApi.setDefaultParameterSet(id);
+      setSuccess("Set di parametri impostato come default");
+      await loadParameterSets();
+    } catch (err: any) {
+      setError(
+        err.response?.data?.error ||
+          "Errore nell'impostazione del set di parametri come default"
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const startEditingParameterSet = (parameterSet: any) => {
+    setEditingParameterSet({ ...parameterSet });
+  };
+
+  const cancelEditingParameterSet = () => {
+    setEditingParameterSet(null);
+  };
+
+  const toggleCardExpansion = (id: number) => {
+    const newExpandedCards = new Set(expandedCards);
+    if (newExpandedCards.has(id)) {
+      newExpandedCards.delete(id);
+    } else {
+      newExpandedCards.add(id);
+    }
+    setExpandedCards(newExpandedCards);
+  };
+
   if (loading) {
     return (
       <div className="settings">
@@ -117,8 +273,8 @@ const Settings: React.FC = () => {
       {success && <div className="success">{success}</div>}
 
       <div className="settings-grid">
-        {/* Parametri di Calcolo */}
-        <div className="settings-card">
+        {/* Parametri di Calcolo - Temporaneamente nascosto */}
+        {/* <div className="settings-card">
           <h3>Parametri di Calcolo</h3>
 
           <div className="form-group">
@@ -317,10 +473,582 @@ const Settings: React.FC = () => {
             />
             <small className="form-help">Margine aziendale ottimale</small>
           </div>
+        </div> */}
+
+        {/* Gestione Set di Parametri */}
+        <div className="settings-card">
+          <div className="settings-card-header">
+            <h3>Gestione Set di Parametri</h3>
+            <button
+              className="btn btn-primary"
+              onClick={() => setShowCreateForm(!showCreateForm)}
+            >
+              {showCreateForm ? "Annulla" : "Crea Nuovo Set"}
+            </button>
+          </div>
+
+          <div className="parameter-sets-management">
+            {/* Lista Set di Parametri */}
+            <div className="parameter-sets-list">
+              <h4>Set di Parametri Esistenti</h4>
+              {parameterSets.length === 0 ? (
+                <p className="text-muted">Nessun set di parametri trovato.</p>
+              ) : (
+                <div className="parameter-sets-grid">
+                  {parameterSets.map((set) => (
+                    <div key={set.id} className="parameter-set-card">
+                      <div className="parameter-set-header">
+                        <h5>
+                          {set.is_default && (
+                            <span className="default-star">⭐</span>
+                          )}
+                          {set.description}
+                        </h5>
+                        <div className="parameter-set-actions">
+                          <button
+                            className="btn btn-sm btn-outline"
+                            onClick={() => toggleCardExpansion(set.id)}
+                          >
+                            {expandedCards.has(set.id)
+                              ? "Nascondi"
+                              : "Dettagli"}
+                          </button>
+                          <button
+                            className="btn btn-sm btn-primary"
+                            onClick={() => handleLoadParameterSet(set.id)}
+                            disabled={saving}
+                          >
+                            Carica
+                          </button>
+                          <button
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => startEditingParameterSet(set)}
+                            disabled={saving}
+                          >
+                            Modifica
+                          </button>
+                          {!set.is_default && (
+                            <button
+                              className="btn btn-sm btn-warning"
+                              onClick={() =>
+                                handleSetDefaultParameterSet(set.id)
+                              }
+                              disabled={saving}
+                            >
+                              ⭐ Default
+                            </button>
+                          )}
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => handleDeleteParameterSet(set.id)}
+                            disabled={saving || set.is_default}
+                          >
+                            Elimina
+                          </button>
+                        </div>
+                      </div>
+                      {expandedCards.has(set.id) && (
+                        <div className="parameter-set-details">
+                          <p>
+                            <strong>Valute:</strong> {set.purchase_currency} →{" "}
+                            {set.selling_currency}
+                          </p>
+                          <p>
+                            <strong>Quality Control:</strong>{" "}
+                            {set.quality_control_percent}%
+                          </p>
+                          <p>
+                            <strong>Trasporto + Assicurazione:</strong>{" "}
+                            {set.transport_insurance_cost}
+                          </p>
+                          <p>
+                            <strong>Dazio:</strong> {set.duty}%
+                          </p>
+                          <p>
+                            <strong>Tasso di Cambio:</strong>{" "}
+                            {set.exchange_rate}
+                          </p>
+                          <p>
+                            <strong>Costi Accessori Italia:</strong>{" "}
+                            {set.italy_accessory_costs}
+                          </p>
+                          <p>
+                            <strong>Moltiplicatori:</strong> Aziendale:{" "}
+                            {set.company_multiplier}, Retail:{" "}
+                            {set.retail_multiplier}
+                          </p>
+                          <p>
+                            <strong>Margine ottimale:</strong>{" "}
+                            {set.optimal_margin}%
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Form per Creare Nuovo Set */}
+            {showCreateForm && (
+              <div className="new-parameter-set-form">
+                <h4>Crea Nuovo Set di Parametri</h4>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Descrizione</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={newParameterSet.description}
+                      onChange={(e) =>
+                        setNewParameterSet({
+                          ...newParameterSet,
+                          description: e.target.value,
+                        })
+                      }
+                      placeholder="Nome del set di parametri"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Valuta acquisto</label>
+                    <select
+                      className="form-select"
+                      value={newParameterSet.purchaseCurrency}
+                      onChange={(e) =>
+                        setNewParameterSet({
+                          ...newParameterSet,
+                          purchaseCurrency: e.target.value,
+                        })
+                      }
+                    >
+                      {CURRENCIES.map((currency) => (
+                        <option key={currency.code} value={currency.code}>
+                          {currency.code} - {currency.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Valuta vendita</label>
+                    <select
+                      className="form-select"
+                      value={newParameterSet.sellingCurrency}
+                      onChange={(e) =>
+                        setNewParameterSet({
+                          ...newParameterSet,
+                          sellingCurrency: e.target.value,
+                        })
+                      }
+                    >
+                      {CURRENCIES.map((currency) => (
+                        <option key={currency.code} value={currency.code}>
+                          {currency.code} - {currency.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Quality Control (%)</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={newParameterSet.qualityControlPercent}
+                      onChange={(e) =>
+                        setNewParameterSet({
+                          ...newParameterSet,
+                          qualityControlPercent: Number(e.target.value),
+                        })
+                      }
+                      min="0"
+                      step="0.1"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      Trasporto + Assicurazione
+                    </label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={newParameterSet.transportInsuranceCost}
+                      onChange={(e) =>
+                        setNewParameterSet({
+                          ...newParameterSet,
+                          transportInsuranceCost: Number(e.target.value),
+                        })
+                      }
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Dazio (%)</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={newParameterSet.duty}
+                      onChange={(e) =>
+                        setNewParameterSet({
+                          ...newParameterSet,
+                          duty: Number(e.target.value),
+                        })
+                      }
+                      min="0"
+                      step="0.1"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Cambio</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={newParameterSet.exchangeRate}
+                      onChange={(e) =>
+                        setNewParameterSet({
+                          ...newParameterSet,
+                          exchangeRate: Number(e.target.value),
+                        })
+                      }
+                      min="0.001"
+                      step="0.001"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Costi accessori Italia</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={newParameterSet.italyAccessoryCosts}
+                      onChange={(e) =>
+                        setNewParameterSet({
+                          ...newParameterSet,
+                          italyAccessoryCosts: Number(e.target.value),
+                        })
+                      }
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      Moltiplicatore aziendale
+                    </label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={newParameterSet.companyMultiplier}
+                      onChange={(e) =>
+                        setNewParameterSet({
+                          ...newParameterSet,
+                          companyMultiplier: Number(e.target.value),
+                        })
+                      }
+                      min="0.1"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Moltiplicatore retail</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={newParameterSet.retailMultiplier}
+                      onChange={(e) =>
+                        setNewParameterSet({
+                          ...newParameterSet,
+                          retailMultiplier: Number(e.target.value),
+                        })
+                      }
+                      min="0.1"
+                      step="0.01"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Margine ottimale (%)</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={newParameterSet.optimalMargin}
+                      onChange={(e) =>
+                        setNewParameterSet({
+                          ...newParameterSet,
+                          optimalMargin: Number(e.target.value),
+                        })
+                      }
+                      min="0"
+                      max="100"
+                      step="0.1"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  className="btn btn-primary"
+                  onClick={handleCreateParameterSet}
+                  disabled={saving || !newParameterSet.description.trim()}
+                >
+                  {saving ? "Creazione..." : "Crea Set di Parametri"}
+                </button>
+              </div>
+            )}
+
+            {/* Form per Modificare Set Esistente */}
+            {editingParameterSet && (
+              <div className="edit-parameter-set-form">
+                <h4>
+                  Modifica Set di Parametri: {editingParameterSet.description}
+                </h4>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Descrizione</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={editingParameterSet.description}
+                      onChange={(e) =>
+                        setEditingParameterSet({
+                          ...editingParameterSet,
+                          description: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Valuta acquisto</label>
+                    <select
+                      className="form-select"
+                      value={editingParameterSet.purchase_currency}
+                      onChange={(e) =>
+                        setEditingParameterSet({
+                          ...editingParameterSet,
+                          purchase_currency: e.target.value,
+                        })
+                      }
+                    >
+                      {CURRENCIES.map((currency) => (
+                        <option key={currency.code} value={currency.code}>
+                          {currency.code} - {currency.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Valuta vendita</label>
+                    <select
+                      className="form-select"
+                      value={editingParameterSet.selling_currency}
+                      onChange={(e) =>
+                        setEditingParameterSet({
+                          ...editingParameterSet,
+                          selling_currency: e.target.value,
+                        })
+                      }
+                    >
+                      {CURRENCIES.map((currency) => (
+                        <option key={currency.code} value={currency.code}>
+                          {currency.code} - {currency.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Quality Control (%)</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={editingParameterSet.quality_control_percent}
+                      onChange={(e) =>
+                        setEditingParameterSet({
+                          ...editingParameterSet,
+                          quality_control_percent: Number(e.target.value),
+                        })
+                      }
+                      min="0"
+                      step="0.1"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      Trasporto + Assicurazione
+                    </label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={editingParameterSet.transport_insurance_cost}
+                      onChange={(e) =>
+                        setEditingParameterSet({
+                          ...editingParameterSet,
+                          transport_insurance_cost: Number(e.target.value),
+                        })
+                      }
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Dazio (%)</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={editingParameterSet.duty}
+                      onChange={(e) =>
+                        setEditingParameterSet({
+                          ...editingParameterSet,
+                          duty: Number(e.target.value),
+                        })
+                      }
+                      min="0"
+                      step="0.1"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Cambio</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={editingParameterSet.exchange_rate}
+                      onChange={(e) =>
+                        setEditingParameterSet({
+                          ...editingParameterSet,
+                          exchange_rate: Number(e.target.value),
+                        })
+                      }
+                      min="0.001"
+                      step="0.001"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Costi accessori Italia</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={editingParameterSet.italy_accessory_costs}
+                      onChange={(e) =>
+                        setEditingParameterSet({
+                          ...editingParameterSet,
+                          italy_accessory_costs: Number(e.target.value),
+                        })
+                      }
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      Moltiplicatore aziendale
+                    </label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={editingParameterSet.company_multiplier}
+                      onChange={(e) =>
+                        setEditingParameterSet({
+                          ...editingParameterSet,
+                          company_multiplier: Number(e.target.value),
+                        })
+                      }
+                      min="0.1"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Moltiplicatore retail</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={editingParameterSet.retail_multiplier}
+                      onChange={(e) =>
+                        setEditingParameterSet({
+                          ...editingParameterSet,
+                          retail_multiplier: Number(e.target.value),
+                        })
+                      }
+                      min="0.1"
+                      step="0.01"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Margine ottimale (%)</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={editingParameterSet.optimal_margin}
+                      onChange={(e) =>
+                        setEditingParameterSet({
+                          ...editingParameterSet,
+                          optimal_margin: Number(e.target.value),
+                        })
+                      }
+                      min="0"
+                      max="100"
+                      step="0.1"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-actions">
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleUpdateParameterSet}
+                    disabled={saving}
+                  >
+                    {saving ? "Aggiornamento..." : "Aggiorna Set"}
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={cancelEditingParameterSet}
+                    disabled={saving}
+                  >
+                    Annulla
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Tassi di Cambio */}
-        <div className="settings-card">
+        {/* Tassi di Cambio - Temporaneamente nascosto */}
+        {/* <div className="settings-card">
           <h3>Tassi di Cambio</h3>
           <p className="text-muted mb-4">
             Tassi di cambio aggiornati automaticamente (base: EUR)
@@ -347,11 +1075,12 @@ const Settings: React.FC = () => {
           >
             {loading ? <span className="loading"></span> : "Aggiorna Tassi"}
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Azioni */}
-      <div className="settings-actions">
+      {/* Azioni di salvataggio - Temporaneamente nascoste */}
+      {/* <div className="settings-actions">
         <button
           className="btn btn-secondary"
           onClick={handleReset}
@@ -369,10 +1098,10 @@ const Settings: React.FC = () => {
             "Salva Impostazioni"
           )}
         </button>
-      </div>
+      </div> */}
 
-      {/* Informazioni */}
-      <div className="settings-info">
+      {/* Informazioni - Temporaneamente nascosto */}
+      {/* <div className="settings-info">
         <h4>Come funziona il calcolo</h4>
         <div className="calculation-steps">
           <div className="step">
@@ -425,7 +1154,7 @@ const Settings: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

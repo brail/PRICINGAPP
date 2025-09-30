@@ -73,6 +73,51 @@ export const pricingApi = {
     const response = await api.get("/health");
     return response.data;
   },
+
+  // API per i set di parametri
+  // Ottieni tutti i set di parametri
+  getParameterSets: async (): Promise<any[]> => {
+    const response = await api.get("/parameter-sets");
+    return response.data;
+  },
+
+  // Ottieni un set di parametri per ID
+  getParameterSetById: async (id: number): Promise<any> => {
+    const response = await api.get(`/parameter-sets/${id}`);
+    return response.data;
+  },
+
+  // Carica un set di parametri come attuale
+  loadParameterSet: async (
+    id: number
+  ): Promise<{ message: string; params: CalculationParams }> => {
+    const response = await api.post(`/parameter-sets/${id}/load`);
+    return response.data;
+  },
+
+  // Crea un nuovo set di parametri
+  createParameterSet: async (params: any): Promise<any> => {
+    const response = await api.post("/parameter-sets", params);
+    return response.data;
+  },
+
+  // Aggiorna un set di parametri
+  updateParameterSet: async (id: number, params: any): Promise<any> => {
+    const response = await api.put(`/parameter-sets/${id}`, params);
+    return response.data;
+  },
+
+  // Elimina un set di parametri
+  deleteParameterSet: async (id: number): Promise<{ message: string }> => {
+    const response = await api.delete(`/parameter-sets/${id}`);
+    return response.data;
+  },
+
+  // Imposta un set di parametri come default
+  setDefaultParameterSet: async (id: number): Promise<any> => {
+    const response = await api.post(`/parameter-sets/${id}/set-default`);
+    return response.data;
+  },
 };
 
 export default api;

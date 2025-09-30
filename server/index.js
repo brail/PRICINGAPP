@@ -3,30 +3,67 @@ const cors = require("cors");
 const axios = require("axios");
 require("dotenv").config();
 
+// Importa il modulo database
+const {
+  initDatabase,
+  seedDatabase,
+  getAllParameterSets,
+  getParameterSetById,
+  getDefaultParameterSet,
+  createParameterSet,
+  updateParameterSet,
+  deleteParameterSet,
+  setDefaultParameterSet,
+} = require("./database");
+
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Configurazione default parametri
-let defaultParams = {
+// Configurazione parametri attuali (caricati dal database)
+let currentParams = {
   purchaseCurrency: "USD",
   sellingCurrency: "EUR",
-  qualityControlPercent: 5, // percentuale quality control
-  transportInsuranceCost: 2.3, // costo trasporto + assicurazione
-  duty: 8, // dazio
-  exchangeRate: 1.07, // cambio
-  italyAccessoryCosts: 1, // costi accessori Italia
-  companyMultiplier: 2.08, // moltiplicatore aziendale
-  retailMultiplier: 2.48, // moltiplicatore retail
-  optimalMargin: 25, // margine ottimale in percentuale
+  qualityControlPercent: 5,
+  transportInsuranceCost: 2.3,
+  duty: 8,
+  exchangeRate: 1.07,
+  italyAccessoryCosts: 1,
+  companyMultiplier: 2.08,
+  retailMultiplier: 2.48,
+  optimalMargin: 25,
 };
 
 // Cache per i tassi di cambio (aggiornati ogni ora)
 let exchangeRates = {};
 let lastExchangeUpdate = 0;
+
+// Funzione per caricare i parametri dal database
+const loadParametersFromDatabase = async () => {
+  try {
+    const defaultSet = await getDefaultParameterSet();
+    if (defaultSet) {
+      currentParams = {
+        purchaseCurrency: defaultSet.purchase_currency,
+        sellingCurrency: defaultSet.selling_currency,
+        qualityControlPercent: defaultSet.quality_control_percent,
+        transportInsuranceCost: defaultSet.transport_insurance_cost,
+        duty: defaultSet.duty,
+        exchangeRate: defaultSet.exchange_rate,
+        italyAccessoryCosts: defaultSet.italy_accessory_costs,
+        companyMultiplier: defaultSet.company_multiplier,
+        retailMultiplier: defaultSet.retail_multiplier,
+        optimalMargin: defaultSet.optimal_margin,
+      };
+      console.log("Parametri caricati dal database:", currentParams);
+    }
+  } catch (error) {
+    console.error("Errore nel caricamento dei parametri dal database:", error);
+  }
+};
 
 // Funzione per ottenere i tassi di cambio
 async function getExchangeRates() {
@@ -146,7 +183,7 @@ async function convertCurrency(
 }
 
 // Calcolo prezzo di vendita da prezzo di acquisto
-async function calculateSellingPrice(purchasePrice, params) {
+async function calculateSellingPrice(purchasePrice, params = currentParams) {
   const {
     qualityControlPercent,
     transportInsuranceCost,
@@ -204,7 +241,7 @@ async function calculateSellingPrice(purchasePrice, params) {
 }
 
 // Calcolo prezzo di acquisto da prezzo di vendita
-async function calculatePurchasePrice(retailPrice, params) {
+async function calculatePurchasePrice(retailPrice, params = currentParams) {
   const {
     italyAccessoryCosts,
     duty,
@@ -266,10 +303,10 @@ async function calculatePurchasePrice(retailPrice, params) {
 
 // Ottieni parametri attuali
 app.get("/api/params", (req, res) => {
-  res.json(defaultParams);
+  res.json(currentParams);
 });
 
-// Aggiorna parametri
+// Aggiorna parametri attuali
 app.put("/api/params", (req, res) => {
   const {
     purchaseCurrency,
@@ -285,36 +322,34 @@ app.put("/api/params", (req, res) => {
   } = req.body;
 
   if (purchaseCurrency !== undefined)
-    defaultParams.purchaseCurrency = purchaseCurrency;
+    currentParams.purchaseCurrency = purchaseCurrency;
   if (sellingCurrency !== undefined)
-    defaultParams.sellingCurrency = sellingCurrency;
+    currentParams.sellingCurrency = sellingCurrency;
   if (qualityControlPercent !== undefined)
-    defaultParams.qualityControlPercent = Math.max(0, qualityControlPercent);
+    currentParams.qualityControlPercent = Math.max(0, qualityControlPercent);
   if (transportInsuranceCost !== undefined)
-    defaultParams.transportInsuranceCost = Math.max(0, transportInsuranceCost);
-  if (duty !== undefined) defaultParams.duty = Math.max(0, duty);
+    currentParams.transportInsuranceCost = Math.max(0, transportInsuranceCost);
+  if (duty !== undefined) currentParams.duty = Math.max(0, duty);
   if (exchangeRate !== undefined)
-    defaultParams.exchangeRate = Math.max(0.001, exchangeRate);
+    currentParams.exchangeRate = Math.max(0.001, exchangeRate);
   if (italyAccessoryCosts !== undefined)
-    defaultParams.italyAccessoryCosts = Math.max(0, italyAccessoryCosts);
+    currentParams.italyAccessoryCosts = Math.max(0, italyAccessoryCosts);
   if (companyMultiplier !== undefined)
-    defaultParams.companyMultiplier = Math.max(0.1, companyMultiplier);
+    currentParams.companyMultiplier = Math.max(0.1, companyMultiplier);
   if (retailMultiplier !== undefined)
-    defaultParams.retailMultiplier = Math.max(0.1, retailMultiplier);
+    currentParams.retailMultiplier = Math.max(0.1, retailMultiplier);
   if (optimalMargin !== undefined)
-    defaultParams.optimalMargin = Math.max(0, Math.min(100, optimalMargin));
+    currentParams.optimalMargin = Math.max(0, Math.min(100, optimalMargin));
 
-  res.json(defaultParams);
+  res.json(currentParams);
 });
 
 // Calcola prezzo di vendita
 app.post("/api/calculate-selling", async (req, res) => {
   try {
     const { purchasePrice } = req.body;
-    const params = { ...defaultParams };
+    const params = { ...currentParams };
 
-    // Converti prezzo di acquisto in valuta di vendita usando il tasso di cambio
-    //const purchasePriceInSellingCurrency = purchasePrice * params.exchangeRate;
     const result = await calculateSellingPrice(purchasePrice, params);
 
     res.json({
@@ -332,7 +367,7 @@ app.post("/api/calculate-selling", async (req, res) => {
 app.post("/api/calculate-purchase", async (req, res) => {
   try {
     const { retailPrice } = req.body;
-    const params = { ...defaultParams };
+    const params = { ...currentParams };
 
     const result = await calculatePurchasePrice(retailPrice, params);
 
@@ -359,11 +394,218 @@ app.get("/api/exchange-rates", async (req, res) => {
   }
 });
 
+// API CRUD per i set di parametri
+
+// Ottieni tutti i set di parametri
+app.get("/api/parameter-sets", async (req, res) => {
+  try {
+    const parameterSets = await getAllParameterSets();
+    res.json(parameterSets);
+  } catch (error) {
+    res.status(500).json({ error: "Errore nel recupero dei set di parametri" });
+  }
+});
+
+// Ottieni un set di parametri per ID
+app.get("/api/parameter-sets/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const parameterSet = await getParameterSetById(id);
+    if (parameterSet) {
+      res.json(parameterSet);
+    } else {
+      res.status(404).json({ error: "Set di parametri non trovato" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Errore nel recupero del set di parametri" });
+  }
+});
+
+// Carica un set di parametri come attuale
+app.post("/api/parameter-sets/:id/load", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const parameterSet = await getParameterSetById(id);
+    if (parameterSet) {
+      // Aggiorna i parametri attuali
+      currentParams = {
+        purchaseCurrency: parameterSet.purchase_currency,
+        sellingCurrency: parameterSet.selling_currency,
+        qualityControlPercent: parameterSet.quality_control_percent,
+        transportInsuranceCost: parameterSet.transport_insurance_cost,
+        duty: parameterSet.duty,
+        exchangeRate: parameterSet.exchange_rate,
+        italyAccessoryCosts: parameterSet.italy_accessory_costs,
+        companyMultiplier: parameterSet.company_multiplier,
+        retailMultiplier: parameterSet.retail_multiplier,
+        optimalMargin: parameterSet.optimal_margin,
+      };
+      res.json({
+        message: "Parametri caricati con successo",
+        params: currentParams,
+      });
+    } else {
+      res.status(404).json({ error: "Set di parametri non trovato" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Errore nel caricamento del set di parametri" });
+  }
+});
+
+// Crea un nuovo set di parametri
+app.post("/api/parameter-sets", async (req, res) => {
+  try {
+    const {
+      description,
+      purchaseCurrency,
+      sellingCurrency,
+      qualityControlPercent,
+      transportInsuranceCost,
+      duty,
+      exchangeRate,
+      italyAccessoryCosts,
+      companyMultiplier,
+      retailMultiplier,
+      optimalMargin,
+    } = req.body;
+
+    // Validazione
+    if (!description) {
+      return res.status(400).json({ error: "Descrizione è obbligatoria" });
+    }
+
+    const newParameterSet = await createParameterSet({
+      description,
+      purchase_currency: purchaseCurrency,
+      selling_currency: sellingCurrency,
+      quality_control_percent: qualityControlPercent,
+      transport_insurance_cost: transportInsuranceCost,
+      duty,
+      exchange_rate: exchangeRate,
+      italy_accessory_costs: italyAccessoryCosts,
+      company_multiplier: companyMultiplier,
+      retail_multiplier: retailMultiplier,
+      optimal_margin: optimalMargin,
+    });
+
+    res.status(201).json(newParameterSet);
+  } catch (error) {
+    if (error.message.includes("UNIQUE constraint failed")) {
+      res.status(400).json({
+        error: "Un set di parametri con questa descrizione esiste già",
+      });
+    } else {
+      res
+        .status(500)
+        .json({ error: "Errore nella creazione del set di parametri" });
+    }
+  }
+});
+
+// Aggiorna un set di parametri
+app.put("/api/parameter-sets/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      description,
+      purchaseCurrency,
+      sellingCurrency,
+      qualityControlPercent,
+      transportInsuranceCost,
+      duty,
+      exchangeRate,
+      italyAccessoryCosts,
+      companyMultiplier,
+      retailMultiplier,
+      optimalMargin,
+    } = req.body;
+
+    const updatedParameterSet = await updateParameterSet(id, {
+      description,
+      purchase_currency: purchaseCurrency,
+      selling_currency: sellingCurrency,
+      quality_control_percent: qualityControlPercent,
+      transport_insurance_cost: transportInsuranceCost,
+      duty,
+      exchange_rate: exchangeRate,
+      italy_accessory_costs: italyAccessoryCosts,
+      company_multiplier: companyMultiplier,
+      retail_multiplier: retailMultiplier,
+      optimal_margin: optimalMargin,
+    });
+
+    res.json(updatedParameterSet);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Errore nell'aggiornamento del set di parametri" });
+  }
+});
+
+// Elimina un set di parametri
+app.delete("/api/parameter-sets/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await deleteParameterSet(id);
+
+    if (result.deletedRows > 0) {
+      res.json({ message: "Set di parametri eliminato con successo" });
+    } else {
+      res.status(404).json({ error: "Set di parametri non trovato" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Errore nell'eliminazione del set di parametri" });
+  }
+});
+
+// Imposta un set di parametri come default
+app.post("/api/parameter-sets/:id/set-default", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await setDefaultParameterSet(id);
+    res.json(result);
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        error: "Errore nell'impostazione del set di parametri come default",
+      });
+  }
+});
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server in esecuzione sulla porta ${PORT}`);
-});
+// Inizializza il database e avvia il server
+const startServer = async () => {
+  try {
+    // Inizializza il database
+    await initDatabase();
+    console.log("Database inizializzato con successo");
+
+    // Seeding del database
+    await seedDatabase();
+    console.log("Seeding del database completato");
+
+    // Carica i parametri dal database
+    await loadParametersFromDatabase();
+    console.log("Parametri caricati dal database");
+
+    // Avvia il server
+    app.listen(PORT, () => {
+      console.log(`Server in esecuzione sulla porta ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Errore nell'inizializzazione del server:", error);
+    process.exit(1);
+  }
+};
+
+// Avvia il server
+startServer();
