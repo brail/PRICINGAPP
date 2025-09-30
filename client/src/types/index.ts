@@ -25,6 +25,7 @@ export interface SellingPriceCalculation {
   retailPriceRaw: number;
   purchaseCurrency: string;
   sellingCurrency: string;
+  companyMargin: number;
   params: CalculationParams;
 }
 
@@ -44,6 +45,7 @@ export interface PurchasePriceCalculation {
   purchasePriceRaw: number;
   purchaseCurrency: string;
   sellingCurrency: string;
+  companyMargin: number;
   params: CalculationParams;
 }
 

@@ -352,6 +352,14 @@ const Calculator: React.FC = () => {
                       )}
                     </span>
                   </div>
+                  <div className="result-item">
+                    <span className="result-label">
+                      Margine aziendale:
+                    </span>
+                    <span className="result-value">
+                      {(calculation.companyMargin * 100).toFixed(1)}%
+                    </span>
+                  </div>
                   <div className="result-item highlight">
                     <span className="result-label">
                       Prezzo retail finale (×
@@ -399,6 +407,14 @@ const Calculator: React.FC = () => {
                         calculation.wholesalePrice,
                         calculation.sellingCurrency
                       )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">
+                      Margine aziendale:
+                    </span>
+                    <span className="result-value">
+                      {(calculation.companyMargin * 100).toFixed(1)}%
                     </span>
                   </div>
                   <div className="result-item">

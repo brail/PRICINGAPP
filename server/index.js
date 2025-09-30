@@ -240,6 +240,9 @@ async function calculatePurchasePrice(retailPrice, params) {
   const purchasePrice = roundPurchasePrice(purchasePriceRaw);
   const qualityControlCost = priceWithoutTransport - purchasePrice;
 
+  // 8. Calcola il margine reale
+  const companyMargin = (wholesalePrice - landedCost) / wholesalePrice;
+
   return {
     retailPrice, // Nel calcolo inverso, retailPrice è l'input dell'utente
     retailPriceRaw: retailPrice, // Nel calcolo inverso, retailPrice è l'input
@@ -254,6 +257,7 @@ async function calculatePurchasePrice(retailPrice, params) {
     qualityControlCost,
     purchasePrice,
     purchasePriceRaw,
+    companyMargin,
   };
 }
 
