@@ -281,9 +281,25 @@ const Settings: React.FC = () => {
 
     try {
       setSaving(true);
+      
+      // Converti i dati da snake_case a camelCase per il backend
+      const parameterSetToUpdate = {
+        description: editingParameterSet.description,
+        purchaseCurrency: editingParameterSet.purchase_currency,
+        sellingCurrency: editingParameterSet.selling_currency,
+        qualityControlPercent: editingParameterSet.quality_control_percent,
+        transportInsuranceCost: editingParameterSet.transport_insurance_cost,
+        duty: editingParameterSet.duty,
+        exchangeRate: editingParameterSet.exchange_rate,
+        italyAccessoryCosts: editingParameterSet.italy_accessory_costs,
+        companyMultiplier: editingParameterSet.company_multiplier,
+        retailMultiplier: editingParameterSet.retail_multiplier,
+        optimalMargin: editingParameterSet.optimal_margin,
+      };
+      
       await pricingApi.updateParameterSet(
         editingParameterSet.id,
-        editingParameterSet
+        parameterSetToUpdate
       );
       setSuccess("Set di parametri aggiornato con successo");
       setEditingParameterSet(null);
