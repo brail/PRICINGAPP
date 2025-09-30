@@ -115,9 +115,15 @@ const Calculator: React.FC = () => {
     if (purchasePriceLocked) return; // Non modificare se bloccato
     setPurchasePrice(value);
     setMode("purchase");
-    // Se c'è un calcolo precedente e l'utente modifica il prezzo di acquisto,
-    // pulisci il prezzo di vendita per permettere un nuovo calcolo
-    if (calculation) {
+
+    // Se il campo viene svuotato, sblocca automaticamente
+    if (!value || isNaN(Number(value))) {
+      setPurchasePriceLocked(false);
+    }
+
+    // NON pulire l'altro campo se è bloccato - deve mantenere il suo valore
+    // Solo pulire se non c'è un lock attivo
+    if (calculation && !retailPriceLocked) {
       setRetailPrice("");
     }
   };
@@ -126,9 +132,15 @@ const Calculator: React.FC = () => {
     if (retailPriceLocked) return; // Non modificare se bloccato
     setRetailPrice(value);
     setMode("selling");
-    // Se c'è un calcolo precedente e l'utente modifica il prezzo di vendita,
-    // pulisci il prezzo di acquisto per permettere un nuovo calcolo
-    if (calculation) {
+
+    // Se il campo viene svuotato, sblocca automaticamente
+    if (!value || isNaN(Number(value))) {
+      setRetailPriceLocked(false);
+    }
+
+    // NON pulire l'altro campo se è bloccato - deve mantenere il suo valore
+    // Solo pulire se non c'è un lock attivo
+    if (calculation && !purchasePriceLocked) {
       setPurchasePrice("");
     }
   };
@@ -139,6 +151,11 @@ const Calculator: React.FC = () => {
     if (!isNaN(numericValue)) {
       setPurchasePrice(numericValue.toFixed(2));
     }
+
+    // Se il retail price è bloccato, calcola automaticamente il margine
+    if (retailPriceLocked && purchasePrice && !isNaN(Number(purchasePrice))) {
+      calculateMarginFromLockedPrice();
+    }
   };
 
   const handleRetailPriceBlur = () => {
@@ -147,10 +164,18 @@ const Calculator: React.FC = () => {
     if (!isNaN(numericValue)) {
       setRetailPrice(numericValue.toFixed(2));
     }
+
+    // Se il purchase price è bloccato, calcola automaticamente il margine
+    if (purchasePriceLocked && retailPrice && !isNaN(Number(retailPrice))) {
+      calculateMarginFromLockedPrice();
+    }
   };
 
   const handleCalculate = async () => {
-    if (purchasePrice && !isNaN(Number(purchasePrice))) {
+    // Se c'è un prezzo bloccato, calcola il margine
+    if (purchasePriceLocked || retailPriceLocked) {
+      await calculateMarginFromLockedPrice();
+    } else if (purchasePrice && !isNaN(Number(purchasePrice))) {
       await calculateFromPurchase();
     } else if (retailPrice && !isNaN(Number(retailPrice))) {
       await calculateFromSelling();
@@ -171,11 +196,95 @@ const Calculator: React.FC = () => {
   };
 
   const handlePurchasePriceLockToggle = () => {
-    setPurchasePriceLocked(!purchasePriceLocked);
+    // Permetti di deselezionare il lock solo se il campo ha un valore valido
+    if (
+      purchasePriceLocked ||
+      (purchasePrice && !isNaN(Number(purchasePrice)))
+    ) {
+      setPurchasePriceLocked(!purchasePriceLocked);
+    }
   };
 
   const handleRetailPriceLockToggle = () => {
-    setRetailPriceLocked(!retailPriceLocked);
+    // Permetti di deselezionare il lock solo se il campo ha un valore valido
+    if (retailPriceLocked || (retailPrice && !isNaN(Number(retailPrice)))) {
+      setRetailPriceLocked(!retailPriceLocked);
+    }
+  };
+
+  // Funzione per calcolare il margine quando un prezzo è bloccato
+  const calculateMarginFromLockedPrice = async () => {
+    if (purchasePriceLocked && retailPrice && !isNaN(Number(retailPrice))) {
+      // Purchase price è bloccato
+      // landedCost = da calculateSellingPrice (con purchasePrice bloccato)
+      // wholesalePrice = da calculatePurchasePrice (con retailPrice inserito nel form)
+      try {
+        // Calcola landedCost dal purchase price bloccato
+        const sellingResult = await pricingApi.calculateSellingPrice(
+          Number(purchasePrice),
+          params.sellingCurrency
+        );
+
+        // Calcola wholesalePrice dal retail price inserito nel form
+        const purchaseResult = await pricingApi.calculatePurchasePrice(
+          Number(retailPrice),
+          params.sellingCurrency
+        );
+
+        const retailPriceValue = Number(retailPrice);
+        const landedCost = sellingResult.landedCost;
+        const wholesalePrice = purchaseResult.wholesalePrice;
+        const companyMargin = (wholesalePrice - landedCost) / wholesalePrice;
+
+        // Crea un oggetto di calcolo personalizzato per il margine
+        const marginCalculation = {
+          ...sellingResult, // Usa sellingResult come base per mantenere i dettagli del calcolo diretto
+          retailPrice: retailPriceValue,
+          companyMargin: companyMargin,
+        };
+
+        setCalculation(marginCalculation);
+      } catch (err) {
+        setError("Errore nel calcolo del margine");
+      }
+    } else if (
+      retailPriceLocked &&
+      purchasePrice &&
+      !isNaN(Number(purchasePrice))
+    ) {
+      // Retail price è bloccato
+      // wholesalePrice = da calculatePurchasePrice (con retailPrice bloccato)
+      // landedCost = da calculateSellingPrice (con purchasePrice inserito nel form)
+      try {
+        // Calcola wholesalePrice dal retail price bloccato
+        const purchaseResult = await pricingApi.calculatePurchasePrice(
+          Number(retailPrice),
+          params.sellingCurrency
+        );
+
+        // Calcola landedCost dal purchase price inserito nel form
+        const sellingResult = await pricingApi.calculateSellingPrice(
+          Number(purchasePrice),
+          params.sellingCurrency
+        );
+
+        const retailPriceValue = Number(retailPrice);
+        const landedCost = sellingResult.landedCost;
+        const wholesalePrice = purchaseResult.wholesalePrice;
+        const companyMargin = (wholesalePrice - landedCost) / wholesalePrice;
+
+        // Crea un oggetto di calcolo personalizzato per il margine
+        const marginCalculation = {
+          ...sellingResult, // Usa sellingResult come base per mantenere i dettagli del calcolo diretto
+          retailPrice: retailPriceValue,
+          companyMargin: companyMargin,
+        };
+
+        setCalculation(marginCalculation);
+      } catch (err) {
+        setError("Errore nel calcolo del margine");
+      }
+    }
   };
 
   // Funzione per determinare il colore del margine basato sulla differenza con il margine ottimale
@@ -240,6 +349,10 @@ const Calculator: React.FC = () => {
                   type="checkbox"
                   checked={purchasePriceLocked}
                   onChange={handlePurchasePriceLockToggle}
+                  disabled={
+                    (!purchasePrice || isNaN(Number(purchasePrice))) &&
+                    !purchasePriceLocked
+                  }
                 />
                 <span className="lock-icon">🔒</span>
               </label>
@@ -267,6 +380,10 @@ const Calculator: React.FC = () => {
                   type="checkbox"
                   checked={retailPriceLocked}
                   onChange={handleRetailPriceLockToggle}
+                  disabled={
+                    (!retailPrice || isNaN(Number(retailPrice))) &&
+                    !retailPriceLocked
+                  }
                 />
                 <span className="lock-icon">🔒</span>
               </label>
@@ -297,7 +414,13 @@ const Calculator: React.FC = () => {
           onClick={handleCalculate}
           disabled={loading || (!purchasePrice && !retailPrice)}
         >
-          {loading ? <span className="loading"></span> : "Calcola"}
+          {loading ? (
+            <span className="loading"></span>
+          ) : purchasePriceLocked || retailPriceLocked ? (
+            "Calcola Margine"
+          ) : (
+            "Calcola"
+          )}
         </button>
       </div>
 

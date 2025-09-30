@@ -187,6 +187,16 @@
   transform: scale(1.05);
 }
 
+.lock-checkbox input[type="checkbox"]:disabled + .lock-icon {
+  color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.lock-checkbox input[type="checkbox"]:disabled + .lock-icon:hover {
+  transform: none;
+}
+
 .results-card {
   background: white;
   border-radius: 12px;
