@@ -235,6 +235,96 @@ const Settings: React.FC = () => {
     return errors;
   };
 
+  const validateEditForm = () => {
+    const errors: string[] = [];
+
+    if (!editingParameterSet?.description?.trim()) {
+      errors.push("Descrizione è obbligatoria");
+    }
+
+    if (!editingParameterSet?.purchase_currency) {
+      errors.push("Valuta acquisto è obbligatoria");
+    }
+
+    if (!editingParameterSet?.selling_currency) {
+      errors.push("Valuta vendita è obbligatoria");
+    }
+
+    if (
+      editingParameterSet?.quality_control_percent === "" ||
+      editingParameterSet?.quality_control_percent === null ||
+      editingParameterSet?.quality_control_percent === undefined ||
+      isNaN(Number(editingParameterSet?.quality_control_percent))
+    ) {
+      errors.push("Quality Control (%) è obbligatorio");
+    }
+
+    if (
+      editingParameterSet?.transport_insurance_cost === "" ||
+      editingParameterSet?.transport_insurance_cost === null ||
+      editingParameterSet?.transport_insurance_cost === undefined ||
+      isNaN(Number(editingParameterSet?.transport_insurance_cost))
+    ) {
+      errors.push("Trasporto + Assicurazione è obbligatorio");
+    }
+
+    if (
+      editingParameterSet?.duty === "" ||
+      editingParameterSet?.duty === null ||
+      editingParameterSet?.duty === undefined ||
+      isNaN(Number(editingParameterSet?.duty))
+    ) {
+      errors.push("Dazio (%) è obbligatorio");
+    }
+
+    if (
+      editingParameterSet?.exchange_rate === "" ||
+      editingParameterSet?.exchange_rate === null ||
+      editingParameterSet?.exchange_rate === undefined ||
+      isNaN(Number(editingParameterSet?.exchange_rate))
+    ) {
+      errors.push("Cambio è obbligatorio");
+    }
+
+    if (
+      editingParameterSet?.italy_accessory_costs === "" ||
+      editingParameterSet?.italy_accessory_costs === null ||
+      editingParameterSet?.italy_accessory_costs === undefined ||
+      isNaN(Number(editingParameterSet?.italy_accessory_costs))
+    ) {
+      errors.push("Costi accessori Italia è obbligatorio");
+    }
+
+    if (
+      editingParameterSet?.company_multiplier === "" ||
+      editingParameterSet?.company_multiplier === null ||
+      editingParameterSet?.company_multiplier === undefined ||
+      isNaN(Number(editingParameterSet?.company_multiplier))
+    ) {
+      errors.push("Moltiplicatore aziendale è obbligatorio");
+    }
+
+    if (
+      editingParameterSet?.retail_multiplier === "" ||
+      editingParameterSet?.retail_multiplier === null ||
+      editingParameterSet?.retail_multiplier === undefined ||
+      isNaN(Number(editingParameterSet?.retail_multiplier))
+    ) {
+      errors.push("Moltiplicatore retail è obbligatorio");
+    }
+
+    if (
+      editingParameterSet?.optimal_margin === "" ||
+      editingParameterSet?.optimal_margin === null ||
+      editingParameterSet?.optimal_margin === undefined ||
+      isNaN(Number(editingParameterSet?.optimal_margin))
+    ) {
+      errors.push("Margine ottimale (%) è obbligatorio");
+    }
+
+    return errors;
+  };
+
   const handleCreateParameterSet = async () => {
     // Validazione del form
     const validationErrors = validateForm();
@@ -279,24 +369,31 @@ const Settings: React.FC = () => {
   const handleUpdateParameterSet = async () => {
     if (!editingParameterSet) return;
 
+    // Validazione del form
+    const validationErrors = validateEditForm();
+    if (validationErrors.length > 0) {
+      setError("Errore di validazione: " + validationErrors.join(", "));
+      return;
+    }
+
     try {
       setSaving(true);
-      
+
       // Converti i dati da snake_case a camelCase per il backend
       const parameterSetToUpdate = {
         description: editingParameterSet.description,
         purchaseCurrency: editingParameterSet.purchase_currency,
         sellingCurrency: editingParameterSet.selling_currency,
-        qualityControlPercent: editingParameterSet.quality_control_percent,
-        transportInsuranceCost: editingParameterSet.transport_insurance_cost,
-        duty: editingParameterSet.duty,
-        exchangeRate: editingParameterSet.exchange_rate,
-        italyAccessoryCosts: editingParameterSet.italy_accessory_costs,
-        companyMultiplier: editingParameterSet.company_multiplier,
-        retailMultiplier: editingParameterSet.retail_multiplier,
-        optimalMargin: editingParameterSet.optimal_margin,
+        qualityControlPercent: Number(editingParameterSet.quality_control_percent),
+        transportInsuranceCost: Number(editingParameterSet.transport_insurance_cost),
+        duty: Number(editingParameterSet.duty),
+        exchangeRate: Number(editingParameterSet.exchange_rate),
+        italyAccessoryCosts: Number(editingParameterSet.italy_accessory_costs),
+        companyMultiplier: Number(editingParameterSet.company_multiplier),
+        retailMultiplier: Number(editingParameterSet.retail_multiplier),
+        optimalMargin: Number(editingParameterSet.optimal_margin),
       };
-      
+
       await pricingApi.updateParameterSet(
         editingParameterSet.id,
         parameterSetToUpdate
@@ -976,7 +1073,7 @@ const Settings: React.FC = () => {
                 </h4>
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Descrizione</label>
+                    <label className="form-label">Descrizione *</label>
                     <input
                       type="text"
                       className="form-input"
@@ -987,13 +1084,14 @@ const Settings: React.FC = () => {
                           description: e.target.value,
                         })
                       }
+                      placeholder="Nome del set di parametri"
                     />
                   </div>
                 </div>
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Valuta acquisto</label>
+                    <label className="form-label">Valuta acquisto *</label>
                     <select
                       className="form-select"
                       value={editingParameterSet.purchase_currency}
@@ -1004,6 +1102,7 @@ const Settings: React.FC = () => {
                         })
                       }
                     >
+                      <option value="">Seleziona valuta</option>
                       {CURRENCIES.map((currency) => (
                         <option key={currency.code} value={currency.code}>
                           {currency.code} - {currency.name}
@@ -1013,7 +1112,7 @@ const Settings: React.FC = () => {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Valuta vendita</label>
+                    <label className="form-label">Valuta vendita *</label>
                     <select
                       className="form-select"
                       value={editingParameterSet.selling_currency}
@@ -1024,6 +1123,7 @@ const Settings: React.FC = () => {
                         })
                       }
                     >
+                      <option value="">Seleziona valuta</option>
                       {CURRENCIES.map((currency) => (
                         <option key={currency.code} value={currency.code}>
                           {currency.code} - {currency.name}
@@ -1035,7 +1135,7 @@ const Settings: React.FC = () => {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Quality Control (%)</label>
+                    <label className="form-label">Quality Control (%) *</label>
                     <input
                       type="number"
                       className="form-input"
@@ -1043,7 +1143,7 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setEditingParameterSet({
                           ...editingParameterSet,
-                          quality_control_percent: Number(e.target.value),
+                          quality_control_percent: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
@@ -1053,7 +1153,7 @@ const Settings: React.FC = () => {
 
                   <div className="form-group">
                     <label className="form-label">
-                      Trasporto + Assicurazione
+                      Trasporto + Assicurazione *
                     </label>
                     <input
                       type="number"
@@ -1062,7 +1162,7 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setEditingParameterSet({
                           ...editingParameterSet,
-                          transport_insurance_cost: Number(e.target.value),
+                          transport_insurance_cost: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
@@ -1073,7 +1173,7 @@ const Settings: React.FC = () => {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Dazio (%)</label>
+                    <label className="form-label">Dazio (%) *</label>
                     <input
                       type="number"
                       className="form-input"
@@ -1081,7 +1181,7 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setEditingParameterSet({
                           ...editingParameterSet,
-                          duty: Number(e.target.value),
+                          duty: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
@@ -1090,7 +1190,7 @@ const Settings: React.FC = () => {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Cambio</label>
+                    <label className="form-label">Cambio *</label>
                     <input
                       type="number"
                       className="form-input"
@@ -1098,7 +1198,7 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setEditingParameterSet({
                           ...editingParameterSet,
-                          exchange_rate: Number(e.target.value),
+                          exchange_rate: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0.001"
@@ -1109,7 +1209,7 @@ const Settings: React.FC = () => {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Costi accessori Italia</label>
+                    <label className="form-label">Costi accessori Italia *</label>
                     <input
                       type="number"
                       className="form-input"
@@ -1117,7 +1217,7 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setEditingParameterSet({
                           ...editingParameterSet,
-                          italy_accessory_costs: Number(e.target.value),
+                          italy_accessory_costs: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
@@ -1127,7 +1227,7 @@ const Settings: React.FC = () => {
 
                   <div className="form-group">
                     <label className="form-label">
-                      Moltiplicatore aziendale
+                      Moltiplicatore aziendale *
                     </label>
                     <input
                       type="number"
@@ -1136,7 +1236,7 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setEditingParameterSet({
                           ...editingParameterSet,
-                          company_multiplier: Number(e.target.value),
+                          company_multiplier: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0.1"
@@ -1147,7 +1247,7 @@ const Settings: React.FC = () => {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Moltiplicatore retail</label>
+                    <label className="form-label">Moltiplicatore retail *</label>
                     <input
                       type="number"
                       className="form-input"
@@ -1155,7 +1255,7 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setEditingParameterSet({
                           ...editingParameterSet,
-                          retail_multiplier: Number(e.target.value),
+                          retail_multiplier: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0.1"
@@ -1164,7 +1264,7 @@ const Settings: React.FC = () => {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Margine ottimale (%)</label>
+                    <label className="form-label">Margine ottimale (%) *</label>
                     <input
                       type="number"
                       className="form-input"
@@ -1172,7 +1272,7 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setEditingParameterSet({
                           ...editingParameterSet,
-                          optimal_margin: Number(e.target.value),
+                          optimal_margin: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
@@ -1186,7 +1286,7 @@ const Settings: React.FC = () => {
                   <button
                     className="btn btn-primary"
                     onClick={handleUpdateParameterSet}
-                    disabled={saving}
+                    disabled={saving || validateEditForm().length > 0}
                   >
                     {saving ? "Aggiornamento..." : "Aggiorna Set"}
                   </button>
