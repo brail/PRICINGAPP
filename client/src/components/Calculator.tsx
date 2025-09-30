@@ -210,6 +210,19 @@ const Calculator: React.FC = () => {
             />
           </div>
         </div>
+        
+        {/* Margine Aziendale */}
+        {calculation && (
+          <div className="margin-display">
+            <div className="margin-item">
+              <span className="margin-label">Margine Aziendale:</span>
+              <span className="margin-value">
+                {(calculation.companyMargin * 100).toFixed(2)}%
+              </span>
+            </div>
+          </div>
+        )}
+        
         <button
           className="btn btn-primary"
           onClick={handleCalculate}
@@ -352,14 +365,6 @@ const Calculator: React.FC = () => {
                       )}
                     </span>
                   </div>
-                  <div className="result-item">
-                    <span className="result-label">
-                      Margine aziendale:
-                    </span>
-                    <span className="result-value">
-                      {(calculation.companyMargin * 100).toFixed(1)}%
-                    </span>
-                  </div>
                   <div className="result-item highlight">
                     <span className="result-label">
                       Prezzo retail finale (×
@@ -407,14 +412,6 @@ const Calculator: React.FC = () => {
                         calculation.wholesalePrice,
                         calculation.sellingCurrency
                       )}
-                    </span>
-                  </div>
-                  <div className="result-item">
-                    <span className="result-label">
-                      Margine aziendale:
-                    </span>
-                    <span className="result-value">
-                      {(calculation.companyMargin * 100).toFixed(1)}%
                     </span>
                   </div>
                   <div className="result-item">
