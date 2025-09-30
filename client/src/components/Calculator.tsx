@@ -73,6 +73,7 @@ const Calculator: React.FC = () => {
         params.sellingCurrency
       );
       setCalculation(result);
+      // Aggiorna il campo retail price con il risultato del calcolo
       setRetailPrice(result.retailPrice.toFixed(2));
     } catch (err) {
       setError("Errore nel calcolo del prezzo di vendita");
@@ -93,6 +94,7 @@ const Calculator: React.FC = () => {
         params.sellingCurrency
       );
       setCalculation(result);
+      // Aggiorna il campo purchase price con il risultato del calcolo
       setPurchasePrice(result.purchasePrice.toFixed(2));
     } catch (err) {
       setError("Errore nel calcolo del prezzo di acquisto");
@@ -104,11 +106,21 @@ const Calculator: React.FC = () => {
   const handlePurchasePriceChange = (value: string) => {
     setPurchasePrice(value);
     setMode("purchase");
+    // Se c'è un calcolo precedente e l'utente modifica il prezzo di acquisto,
+    // pulisci il prezzo di vendita per permettere un nuovo calcolo
+    if (calculation) {
+      setRetailPrice("");
+    }
   };
 
   const handleRetailPriceChange = (value: string) => {
     setRetailPrice(value);
     setMode("selling");
+    // Se c'è un calcolo precedente e l'utente modifica il prezzo di vendita,
+    // pulisci il prezzo di acquisto per permettere un nuovo calcolo
+    if (calculation) {
+      setPurchasePrice("");
+    }
   };
 
   const handleCalculate = async () => {
@@ -116,6 +128,12 @@ const Calculator: React.FC = () => {
       await calculateFromPurchase();
     } else if (retailPrice && !isNaN(Number(retailPrice))) {
       await calculateFromSelling();
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleCalculate();
     }
   };
 
@@ -152,6 +170,7 @@ const Calculator: React.FC = () => {
               className="form-input"
               value={purchasePrice}
               onChange={(e) => handlePurchasePriceChange(e.target.value)}
+              onKeyDown={handleKeyPress}
               placeholder="0.00"
               step="0.01"
               min="0"
@@ -166,6 +185,7 @@ const Calculator: React.FC = () => {
               className="form-input"
               value={retailPrice}
               onChange={(e) => handleRetailPriceChange(e.target.value)}
+              onKeyDown={handleKeyPress}
               placeholder="0.00"
               step="0.01"
               min="0"
