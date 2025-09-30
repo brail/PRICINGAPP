@@ -499,7 +499,7 @@ const Settings: React.FC = () => {
                     <div key={set.id} className="parameter-set-card">
                       <div className="parameter-set-header">
                         <h5>
-                          {set.is_default && (
+                          {!!set.is_default && (
                             <span className="default-star">⭐</span>
                           )}
                           {set.description}
