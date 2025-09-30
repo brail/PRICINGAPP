@@ -460,11 +460,13 @@ const Calculator: React.FC = () => {
             onChange={(e) => handleParameterSetChange(Number(e.target.value))}
             disabled={loadingParameterSets}
           >
+            {/*
             <option value="">
               {currentParamsMatchSet
                 ? "Seleziona un set di parametri..."
                 : "Parametri personalizzati (non salvati)"}
             </option>
+            */}
             {parameterSets.map((set) => (
               <option key={set.id} value={set.id}>
                 {set.description}
@@ -475,6 +477,55 @@ const Calculator: React.FC = () => {
             <span className="loading-text">Caricamento...</span>
           )}
         </div>
+
+        {/* Dettagli Set di Parametri Caricato */}
+        {selectedParameterSetId && params && (
+          <div className="parameter-set-details">
+            <h4>Parametri Attivi</h4>
+            <div className="parameter-grid">
+              <div className="parameter-item">
+                <span className="parameter-label">Valuta Acquisto:</span>
+                <span className="parameter-value">{params.purchaseCurrency}</span>
+              </div>
+              <div className="parameter-item">
+                <span className="parameter-label">Valuta Vendita:</span>
+                <span className="parameter-value">{params.sellingCurrency}</span>
+              </div>
+              <div className="parameter-item">
+                <span className="parameter-label">Quality Control:</span>
+                <span className="parameter-value">{params.qualityControlPercent}%</span>
+              </div>
+              <div className="parameter-item">
+                <span className="parameter-label">Trasporto + Assicurazione:</span>
+                <span className="parameter-value">{params.transportInsuranceCost} {params.purchaseCurrency}</span>
+              </div>
+              <div className="parameter-item">
+                <span className="parameter-label">Dazio:</span>
+                <span className="parameter-value">{params.duty}%</span>
+              </div>
+              <div className="parameter-item">
+                <span className="parameter-label">Cambio:</span>
+                <span className="parameter-value">{params.exchangeRate}</span>
+              </div>
+              <div className="parameter-item">
+                <span className="parameter-label">Costi Accessori Italia:</span>
+                <span className="parameter-value">{params.italyAccessoryCosts} {params.sellingCurrency}</span>
+              </div>
+              <div className="parameter-item">
+                <span className="parameter-label">Moltiplicatore Aziendale:</span>
+                <span className="parameter-value">{params.companyMultiplier}</span>
+              </div>
+              <div className="parameter-item">
+                <span className="parameter-label">Moltiplicatore Retail:</span>
+                <span className="parameter-value">{params.retailMultiplier}</span>
+              </div>
+              <div className="parameter-item">
+                <span className="parameter-label">Margine Ottimale:</span>
+                <span className="parameter-value">{params.optimalMargin}%</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="form-grid">
           <div className="form-group">

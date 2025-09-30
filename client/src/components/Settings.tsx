@@ -35,7 +35,9 @@ const Settings: React.FC = () => {
   >(null);
   const [duplicateDescription, setDuplicateDescription] = useState<string>("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
-  const [parameterSetToDelete, setParameterSetToDelete] = useState<any | null>(null);
+  const [parameterSetToDelete, setParameterSetToDelete] = useState<any | null>(
+    null
+  );
   const [newParameterSet, setNewParameterSet] = useState<{
     description: string;
     purchaseCurrency: string;
