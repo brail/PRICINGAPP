@@ -30,7 +30,19 @@ const Settings: React.FC = () => {
     null
   );
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
-  const [newParameterSet, setNewParameterSet] = useState({
+  const [newParameterSet, setNewParameterSet] = useState<{
+    description: string;
+    purchaseCurrency: string;
+    sellingCurrency: string;
+    qualityControlPercent: string | number;
+    transportInsuranceCost: string | number;
+    duty: string | number;
+    exchangeRate: string | number;
+    italyAccessoryCosts: string | number;
+    companyMultiplier: string | number;
+    retailMultiplier: string | number;
+    optimalMargin: string | number;
+  }>({
     description: "",
     purchaseCurrency: "",
     sellingCurrency: "",
@@ -141,25 +153,82 @@ const Settings: React.FC = () => {
     });
   };
 
+  const validateForm = () => {
+    const errors: string[] = [];
+    
+    if (!newParameterSet.description.trim()) {
+      errors.push("Descrizione è obbligatoria");
+    }
+    
+    if (!newParameterSet.purchaseCurrency) {
+      errors.push("Valuta acquisto è obbligatoria");
+    }
+    
+    if (!newParameterSet.sellingCurrency) {
+      errors.push("Valuta vendita è obbligatoria");
+    }
+    
+    if (newParameterSet.qualityControlPercent === "" || newParameterSet.qualityControlPercent === null || newParameterSet.qualityControlPercent === undefined) {
+      errors.push("Quality Control (%) è obbligatorio");
+    }
+    
+    if (newParameterSet.transportInsuranceCost === "" || newParameterSet.transportInsuranceCost === null || newParameterSet.transportInsuranceCost === undefined) {
+      errors.push("Trasporto + Assicurazione è obbligatorio");
+    }
+    
+    if (newParameterSet.duty === "" || newParameterSet.duty === null || newParameterSet.duty === undefined) {
+      errors.push("Dazio (%) è obbligatorio");
+    }
+    
+    if (newParameterSet.exchangeRate === "" || newParameterSet.exchangeRate === null || newParameterSet.exchangeRate === undefined) {
+      errors.push("Cambio è obbligatorio");
+    }
+    
+    if (newParameterSet.italyAccessoryCosts === "" || newParameterSet.italyAccessoryCosts === null || newParameterSet.italyAccessoryCosts === undefined) {
+      errors.push("Costi accessori Italia è obbligatorio");
+    }
+    
+    if (newParameterSet.companyMultiplier === "" || newParameterSet.companyMultiplier === null || newParameterSet.companyMultiplier === undefined) {
+      errors.push("Moltiplicatore aziendale è obbligatorio");
+    }
+    
+    if (newParameterSet.retailMultiplier === "" || newParameterSet.retailMultiplier === null || newParameterSet.retailMultiplier === undefined) {
+      errors.push("Moltiplicatore retail è obbligatorio");
+    }
+    
+    if (newParameterSet.optimalMargin === "" || newParameterSet.optimalMargin === null || newParameterSet.optimalMargin === undefined) {
+      errors.push("Margine ottimale (%) è obbligatorio");
+    }
+    
+    return errors;
+  };
+
   const handleCreateParameterSet = async () => {
+    // Validazione del form
+    const validationErrors = validateForm();
+    if (validationErrors.length > 0) {
+      setError("Errore di validazione: " + validationErrors.join(", "));
+      return;
+    }
+
     try {
       setSaving(true);
-      
-      // Converti valori vuoti in null o valori di default
+
+      // Converti valori in numeri (ora sappiamo che non sono vuoti)
       const parameterSetToCreate = {
         description: newParameterSet.description,
-        purchaseCurrency: newParameterSet.purchaseCurrency || "USD",
-        sellingCurrency: newParameterSet.sellingCurrency || "EUR",
-        qualityControlPercent: newParameterSet.qualityControlPercent === "" ? 0 : Number(newParameterSet.qualityControlPercent),
-        transportInsuranceCost: newParameterSet.transportInsuranceCost === "" ? 0 : Number(newParameterSet.transportInsuranceCost),
-        duty: newParameterSet.duty === "" ? 0 : Number(newParameterSet.duty),
-        exchangeRate: newParameterSet.exchangeRate === "" ? 1 : Number(newParameterSet.exchangeRate),
-        italyAccessoryCosts: newParameterSet.italyAccessoryCosts === "" ? 0 : Number(newParameterSet.italyAccessoryCosts),
-        companyMultiplier: newParameterSet.companyMultiplier === "" ? 1 : Number(newParameterSet.companyMultiplier),
-        retailMultiplier: newParameterSet.retailMultiplier === "" ? 1 : Number(newParameterSet.retailMultiplier),
-        optimalMargin: newParameterSet.optimalMargin === "" ? 0 : Number(newParameterSet.optimalMargin),
+        purchaseCurrency: newParameterSet.purchaseCurrency,
+        sellingCurrency: newParameterSet.sellingCurrency,
+        qualityControlPercent: Number(newParameterSet.qualityControlPercent),
+        transportInsuranceCost: Number(newParameterSet.transportInsuranceCost),
+        duty: Number(newParameterSet.duty),
+        exchangeRate: Number(newParameterSet.exchangeRate),
+        italyAccessoryCosts: Number(newParameterSet.italyAccessoryCosts),
+        companyMultiplier: Number(newParameterSet.companyMultiplier),
+        retailMultiplier: Number(newParameterSet.retailMultiplier),
+        optimalMargin: Number(newParameterSet.optimalMargin),
       };
-      
+
       await pricingApi.createParameterSet(parameterSetToCreate);
       setSuccess("Set di parametri creato con successo");
       resetCreateForm();
@@ -620,7 +689,7 @@ const Settings: React.FC = () => {
                 <h4>Crea Nuovo Set di Parametri</h4>
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Descrizione</label>
+                    <label className="form-label">Descrizione *</label>
                     <input
                       type="text"
                       className="form-input"
@@ -638,7 +707,7 @@ const Settings: React.FC = () => {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Valuta acquisto</label>
+                    <label className="form-label">Valuta acquisto *</label>
                     <select
                       className="form-select"
                       value={newParameterSet.purchaseCurrency}
@@ -659,7 +728,7 @@ const Settings: React.FC = () => {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Valuta vendita</label>
+                    <label className="form-label">Valuta vendita *</label>
                     <select
                       className="form-select"
                       value={newParameterSet.sellingCurrency}
@@ -682,7 +751,7 @@ const Settings: React.FC = () => {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Quality Control (%)</label>
+                    <label className="form-label">Quality Control (%) *</label>
                     <input
                       type="number"
                       className="form-input"
@@ -690,7 +759,8 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setNewParameterSet({
                           ...newParameterSet,
-                          qualityControlPercent: e.target.value === "" ? "" : Number(e.target.value),
+                          qualityControlPercent:
+                            e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
@@ -700,7 +770,7 @@ const Settings: React.FC = () => {
 
                   <div className="form-group">
                     <label className="form-label">
-                      Trasporto + Assicurazione
+                      Trasporto + Assicurazione *
                     </label>
                     <input
                       type="number"
@@ -709,7 +779,8 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setNewParameterSet({
                           ...newParameterSet,
-                          transportInsuranceCost: e.target.value === "" ? "" : Number(e.target.value),
+                          transportInsuranceCost:
+                            e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
@@ -720,7 +791,7 @@ const Settings: React.FC = () => {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Dazio (%)</label>
+                    <label className="form-label">Dazio (%) *</label>
                     <input
                       type="number"
                       className="form-input"
@@ -728,7 +799,8 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setNewParameterSet({
                           ...newParameterSet,
-                          duty: e.target.value === "" ? "" : Number(e.target.value),
+                          duty:
+                            e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
@@ -737,7 +809,7 @@ const Settings: React.FC = () => {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Cambio</label>
+                    <label className="form-label">Cambio *</label>
                     <input
                       type="number"
                       className="form-input"
@@ -745,7 +817,8 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setNewParameterSet({
                           ...newParameterSet,
-                          exchangeRate: e.target.value === "" ? "" : Number(e.target.value),
+                          exchangeRate:
+                            e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0.001"
@@ -756,7 +829,7 @@ const Settings: React.FC = () => {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Costi accessori Italia</label>
+                    <label className="form-label">Costi accessori Italia *</label>
                     <input
                       type="number"
                       className="form-input"
@@ -764,7 +837,8 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setNewParameterSet({
                           ...newParameterSet,
-                          italyAccessoryCosts: e.target.value === "" ? "" : Number(e.target.value),
+                          italyAccessoryCosts:
+                            e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
@@ -774,7 +848,7 @@ const Settings: React.FC = () => {
 
                   <div className="form-group">
                     <label className="form-label">
-                      Moltiplicatore aziendale
+                      Moltiplicatore aziendale *
                     </label>
                     <input
                       type="number"
@@ -783,7 +857,8 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setNewParameterSet({
                           ...newParameterSet,
-                          companyMultiplier: e.target.value === "" ? "" : Number(e.target.value),
+                          companyMultiplier:
+                            e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0.1"
@@ -794,7 +869,7 @@ const Settings: React.FC = () => {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Moltiplicatore retail</label>
+                    <label className="form-label">Moltiplicatore retail *</label>
                     <input
                       type="number"
                       className="form-input"
@@ -802,7 +877,8 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setNewParameterSet({
                           ...newParameterSet,
-                          retailMultiplier: e.target.value === "" ? "" : Number(e.target.value),
+                          retailMultiplier:
+                            e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0.1"
@@ -811,7 +887,7 @@ const Settings: React.FC = () => {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Margine ottimale (%)</label>
+                    <label className="form-label">Margine ottimale (%) *</label>
                     <input
                       type="number"
                       className="form-input"
@@ -819,7 +895,8 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setNewParameterSet({
                           ...newParameterSet,
-                          optimalMargin: e.target.value === "" ? "" : Number(e.target.value),
+                          optimalMargin:
+                            e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
@@ -832,7 +909,7 @@ const Settings: React.FC = () => {
                 <button
                   className="btn btn-primary"
                   onClick={handleCreateParameterSet}
-                  disabled={saving || !newParameterSet.description.trim()}
+                  disabled={saving || validateForm().length > 0}
                 >
                   {saving ? "Creazione..." : "Crea Set di Parametri"}
                 </button>
