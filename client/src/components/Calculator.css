@@ -483,13 +483,20 @@
   margin-bottom: 24px;
 }
 
-.parameter-set-details h4 {
+.parameter-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.parameter-details-header h4 {
   color: #495057;
-  margin: 0 0 16px 0;
+  margin: 0;
   font-size: 16px;
   font-weight: 600;
-  border-bottom: 1px solid #dee2e6;
-  padding-bottom: 8px;
 }
 
 .parameter-grid {
@@ -535,6 +542,12 @@
 
 /* Responsive Parameter Grid */
 @media (max-width: 768px) {
+  .parameter-details-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
   .parameter-grid {
     grid-template-columns: 1fr;
   }
@@ -554,11 +567,11 @@
   .parameter-set-details {
     padding: 16px;
   }
-  
+
   .parameter-set-details h4 {
     font-size: 15px;
   }
-  
+
   .parameter-label,
   .parameter-value {
     font-size: 13px;
