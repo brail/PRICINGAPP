@@ -218,10 +218,10 @@ async function calculatePurchasePrice(retailPrice, params) {
   const wholesalePrice = retailPrice / retailMultiplier;
 
   // 2. Rimuovi moltiplicatore aziendale
-  const priceWithoutMultipliers = wholesalePrice / companyMultiplier;
+  const landedCost = wholesalePrice / companyMultiplier;
 
   // 3. Rimuovi costi accessori Italia
-  const priceWithoutAccessories = priceWithoutMultipliers - italyAccessoryCosts;
+  const priceWithoutAccessories = landedCost - italyAccessoryCosts;
 
   // 4. Rimuovi dazio
   const priceWithoutDuty = priceWithoutAccessories / (1 + duty / 100);
@@ -244,7 +244,7 @@ async function calculatePurchasePrice(retailPrice, params) {
     retailPrice, // Nel calcolo inverso, retailPrice è l'input dell'utente
     retailPriceRaw: retailPrice, // Nel calcolo inverso, retailPrice è l'input
     wholesalePrice,
-    priceWithoutMultipliers,
+    landedCost,
     italyAccessoryCosts,
     priceWithoutAccessories,
     dutyCost,

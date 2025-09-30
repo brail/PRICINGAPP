@@ -408,8 +408,8 @@ const Calculator: React.FC = () => {
                     </span>
                     <span className="result-value">
                       {formatCurrency(
-                        "priceWithoutMultipliers" in calculation
-                          ? calculation.priceWithoutMultipliers
+                        "landedCost" in calculation
+                          ? calculation.landedCost
                           : 0,
                         calculation.sellingCurrency
                       )}

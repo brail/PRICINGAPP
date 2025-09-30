@@ -32,7 +32,7 @@ export interface PurchasePriceCalculation {
   retailPrice: number;
   retailPriceRaw: number;
   wholesalePrice: number;
-  priceWithoutMultipliers: number;
+  landedCost: number;
   italyAccessoryCosts: number;
   priceWithoutAccessories: number;
   dutyCost: number;
