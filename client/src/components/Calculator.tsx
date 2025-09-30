@@ -406,6 +406,35 @@ const Calculator: React.FC = () => {
                 {params.optimalMargin}%)
               </span>
             </div>
+            <div className="margin-bar-container">
+              <div className="margin-bar">
+                <div
+                  className="margin-bar-fill"
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      Math.max(0, calculation.companyMargin * 100)
+                    )}%`,
+                  }}
+                ></div>
+                <div
+                  className="margin-bar-target"
+                  style={{
+                    left: `${Math.min(
+                      100,
+                      Math.max(0, params.optimalMargin)
+                    )}%`,
+                  }}
+                ></div>
+              </div>
+              <div className="margin-bar-labels">
+                <span>0%</span>
+                <span className="target-label">
+                  Target: {params.optimalMargin}%
+                </span>
+                <span>100%</span>
+              </div>
+            </div>
           </div>
         )}
 

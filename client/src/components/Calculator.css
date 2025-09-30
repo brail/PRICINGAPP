@@ -315,6 +315,95 @@
   }
 }
 
+/* Stili per la barra di margine */
+.margin-bar-container {
+  margin-top: 16px;
+}
+
+.margin-bar {
+  position: relative;
+  height: 20px;
+  background: #e9ecef;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #dee2e6;
+}
+
+.margin-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #28a745, #20c997);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+  position: relative;
+}
+
+.margin-bar-fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 2px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+.margin-bar-target {
+  position: absolute;
+  top: -2px;
+  width: 4px;
+  height: 24px;
+  background: #dc3545;
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(220, 53, 69, 0.8), 0 0 16px rgba(220, 53, 69, 0.4);
+  z-index: 10;
+  border: 2px solid white;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.8), 0 0 16px rgba(220, 53, 69, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(220, 53, 69, 1), 0 0 24px rgba(220, 53, 69, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.8), 0 0 16px rgba(220, 53, 69, 0.4);
+  }
+}
+
+.margin-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.target-label {
+  font-weight: 600;
+  color: #dc3545;
+}
+
+/* Colori dinamici per la barra di margine */
+.margin-excellent .margin-bar-fill {
+  background: linear-gradient(90deg, #28a745, #20c997);
+}
+
+.margin-good .margin-bar-fill {
+  background: linear-gradient(90deg, #28a745, #34ce57);
+}
+
+.margin-warning .margin-bar-fill {
+  background: linear-gradient(90deg, #ffc107, #fd7e14);
+}
+
+.margin-danger .margin-bar-fill {
+  background: linear-gradient(90deg, #dc3545, #e74c3c);
+}
+
 @media (max-width: 480px) {
   .calculator-header h2 {
     font-size: 24px;
@@ -326,5 +415,13 @@
 
   .results-header h3 {
     font-size: 20px;
+  }
+
+  .margin-bar-labels {
+    font-size: 11px;
+  }
+
+  .target-label {
+    font-size: 10px;
   }
 }
