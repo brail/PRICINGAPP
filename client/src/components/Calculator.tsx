@@ -41,6 +41,7 @@ const Calculator: React.FC = () => {
     number | null
   >(null);
   const [loadingParameterSets, setLoadingParameterSets] = useState(false);
+  const [currentParamsMatchSet, setCurrentParamsMatchSet] = useState(false);
 
   // Carica parametri iniziali e set di parametri
   useEffect(() => {
@@ -48,10 +49,65 @@ const Calculator: React.FC = () => {
     loadParameterSets();
   }, []);
 
+  // Aggiorna la selezione del set quando i parametri cambiano
+  useEffect(() => {
+    if (parameterSets.length > 0 && params) {
+      const matchingSet = parameterSets.find((set) => {
+        return (
+          set.purchase_currency === params.purchaseCurrency &&
+          set.selling_currency === params.sellingCurrency &&
+          set.quality_control_percent === params.qualityControlPercent &&
+          set.transport_insurance_cost === params.transportInsuranceCost &&
+          set.duty === params.duty &&
+          set.exchange_rate === params.exchangeRate &&
+          set.italy_accessory_costs === params.italyAccessoryCosts &&
+          set.company_multiplier === params.companyMultiplier &&
+          set.retail_multiplier === params.retailMultiplier &&
+          set.optimal_margin === params.optimalMargin
+        );
+      });
+
+      if (matchingSet) {
+        setCurrentParamsMatchSet(true);
+        if (matchingSet.id !== selectedParameterSetId) {
+          setSelectedParameterSetId(matchingSet.id);
+        }
+      } else {
+        setCurrentParamsMatchSet(false);
+        setSelectedParameterSetId(null);
+      }
+    }
+  }, [params, parameterSets, selectedParameterSetId]);
+
   const loadParams = async () => {
     try {
       const currentParams = await pricingApi.getParams();
       setParams(currentParams);
+      
+      // Aggiorna la selezione del set se i parametri sono già stati caricati
+      if (parameterSets.length > 0) {
+        const matchingSet = parameterSets.find((set) => {
+          return (
+            set.purchase_currency === currentParams.purchaseCurrency &&
+            set.selling_currency === currentParams.sellingCurrency &&
+            set.quality_control_percent === currentParams.qualityControlPercent &&
+            set.transport_insurance_cost === currentParams.transportInsuranceCost &&
+            set.duty === currentParams.duty &&
+            set.exchange_rate === currentParams.exchangeRate &&
+            set.italy_accessory_costs === currentParams.italyAccessoryCosts &&
+            set.company_multiplier === currentParams.companyMultiplier &&
+            set.retail_multiplier === currentParams.retailMultiplier &&
+            set.optimal_margin === currentParams.optimalMargin
+          );
+        });
+
+        if (matchingSet) {
+          setSelectedParameterSetId(matchingSet.id);
+          setCurrentParamsMatchSet(true);
+        } else {
+          setCurrentParamsMatchSet(false);
+        }
+      }
     } catch (err) {
       setError("Errore nel caricamento dei parametri");
     }
@@ -63,12 +119,37 @@ const Calculator: React.FC = () => {
       const sets = await pricingApi.getParameterSets();
       setParameterSets(sets);
 
-      // Seleziona automaticamente il set "Parametri Default" se esiste
-      const defaultSet = sets.find(
-        (set) => set.description === "Parametri Default"
-      );
-      if (defaultSet) {
-        setSelectedParameterSetId(defaultSet.id);
+      // Trova il set che corrisponde ai parametri attualmente caricati
+      const currentParams = await pricingApi.getParams();
+      const matchingSet = sets.find((set) => {
+        return (
+          set.purchase_currency === currentParams.purchaseCurrency &&
+          set.selling_currency === currentParams.sellingCurrency &&
+          set.quality_control_percent === currentParams.qualityControlPercent &&
+          set.transport_insurance_cost === currentParams.transportInsuranceCost &&
+          set.duty === currentParams.duty &&
+          set.exchange_rate === currentParams.exchangeRate &&
+          set.italy_accessory_costs === currentParams.italyAccessoryCosts &&
+          set.company_multiplier === currentParams.companyMultiplier &&
+          set.retail_multiplier === currentParams.retailMultiplier &&
+          set.optimal_margin === currentParams.optimalMargin
+        );
+      });
+
+      if (matchingSet) {
+        setSelectedParameterSetId(matchingSet.id);
+        setCurrentParamsMatchSet(true);
+      } else {
+        setCurrentParamsMatchSet(false);
+        // Se non trova una corrispondenza, seleziona il default
+        const defaultSet = sets.find(
+          (set) => set.description === "Parametri Default"
+        );
+        if (defaultSet) {
+          setSelectedParameterSetId(defaultSet.id);
+        } else {
+          setSelectedParameterSetId(null);
+        }
       }
     } catch (err) {
       setError("Errore nel caricamento dei set di parametri");
@@ -376,7 +457,11 @@ const Calculator: React.FC = () => {
             onChange={(e) => handleParameterSetChange(Number(e.target.value))}
             disabled={loadingParameterSets}
           >
-            <option value="">Seleziona un set di parametri...</option>
+            <option value="">
+              {currentParamsMatchSet 
+                ? "Seleziona un set di parametri..." 
+                : "Parametri personalizzati (non salvati)"}
+            </option>
             {parameterSets.map((set) => (
               <option key={set.id} value={set.id}>
                 {set.description}

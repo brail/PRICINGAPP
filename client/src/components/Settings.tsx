@@ -155,51 +155,83 @@ const Settings: React.FC = () => {
 
   const validateForm = () => {
     const errors: string[] = [];
-    
+
     if (!newParameterSet.description.trim()) {
       errors.push("Descrizione è obbligatoria");
     }
-    
+
     if (!newParameterSet.purchaseCurrency) {
       errors.push("Valuta acquisto è obbligatoria");
     }
-    
+
     if (!newParameterSet.sellingCurrency) {
       errors.push("Valuta vendita è obbligatoria");
     }
-    
-    if (newParameterSet.qualityControlPercent === "" || newParameterSet.qualityControlPercent === null || newParameterSet.qualityControlPercent === undefined) {
+
+    if (
+      newParameterSet.qualityControlPercent === "" ||
+      newParameterSet.qualityControlPercent === null ||
+      newParameterSet.qualityControlPercent === undefined
+    ) {
       errors.push("Quality Control (%) è obbligatorio");
     }
-    
-    if (newParameterSet.transportInsuranceCost === "" || newParameterSet.transportInsuranceCost === null || newParameterSet.transportInsuranceCost === undefined) {
+
+    if (
+      newParameterSet.transportInsuranceCost === "" ||
+      newParameterSet.transportInsuranceCost === null ||
+      newParameterSet.transportInsuranceCost === undefined
+    ) {
       errors.push("Trasporto + Assicurazione è obbligatorio");
     }
-    
-    if (newParameterSet.duty === "" || newParameterSet.duty === null || newParameterSet.duty === undefined) {
+
+    if (
+      newParameterSet.duty === "" ||
+      newParameterSet.duty === null ||
+      newParameterSet.duty === undefined
+    ) {
       errors.push("Dazio (%) è obbligatorio");
     }
-    
-    if (newParameterSet.exchangeRate === "" || newParameterSet.exchangeRate === null || newParameterSet.exchangeRate === undefined) {
+
+    if (
+      newParameterSet.exchangeRate === "" ||
+      newParameterSet.exchangeRate === null ||
+      newParameterSet.exchangeRate === undefined
+    ) {
       errors.push("Cambio è obbligatorio");
     }
-    
-    if (newParameterSet.italyAccessoryCosts === "" || newParameterSet.italyAccessoryCosts === null || newParameterSet.italyAccessoryCosts === undefined) {
+
+    if (
+      newParameterSet.italyAccessoryCosts === "" ||
+      newParameterSet.italyAccessoryCosts === null ||
+      newParameterSet.italyAccessoryCosts === undefined
+    ) {
       errors.push("Costi accessori Italia è obbligatorio");
     }
-    
-    if (newParameterSet.companyMultiplier === "" || newParameterSet.companyMultiplier === null || newParameterSet.companyMultiplier === undefined) {
+
+    if (
+      newParameterSet.companyMultiplier === "" ||
+      newParameterSet.companyMultiplier === null ||
+      newParameterSet.companyMultiplier === undefined
+    ) {
       errors.push("Moltiplicatore aziendale è obbligatorio");
     }
-    
-    if (newParameterSet.retailMultiplier === "" || newParameterSet.retailMultiplier === null || newParameterSet.retailMultiplier === undefined) {
+
+    if (
+      newParameterSet.retailMultiplier === "" ||
+      newParameterSet.retailMultiplier === null ||
+      newParameterSet.retailMultiplier === undefined
+    ) {
       errors.push("Moltiplicatore retail è obbligatorio");
     }
-    
-    if (newParameterSet.optimalMargin === "" || newParameterSet.optimalMargin === null || newParameterSet.optimalMargin === undefined) {
+
+    if (
+      newParameterSet.optimalMargin === "" ||
+      newParameterSet.optimalMargin === null ||
+      newParameterSet.optimalMargin === undefined
+    ) {
       errors.push("Margine ottimale (%) è obbligatorio");
     }
-    
+
     return errors;
   };
 
@@ -829,7 +861,9 @@ const Settings: React.FC = () => {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Costi accessori Italia *</label>
+                    <label className="form-label">
+                      Costi accessori Italia *
+                    </label>
                     <input
                       type="number"
                       className="form-input"
@@ -869,7 +903,9 @@ const Settings: React.FC = () => {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Moltiplicatore retail *</label>
+                    <label className="form-label">
+                      Moltiplicatore retail *
+                    </label>
                     <input
                       type="number"
                       className="form-input"
