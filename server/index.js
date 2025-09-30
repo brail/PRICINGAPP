@@ -54,7 +54,7 @@ const loadParametersFromDatabase = async () => {
         duty: defaultSet.duty,
         exchangeRate: defaultSet.exchange_rate,
         italyAccessoryCosts: defaultSet.italy_accessory_costs,
-        companyMultiplier: defaultSet.company_multiplier,
+        companyMultiplier: calculateCompanyMultiplier(defaultSet.optimal_margin),
         retailMultiplier: defaultSet.retail_multiplier,
         optimalMargin: defaultSet.optimal_margin,
       };
@@ -95,6 +95,14 @@ async function getExchangeRates() {
       JPY: 160.5,
     };
   }
+}
+
+// Funzione per calcolare dinamicamente il companyMultiplier
+function calculateCompanyMultiplier(optimalMargin) {
+  if (optimalMargin <= 0 || optimalMargin >= 100) {
+    return 1; // Valore di fallback per margini non validi
+  }
+  return 1 / (1 - optimalMargin / 100);
 }
 
 // Funzione per arrotondare il prezzo retail finale
@@ -190,9 +198,12 @@ async function calculateSellingPrice(purchasePrice, params = currentParams) {
     duty,
     exchangeRate,
     italyAccessoryCosts,
-    companyMultiplier,
     retailMultiplier,
+    optimalMargin,
   } = params;
+
+  // Calcola dinamicamente il companyMultiplier
+  const companyMultiplier = calculateCompanyMultiplier(optimalMargin);
 
   // 1. Quality Control
   const qualityControlCost = purchasePrice * (qualityControlPercent / 100);
@@ -247,10 +258,13 @@ async function calculatePurchasePrice(retailPrice, params = currentParams) {
     duty,
     transportInsuranceCost,
     qualityControlPercent,
-    companyMultiplier,
     retailMultiplier,
     exchangeRate,
+    optimalMargin,
   } = params;
+
+  // Calcola dinamicamente il companyMultiplier
+  const companyMultiplier = calculateCompanyMultiplier(optimalMargin);
 
   // 1. Rimuovi moltiplicatore retail
   const wholesalePrice = retailPrice / retailMultiplier;
@@ -316,7 +330,6 @@ app.put("/api/params", (req, res) => {
     duty,
     exchangeRate,
     italyAccessoryCosts,
-    companyMultiplier,
     retailMultiplier,
     optimalMargin,
   } = req.body;
@@ -334,12 +347,13 @@ app.put("/api/params", (req, res) => {
     currentParams.exchangeRate = Math.max(0.001, exchangeRate);
   if (italyAccessoryCosts !== undefined)
     currentParams.italyAccessoryCosts = Math.max(0, italyAccessoryCosts);
-  if (companyMultiplier !== undefined)
-    currentParams.companyMultiplier = Math.max(0.1, companyMultiplier);
   if (retailMultiplier !== undefined)
     currentParams.retailMultiplier = Math.max(0.1, retailMultiplier);
   if (optimalMargin !== undefined)
     currentParams.optimalMargin = Math.max(0, Math.min(100, optimalMargin));
+
+  // Calcola dinamicamente il companyMultiplier
+  currentParams.companyMultiplier = calculateCompanyMultiplier(currentParams.optimalMargin);
 
   res.json(currentParams);
 });
@@ -466,7 +480,6 @@ app.post("/api/parameter-sets", async (req, res) => {
       duty,
       exchangeRate,
       italyAccessoryCosts,
-      companyMultiplier,
       retailMultiplier,
       optimalMargin,
     } = req.body;
@@ -485,7 +498,7 @@ app.post("/api/parameter-sets", async (req, res) => {
       duty,
       exchange_rate: exchangeRate,
       italy_accessory_costs: italyAccessoryCosts,
-      company_multiplier: companyMultiplier,
+      company_multiplier: calculateCompanyMultiplier(optimalMargin),
       retail_multiplier: retailMultiplier,
       optimal_margin: optimalMargin,
     });
@@ -517,7 +530,6 @@ app.put("/api/parameter-sets/:id", async (req, res) => {
       duty,
       exchangeRate,
       italyAccessoryCosts,
-      companyMultiplier,
       retailMultiplier,
       optimalMargin,
     } = req.body;
@@ -531,7 +543,7 @@ app.put("/api/parameter-sets/:id", async (req, res) => {
       duty,
       exchange_rate: exchangeRate,
       italy_accessory_costs: italyAccessoryCosts,
-      company_multiplier: companyMultiplier,
+      company_multiplier: calculateCompanyMultiplier(optimalMargin),
       retail_multiplier: retailMultiplier,
       optimal_margin: optimalMargin,
     });

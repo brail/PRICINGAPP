@@ -528,28 +528,26 @@ const Calculator: React.FC = () => {
                   <span className="parameter-value">{params.exchangeRate}</span>
                 </div>
                 <div className="parameter-item">
-                  <span className="parameter-label">Costi Accessori Italia:</span>
+                  <span className="parameter-label">
+                    Costi Accessori Italia:
+                  </span>
                   <span className="parameter-value">
                     {params.italyAccessoryCosts} {params.sellingCurrency}
                   </span>
                 </div>
                 <div className="parameter-item">
                   <span className="parameter-label">
-                    Moltiplicatore Aziendale:
+                    Moltiplicatore Retail:
                   </span>
-                  <span className="parameter-value">
-                    {params.companyMultiplier}
-                  </span>
-                </div>
-                <div className="parameter-item">
-                  <span className="parameter-label">Moltiplicatore Retail:</span>
                   <span className="parameter-value">
                     {params.retailMultiplier}
                   </span>
                 </div>
                 <div className="parameter-item">
                   <span className="parameter-label">Margine Ottimale:</span>
-                  <span className="parameter-value">{params.optimalMargin}%</span>
+                  <span className="parameter-value">
+                    {params.optimalMargin}%
+                  </span>
                 </div>
               </div>
             )}

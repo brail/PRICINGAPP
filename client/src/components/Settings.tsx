@@ -12,7 +12,7 @@ const Settings: React.FC = () => {
     duty: 0,
     exchangeRate: 1,
     italyAccessoryCosts: 0,
-    companyMultiplier: 1.5,
+    companyMultiplier: 1.33, // Calcolato dinamicamente da optimalMargin
     retailMultiplier: 2.0,
     optimalMargin: 25,
   });
@@ -47,7 +47,6 @@ const Settings: React.FC = () => {
     duty: string | number;
     exchangeRate: string | number;
     italyAccessoryCosts: string | number;
-    companyMultiplier: string | number;
     retailMultiplier: string | number;
     optimalMargin: string | number;
   }>({
@@ -59,7 +58,6 @@ const Settings: React.FC = () => {
     duty: "",
     exchangeRate: "",
     italyAccessoryCosts: "",
-    companyMultiplier: "",
     retailMultiplier: "",
     optimalMargin: "",
   });
@@ -155,7 +153,6 @@ const Settings: React.FC = () => {
       duty: "",
       exchangeRate: "",
       italyAccessoryCosts: "",
-      companyMultiplier: "",
       retailMultiplier: "",
       optimalMargin: "",
     });
@@ -216,13 +213,6 @@ const Settings: React.FC = () => {
       errors.push("Costi accessori Italia è obbligatorio");
     }
 
-    if (
-      newParameterSet.companyMultiplier === "" ||
-      newParameterSet.companyMultiplier === null ||
-      newParameterSet.companyMultiplier === undefined
-    ) {
-      errors.push("Moltiplicatore aziendale è obbligatorio");
-    }
 
     if (
       newParameterSet.retailMultiplier === "" ||
@@ -303,14 +293,6 @@ const Settings: React.FC = () => {
       errors.push("Costi accessori Italia è obbligatorio");
     }
 
-    if (
-      editingParameterSet?.company_multiplier === "" ||
-      editingParameterSet?.company_multiplier === null ||
-      editingParameterSet?.company_multiplier === undefined ||
-      isNaN(Number(editingParameterSet?.company_multiplier))
-    ) {
-      errors.push("Moltiplicatore aziendale è obbligatorio");
-    }
 
     if (
       editingParameterSet?.retail_multiplier === "" ||
@@ -354,7 +336,6 @@ const Settings: React.FC = () => {
         duty: Number(newParameterSet.duty),
         exchangeRate: Number(newParameterSet.exchangeRate),
         italyAccessoryCosts: Number(newParameterSet.italyAccessoryCosts),
-        companyMultiplier: Number(newParameterSet.companyMultiplier),
         retailMultiplier: Number(newParameterSet.retailMultiplier),
         optimalMargin: Number(newParameterSet.optimalMargin),
       };
@@ -401,7 +382,6 @@ const Settings: React.FC = () => {
         duty: Number(editingParameterSet.duty),
         exchangeRate: Number(editingParameterSet.exchange_rate),
         italyAccessoryCosts: Number(editingParameterSet.italy_accessory_costs),
-        companyMultiplier: Number(editingParameterSet.company_multiplier),
         retailMultiplier: Number(editingParameterSet.retail_multiplier),
         optimalMargin: Number(editingParameterSet.optimal_margin),
       };
@@ -535,7 +515,6 @@ const Settings: React.FC = () => {
         duty: duplicatingParameterSet.duty,
         exchangeRate: duplicatingParameterSet.exchange_rate,
         italyAccessoryCosts: duplicatingParameterSet.italy_accessory_costs,
-        companyMultiplier: duplicatingParameterSet.company_multiplier,
         retailMultiplier: duplicatingParameterSet.retail_multiplier,
         optimalMargin: duplicatingParameterSet.optimal_margin,
       };
@@ -918,8 +897,7 @@ const Settings: React.FC = () => {
                             {set.italy_accessory_costs}
                           </p>
                           <p>
-                            <strong>Moltiplicatori:</strong> Aziendale:{" "}
-                            {set.company_multiplier}, Retail:{" "}
+                            <strong>Moltiplicatore Retail:</strong>{" "}
                             {set.retail_multiplier}
                           </p>
                           <p>
@@ -1099,25 +1077,6 @@ const Settings: React.FC = () => {
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">
-                      Moltiplicatore aziendale *
-                    </label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={newParameterSet.companyMultiplier}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          companyMultiplier:
-                            e.target.value === "" ? "" : Number(e.target.value),
-                        })
-                      }
-                      min="0.1"
-                      step="0.01"
-                    />
-                  </div>
                 </div>
 
                 <div className="form-row">
@@ -1383,25 +1342,6 @@ const Settings: React.FC = () => {
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">
-                      Moltiplicatore aziendale *
-                    </label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={editingParameterSet.company_multiplier}
-                      onChange={(e) =>
-                        setEditingParameterSet({
-                          ...editingParameterSet,
-                          company_multiplier:
-                            e.target.value === "" ? "" : Number(e.target.value),
-                        })
-                      }
-                      min="0.1"
-                      step="0.01"
-                    />
-                  </div>
                 </div>
 
                 <div className="form-row">

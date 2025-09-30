@@ -547,17 +547,17 @@
     align-items: flex-start;
     gap: 12px;
   }
-  
+
   .parameter-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .parameter-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
   }
-  
+
   .parameter-value {
     align-self: flex-end;
   }
