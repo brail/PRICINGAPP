@@ -384,8 +384,12 @@ const Settings: React.FC = () => {
         description: editingParameterSet.description,
         purchaseCurrency: editingParameterSet.purchase_currency,
         sellingCurrency: editingParameterSet.selling_currency,
-        qualityControlPercent: Number(editingParameterSet.quality_control_percent),
-        transportInsuranceCost: Number(editingParameterSet.transport_insurance_cost),
+        qualityControlPercent: Number(
+          editingParameterSet.quality_control_percent
+        ),
+        transportInsuranceCost: Number(
+          editingParameterSet.transport_insurance_cost
+        ),
         duty: Number(editingParameterSet.duty),
         exchangeRate: Number(editingParameterSet.exchange_rate),
         italyAccessoryCosts: Number(editingParameterSet.italy_accessory_costs),
@@ -735,7 +739,12 @@ const Settings: React.FC = () => {
               ) : (
                 <div className="parameter-sets-grid">
                   {parameterSets.map((set) => (
-                    <div key={set.id} className="parameter-set-card">
+                    <div 
+                      key={set.id} 
+                      className="parameter-set-card"
+                      onClick={() => toggleCardExpansion(set.id)}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <div className="parameter-set-header">
                         <h5>
                           {!!set.is_default && (
@@ -745,23 +754,21 @@ const Settings: React.FC = () => {
                         </h5>
                         <div className="parameter-set-actions">
                           <button
-                            className="btn btn-sm btn-outline"
-                            onClick={() => toggleCardExpansion(set.id)}
-                          >
-                            {expandedCards.has(set.id)
-                              ? "Nascondi"
-                              : "Dettagli"}
-                          </button>
-                          <button
                             className="btn btn-sm btn-primary"
-                            onClick={() => handleLoadParameterSet(set.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleLoadParameterSet(set.id);
+                            }}
                             disabled={saving}
                           >
                             Carica
                           </button>
                           <button
                             className="btn btn-sm btn-secondary"
-                            onClick={() => startEditingParameterSet(set)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              startEditingParameterSet(set);
+                            }}
                             disabled={saving}
                           >
                             Modifica
@@ -769,9 +776,10 @@ const Settings: React.FC = () => {
                           {!set.is_default && (
                             <button
                               className="btn btn-sm btn-warning"
-                              onClick={() =>
-                                handleSetDefaultParameterSet(set.id)
-                              }
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSetDefaultParameterSet(set.id);
+                              }}
                               disabled={saving}
                             >
                               ⭐ Default
@@ -779,7 +787,10 @@ const Settings: React.FC = () => {
                           )}
                           <button
                             className="btn btn-sm btn-danger"
-                            onClick={() => handleDeleteParameterSet(set.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteParameterSet(set.id);
+                            }}
                             disabled={saving || set.is_default}
                           >
                             Elimina
@@ -1143,7 +1154,8 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setEditingParameterSet({
                           ...editingParameterSet,
-                          quality_control_percent: e.target.value === "" ? "" : Number(e.target.value),
+                          quality_control_percent:
+                            e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
@@ -1162,7 +1174,8 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setEditingParameterSet({
                           ...editingParameterSet,
-                          transport_insurance_cost: e.target.value === "" ? "" : Number(e.target.value),
+                          transport_insurance_cost:
+                            e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
@@ -1181,7 +1194,8 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setEditingParameterSet({
                           ...editingParameterSet,
-                          duty: e.target.value === "" ? "" : Number(e.target.value),
+                          duty:
+                            e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
@@ -1198,7 +1212,8 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setEditingParameterSet({
                           ...editingParameterSet,
-                          exchange_rate: e.target.value === "" ? "" : Number(e.target.value),
+                          exchange_rate:
+                            e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0.001"
@@ -1209,7 +1224,9 @@ const Settings: React.FC = () => {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Costi accessori Italia *</label>
+                    <label className="form-label">
+                      Costi accessori Italia *
+                    </label>
                     <input
                       type="number"
                       className="form-input"
@@ -1217,7 +1234,8 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setEditingParameterSet({
                           ...editingParameterSet,
-                          italy_accessory_costs: e.target.value === "" ? "" : Number(e.target.value),
+                          italy_accessory_costs:
+                            e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
@@ -1236,7 +1254,8 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setEditingParameterSet({
                           ...editingParameterSet,
-                          company_multiplier: e.target.value === "" ? "" : Number(e.target.value),
+                          company_multiplier:
+                            e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0.1"
@@ -1247,7 +1266,9 @@ const Settings: React.FC = () => {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Moltiplicatore retail *</label>
+                    <label className="form-label">
+                      Moltiplicatore retail *
+                    </label>
                     <input
                       type="number"
                       className="form-input"
@@ -1255,7 +1276,8 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setEditingParameterSet({
                           ...editingParameterSet,
-                          retail_multiplier: e.target.value === "" ? "" : Number(e.target.value),
+                          retail_multiplier:
+                            e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0.1"
@@ -1272,7 +1294,8 @@ const Settings: React.FC = () => {
                       onChange={(e) =>
                         setEditingParameterSet({
                           ...editingParameterSet,
-                          optimal_margin: e.target.value === "" ? "" : Number(e.target.value),
+                          optimal_margin:
+                            e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                       min="0"
