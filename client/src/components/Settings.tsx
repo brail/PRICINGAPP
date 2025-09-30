@@ -315,9 +315,7 @@ const Settings: React.FC = () => {
               max="100"
               step="0.1"
             />
-            <small className="form-help">
-              Margine aziendale ottimale di riferimento per la colorazione
-            </small>
+            <small className="form-help">Margine aziendale ottimale</small>
           </div>
         </div>
 

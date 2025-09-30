@@ -246,7 +246,8 @@ const Calculator: React.FC = () => {
             <div className="margin-item">
               <span className="margin-label">Margine Aziendale:</span>
               <span className="margin-value">
-                {(calculation.companyMargin * 100).toFixed(2)}%
+                {(calculation.companyMargin * 100).toFixed(2)}% (richiesto:{" "}
+                {params.optimalMargin}%)
               </span>
             </div>
           </div>
