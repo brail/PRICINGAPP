@@ -21,6 +21,7 @@ let defaultParams = {
   italyAccessoryCosts: 1, // costi accessori Italia
   companyMultiplier: 2.08, // moltiplicatore aziendale
   retailMultiplier: 2.48, // moltiplicatore retail
+  optimalMargin: 25, // margine ottimale in percentuale
 };
 
 // Cache per i tassi di cambio (aggiornati ogni ora)
@@ -280,6 +281,7 @@ app.put("/api/params", (req, res) => {
     italyAccessoryCosts,
     companyMultiplier,
     retailMultiplier,
+    optimalMargin,
   } = req.body;
 
   if (purchaseCurrency !== undefined)
@@ -299,6 +301,8 @@ app.put("/api/params", (req, res) => {
     defaultParams.companyMultiplier = Math.max(0.1, companyMultiplier);
   if (retailMultiplier !== undefined)
     defaultParams.retailMultiplier = Math.max(0.1, retailMultiplier);
+  if (optimalMargin !== undefined)
+    defaultParams.optimalMargin = Math.max(0, Math.min(100, optimalMargin));
 
   res.json(defaultParams);
 });

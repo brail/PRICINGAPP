@@ -14,6 +14,7 @@ const Settings: React.FC = () => {
     italyAccessoryCosts: 0,
     companyMultiplier: 1.5,
     retailMultiplier: 2.0,
+    optimalMargin: 25,
   });
 
   const [exchangeRates, setExchangeRates] = useState<ExchangeRates>({});
@@ -77,6 +78,7 @@ const Settings: React.FC = () => {
       italyAccessoryCosts: 0,
       companyMultiplier: 1.5,
       retailMultiplier: 2.0,
+      optimalMargin: 25,
     });
     setError("");
     setSuccess("");
@@ -294,6 +296,27 @@ const Settings: React.FC = () => {
             />
             <small className="form-help">
               Moltiplicatore per il prezzo retail finale
+            </small>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Margine ottimale (%)</label>
+            <input
+              type="number"
+              className="form-input"
+              value={params.optimalMargin}
+              onChange={(e) =>
+                setParams({
+                  ...params,
+                  optimalMargin: Number(e.target.value),
+                })
+              }
+              min="0"
+              max="100"
+              step="0.1"
+            />
+            <small className="form-help">
+              Margine aziendale ottimale di riferimento per la colorazione
             </small>
           </div>
         </div>

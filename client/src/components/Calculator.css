@@ -55,6 +55,7 @@
   padding: 16px;
   margin-bottom: 20px;
   border-left: 4px solid #28a745;
+  transition: all 0.3s ease;
 }
 
 .margin-item {
@@ -73,6 +74,43 @@
   font-weight: 700;
   color: #28a745;
   font-size: 18px;
+}
+
+/* Stati di colore per il margine */
+.margin-excellent {
+  background: #d4edda;
+  border-left-color: #155724;
+}
+
+.margin-excellent .margin-value {
+  color: #155724;
+}
+
+.margin-good {
+  background: #f8f9fa;
+  border-left-color: #28a745;
+}
+
+.margin-good .margin-value {
+  color: #28a745;
+}
+
+.margin-warning {
+  background: #fff3cd;
+  border-left-color: #856404;
+}
+
+.margin-warning .margin-value {
+  color: #856404;
+}
+
+.margin-danger {
+  background: #f8d7da;
+  border-left-color: #721c24;
+}
+
+.margin-danger .margin-value {
+  color: #721c24;
 }
 
 @media (max-width: 768px) {

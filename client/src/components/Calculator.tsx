@@ -21,6 +21,7 @@ const Calculator: React.FC = () => {
     italyAccessoryCosts: 0,
     companyMultiplier: 1.5,
     retailMultiplier: 2.0,
+    optimalMargin: 25,
   });
 
   const [purchasePrice, setPurchasePrice] = useState<string>("");
@@ -160,6 +161,29 @@ const Calculator: React.FC = () => {
     setError("");
   };
 
+  // Funzione per determinare il colore del margine basato sulla differenza con il margine ottimale
+  const getMarginColor = (
+    companyMargin: number,
+    optimalMargin: number
+  ): string => {
+    const marginPercent = companyMargin * 100;
+    const difference = marginPercent - optimalMargin;
+
+    if (difference > 0) {
+      // Margine maggiore del margine ottimale - verde più intenso
+      return "margin-excellent";
+    } else if (difference >= -2) {
+      // Margine uguale o minore fino a 2 punti percentuali - verde normale
+      return "margin-good";
+    } else if (difference >= -3) {
+      // Margine da 2 a 3 punti percentuali sotto l'ottimale - giallo
+      return "margin-warning";
+    } else {
+      // Margine minore di 3 punti o più sotto l'ottimale - rosso
+      return "margin-danger";
+    }
+  };
+
   return (
     <div className="calculator">
       <div className="calculator-header">
@@ -210,10 +234,15 @@ const Calculator: React.FC = () => {
             />
           </div>
         </div>
-        
+
         {/* Margine Aziendale */}
         {calculation && (
-          <div className="margin-display">
+          <div
+            className={`margin-display ${getMarginColor(
+              calculation.companyMargin,
+              params.optimalMargin
+            )}`}
+          >
             <div className="margin-item">
               <span className="margin-label">Margine Aziendale:</span>
               <span className="margin-value">
@@ -222,7 +251,7 @@ const Calculator: React.FC = () => {
             </div>
           </div>
         )}
-        
+
         <button
           className="btn btn-primary"
           onClick={handleCalculate}

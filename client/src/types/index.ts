@@ -8,6 +8,7 @@ export interface CalculationParams {
   italyAccessoryCosts: number;
   companyMultiplier: number;
   retailMultiplier: number;
+  optimalMargin: number;
 }
 
 export interface SellingPriceCalculation {
