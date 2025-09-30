@@ -79,6 +79,12 @@
   font-size: 22px;
 }
 
+.results-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
 .results-grid {
   display: grid;
   gap: 16px;
@@ -170,5 +176,3 @@
     font-size: 20px;
   }
 }
-
-

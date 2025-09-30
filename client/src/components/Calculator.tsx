@@ -31,6 +31,7 @@ const Calculator: React.FC = () => {
   const [calculation, setCalculation] = useState<
     SellingPriceCalculation | PurchasePriceCalculation | null
   >(null);
+  const [showDetails, setShowDetails] = useState<boolean>(false);
 
   // Carica parametri iniziali
   useEffect(() => {
@@ -203,284 +204,309 @@ const Calculator: React.FC = () => {
         <div className="results-card">
           <div className="results-header">
             <h3>Dettaglio Calcolo</h3>
-            <button className="btn btn-secondary" onClick={clearAll}>
-              Pulisci Tutto
-            </button>
+            <div className="results-actions">
+              <button
+                className="btn btn-primary"
+                onClick={() => setShowDetails(!showDetails)}
+              >
+                {showDetails ? "Nascondi Dettagli" : "Mostra Dettagli"}
+              </button>
+              <button className="btn btn-secondary" onClick={clearAll}>
+                Pulisci Tutto
+              </button>
+            </div>
           </div>
 
-          <div className="results-grid">
-            {mode === "purchase" && "retailPrice" in calculation && (
-              <>
-                <div className="result-item">
-                  <span className="result-label">Prezzo di acquisto:</span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      calculation.purchasePrice,
-                      calculation.purchaseCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item">
-                  <span className="result-label">
-                    Quality Control ({calculation.params.qualityControlPercent}
-                    %):
-                  </span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      calculation.qualityControlCost,
-                      calculation.purchaseCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item">
-                  <span className="result-label">Prezzo con Q.C.:</span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      "priceWithQC" in calculation
-                        ? calculation.priceWithQC
-                        : 0,
-                      calculation.purchaseCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item">
-                  <span className="result-label">
-                    Trasporto + Assicurazione:
-                  </span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      calculation.transportInsuranceCost,
-                      calculation.purchaseCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item">
-                  <span className="result-label">Prezzo con trasporto:</span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      "priceWithTransport" in calculation
-                        ? calculation.priceWithTransport
-                        : 0,
-                      calculation.purchaseCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item">
-                  <span className="result-label">
-                    Dazio ({calculation.params.duty}%):
-                  </span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      calculation.dutyCost,
-                      calculation.purchaseCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item">
-                  <span className="result-label">Prezzo con dazio:</span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      "priceWithDuty" in calculation
-                        ? calculation.priceWithDuty
-                        : 0,
-                      calculation.purchaseCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item">
-                  <span className="result-label">Costi accessori Italia:</span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      calculation.italyAccessoryCosts,
-                      calculation.sellingCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item">
-                  <span className="result-label">Valore Landed:</span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      "landedCost" in calculation ? calculation.landedCost : 0,
-                      calculation.sellingCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item">
-                  <span className="result-label">
-                    Prezzo aziendale (×{calculation.params.companyMultiplier}):
-                  </span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      calculation.wholesalePrice,
-                      calculation.sellingCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item highlight">
-                  <span className="result-label">
-                    Prezzo retail finale (×{calculation.params.retailMultiplier}
-                    ):
-                  </span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      isNaN(calculation.retailPrice)
-                        ? 0
-                        : calculation.retailPrice,
-                      calculation.sellingCurrency
-                    )}{" "}
-                    (
-                    {formatCurrency(
-                      isNaN(calculation.retailPriceRaw)
-                        ? 0
-                        : calculation.retailPriceRaw || calculation.retailPrice,
-                      calculation.sellingCurrency
-                    )}
-                    )
-                  </span>
-                </div>
-              </>
-            )}
-
-            {mode === "selling" && "purchasePrice" in calculation && (
-              <>
-                <div className="result-item highlight">
-                  <span className="result-label">Prezzo retail:</span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      calculation.retailPrice,
-                      calculation.sellingCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item">
-                  <span className="result-label">
-                    Prezzo aziendale (÷{calculation.params.retailMultiplier}):
-                  </span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      calculation.wholesalePrice,
-                      calculation.sellingCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item">
-                  <span className="result-label">
-                    Prezzo senza moltiplicatori (÷
-                    {calculation.params.companyMultiplier}):
-                  </span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      "priceWithoutMultipliers" in calculation
-                        ? calculation.priceWithoutMultipliers
-                        : 0,
-                      calculation.sellingCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item">
-                  <span className="result-label">Costi accessori Italia:</span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      calculation.italyAccessoryCosts,
-                      calculation.sellingCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item">
-                  <span className="result-label">Prezzo senza accessori:</span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      "priceWithoutAccessories" in calculation
-                        ? calculation.priceWithoutAccessories
-                        : 0,
-                      calculation.sellingCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item">
-                  <span className="result-label">
-                    Dazio ({calculation.params.duty}%):
-                  </span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      calculation.dutyCost,
-                      calculation.sellingCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item">
-                  <span className="result-label">Prezzo senza dazio:</span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      "priceWithoutDuty" in calculation
-                        ? calculation.priceWithoutDuty
-                        : 0,
-                      calculation.sellingCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item">
-                  <span className="result-label">
-                    Trasporto + Assicurazione:
-                  </span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      calculation.transportInsuranceCost,
-                      calculation.sellingCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item">
-                  <span className="result-label">Prezzo senza trasporto:</span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      "priceWithoutTransport" in calculation
-                        ? calculation.priceWithoutTransport
-                        : 0,
-                      calculation.sellingCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item">
-                  <span className="result-label">
-                    Quality Control ({calculation.params.qualityControlPercent}
-                    %):
-                  </span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      calculation.qualityControlCost,
-                      calculation.sellingCurrency
-                    )}
-                  </span>
-                </div>
-                <div className="result-item highlight">
-                  <span className="result-label">Prezzo di acquisto:</span>
-                  <span className="result-value">
-                    {formatCurrency(
-                      isNaN(calculation.purchasePrice)
-                        ? 0
-                        : calculation.purchasePrice,
-                      calculation.purchaseCurrency
-                    )}{" "}
-                    (
-                    {formatCurrency(
-                      isNaN(
-                        "purchasePriceRaw" in calculation
-                          ? calculation.purchasePriceRaw
-                          : calculation.purchasePrice
+          {showDetails && (
+            <div className="results-grid">
+              {mode === "purchase" && "retailPrice" in calculation && (
+                <>
+                  <div className="result-item">
+                    <span className="result-label">Prezzo di acquisto:</span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        calculation.purchasePrice,
+                        calculation.purchaseCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">
+                      Quality Control (
+                      {calculation.params.qualityControlPercent}
+                      %):
+                    </span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        calculation.qualityControlCost,
+                        calculation.purchaseCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">Prezzo con Q.C.:</span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        "priceWithQC" in calculation
+                          ? calculation.priceWithQC
+                          : 0,
+                        calculation.purchaseCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">
+                      Trasporto + Assicurazione:
+                    </span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        calculation.transportInsuranceCost,
+                        calculation.purchaseCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">Prezzo con trasporto:</span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        "priceWithTransport" in calculation
+                          ? calculation.priceWithTransport
+                          : 0,
+                        calculation.purchaseCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">
+                      Dazio ({calculation.params.duty}%):
+                    </span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        calculation.dutyCost,
+                        calculation.purchaseCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">Prezzo con dazio:</span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        "priceWithDuty" in calculation
+                          ? calculation.priceWithDuty
+                          : 0,
+                        calculation.purchaseCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">
+                      Costi accessori Italia:
+                    </span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        calculation.italyAccessoryCosts,
+                        calculation.sellingCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">Valore Landed:</span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        "landedCost" in calculation
+                          ? calculation.landedCost
+                          : 0,
+                        calculation.sellingCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">
+                      Prezzo aziendale (×{calculation.params.companyMultiplier}
+                      ):
+                    </span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        calculation.wholesalePrice,
+                        calculation.sellingCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item highlight">
+                    <span className="result-label">
+                      Prezzo retail finale (×
+                      {calculation.params.retailMultiplier}
+                      ):
+                    </span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        isNaN(calculation.retailPrice)
+                          ? 0
+                          : calculation.retailPrice,
+                        calculation.sellingCurrency
+                      )}{" "}
+                      (
+                      {formatCurrency(
+                        isNaN(calculation.retailPriceRaw)
+                          ? 0
+                          : calculation.retailPriceRaw ||
+                              calculation.retailPrice,
+                        calculation.sellingCurrency
+                      )}
                       )
-                        ? 0
-                        : "purchasePriceRaw" in calculation
-                        ? calculation.purchasePriceRaw
-                        : calculation.purchasePrice,
-                      calculation.purchaseCurrency
-                    )}
-                    )
-                  </span>
-                </div>
-              </>
-            )}
-          </div>
+                    </span>
+                  </div>
+                </>
+              )}
+
+              {mode === "selling" && "purchasePrice" in calculation && (
+                <>
+                  <div className="result-item highlight">
+                    <span className="result-label">Prezzo retail:</span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        calculation.retailPrice,
+                        calculation.sellingCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">
+                      Prezzo aziendale (÷{calculation.params.retailMultiplier}):
+                    </span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        calculation.wholesalePrice,
+                        calculation.sellingCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">
+                      Prezzo senza moltiplicatori (÷
+                      {calculation.params.companyMultiplier}):
+                    </span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        "priceWithoutMultipliers" in calculation
+                          ? calculation.priceWithoutMultipliers
+                          : 0,
+                        calculation.sellingCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">
+                      Costi accessori Italia:
+                    </span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        calculation.italyAccessoryCosts,
+                        calculation.sellingCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">
+                      Prezzo senza accessori:
+                    </span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        "priceWithoutAccessories" in calculation
+                          ? calculation.priceWithoutAccessories
+                          : 0,
+                        calculation.sellingCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">
+                      Dazio ({calculation.params.duty}%):
+                    </span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        calculation.dutyCost,
+                        calculation.sellingCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">Prezzo senza dazio:</span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        "priceWithoutDuty" in calculation
+                          ? calculation.priceWithoutDuty
+                          : 0,
+                        calculation.sellingCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">
+                      Trasporto + Assicurazione:
+                    </span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        calculation.transportInsuranceCost,
+                        calculation.sellingCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">
+                      Prezzo senza trasporto:
+                    </span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        "priceWithoutTransport" in calculation
+                          ? calculation.priceWithoutTransport
+                          : 0,
+                        calculation.sellingCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">
+                      Quality Control (
+                      {calculation.params.qualityControlPercent}
+                      %):
+                    </span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        calculation.qualityControlCost,
+                        calculation.sellingCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item highlight">
+                    <span className="result-label">Prezzo di acquisto:</span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        isNaN(calculation.purchasePrice)
+                          ? 0
+                          : calculation.purchasePrice,
+                        calculation.purchaseCurrency
+                      )}{" "}
+                      (
+                      {formatCurrency(
+                        isNaN(
+                          "purchasePriceRaw" in calculation
+                            ? calculation.purchasePriceRaw
+                            : calculation.purchasePrice
+                        )
+                          ? 0
+                          : "purchasePriceRaw" in calculation
+                          ? calculation.purchasePriceRaw
+                          : calculation.purchasePrice,
+                        calculation.purchaseCurrency
+                      )}
+                      )
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
