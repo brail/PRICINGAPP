@@ -887,6 +887,12 @@ const Calculator: React.FC = () => {
                     </span>
                   </div>
                   <div className="result-item">
+                    <span className="result-label">Tools:</span>
+                    <span className="result-value">
+                      {formatCurrency(params.tools, params.purchaseCurrency)}
+                    </span>
+                  </div>
+                  <div className="result-item">
                     <span className="result-label">
                       Quality Control (
                       {calculation.params.qualityControlPercent}
@@ -900,7 +906,9 @@ const Calculator: React.FC = () => {
                     </span>
                   </div>
                   <div className="result-item">
-                    <span className="result-label">Prezzo con Q.C.:</span>
+                    <span className="result-label">
+                      Prezzo con Q.C. e Tools:
+                    </span>
                     <span className="result-value">
                       {formatCurrency(
                         "priceWithQC" in calculation
@@ -963,12 +971,6 @@ const Calculator: React.FC = () => {
                         calculation.italyAccessoryCosts,
                         calculation.sellingCurrency
                       )}
-                    </span>
-                  </div>
-                  <div className="result-item">
-                    <span className="result-label">Tools:</span>
-                    <span className="result-value">
-                      {formatCurrency(params.tools, params.purchaseCurrency)}
                     </span>
                   </div>
                   <div className="result-item">
@@ -1069,12 +1071,6 @@ const Calculator: React.FC = () => {
                     </span>
                   </div>
                   <div className="result-item">
-                    <span className="result-label">Tools:</span>
-                    <span className="result-value">
-                      {formatCurrency(params.tools, params.purchaseCurrency)}
-                    </span>
-                  </div>
-                  <div className="result-item">
                     <span className="result-label">
                       Prezzo senza accessori:
                     </span>
@@ -1131,6 +1127,12 @@ const Calculator: React.FC = () => {
                           : 0,
                         calculation.sellingCurrency
                       )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">Tools:</span>
+                    <span className="result-value">
+                      {formatCurrency(params.tools, params.purchaseCurrency)}
                     </span>
                   </div>
                   <div className="result-item">

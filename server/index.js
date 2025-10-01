@@ -295,11 +295,11 @@ async function calculatePurchasePrice(retailPrice, params = currentParams) {
   // 7. Rimuovi quality control
   const purchasePriceRaw =
     priceWithoutTransport / (1 + qualityControlPercent / 100);
-  const purchasePrice = roundPurchasePrice(purchasePriceRaw);
-  const qualityControlCost = priceWithoutTransport - purchasePrice;
-
+  const purchasePriceWithoutTools = roundPurchasePrice(purchasePriceRaw);
+  const qualityControlCost = priceWithoutTransport - purchasePriceRaw;
+  
   // 8. Rimuovi tools (ultimo passaggio dopo quality control)
-  const purchasePriceWithoutTools = purchasePrice - tools;
+  const purchasePrice = purchasePriceWithoutTools - tools;
 
   // 9. Calcola il margine reale
   const companyMargin = (wholesalePrice - landedCost) / wholesalePrice;
@@ -316,7 +316,7 @@ async function calculatePurchasePrice(retailPrice, params = currentParams) {
     transportInsuranceCost,
     priceWithoutTransport,
     qualityControlCost,
-    purchasePrice: purchasePriceWithoutTools, // Prezzo finale senza tools
+    purchasePrice, // Prezzo finale senza tools
     purchasePriceRaw,
     companyMargin,
   };
