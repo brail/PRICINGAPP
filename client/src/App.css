@@ -19,11 +19,25 @@
   padding: 16px 0;
 }
 
+.nav-title-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.nav-title-link:hover {
+  text-decoration: none;
+}
+
 .nav-title {
   color: #007bff;
   font-size: 24px;
   font-weight: 700;
   margin: 0;
+  transition: color 0.2s ease;
+}
+
+.nav-title-link:hover .nav-title {
+  color: #0056b3;
 }
 
 .nav-links {

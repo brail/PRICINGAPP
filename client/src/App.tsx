@@ -12,7 +12,9 @@ function App() {
       <nav className="navbar">
         <div className="container">
           <div className="nav-content">
-            <h1 className="nav-title">Pricing Calculator</h1>
+            <Link to="/" className="nav-title-link">
+              <h1 className="nav-title">Pricing Calculator</h1>
+            </Link>
             <div className="nav-links">
               <Link
                 to="/"

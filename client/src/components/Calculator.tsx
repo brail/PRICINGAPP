@@ -112,7 +112,45 @@ const Calculator: React.FC = () => {
         }
       }
     } catch (err) {
+      console.error("Errore nel caricamento dei parametri:", err);
       setError("Errore nel caricamento dei parametri");
+      
+      // Se c'è un errore, prova a caricare i parametri di default
+      try {
+        await loadDefaultParameters();
+      } catch (defaultErr) {
+        console.error("Errore nel caricamento dei parametri di default:", defaultErr);
+      }
+    }
+  };
+
+  const loadDefaultParameters = async () => {
+    try {
+      // Carica il set di parametri di default
+      const sets = await pricingApi.getParameterSets();
+      const defaultSet = sets.find(set => set.is_default === 1 || set.description === "Parametri Default");
+      
+      if (defaultSet) {
+        const defaultParams: CalculationParams = {
+          purchaseCurrency: defaultSet.purchase_currency,
+          sellingCurrency: defaultSet.selling_currency,
+          qualityControlPercent: defaultSet.quality_control_percent,
+          transportInsuranceCost: defaultSet.transport_insurance_cost,
+          duty: defaultSet.duty,
+          exchangeRate: defaultSet.exchange_rate,
+          italyAccessoryCosts: defaultSet.italy_accessory_costs,
+          companyMultiplier: defaultSet.company_multiplier,
+          retailMultiplier: defaultSet.retail_multiplier,
+          optimalMargin: defaultSet.optimal_margin,
+        };
+        
+        setParams(defaultParams);
+        setSelectedParameterSetId(defaultSet.id);
+        setCurrentParamsMatchSet(true);
+        console.log("Parametri di default caricati:", defaultParams);
+      }
+    } catch (err) {
+      console.error("Errore nel caricamento dei parametri di default:", err);
     }
   };
 
@@ -123,39 +161,39 @@ const Calculator: React.FC = () => {
       setParameterSets(sets);
 
       // Trova il set che corrisponde ai parametri attualmente caricati
-      const currentParams = await pricingApi.getParams();
-      const matchingSet = sets.find((set) => {
-        return (
-          set.purchase_currency === currentParams.purchaseCurrency &&
-          set.selling_currency === currentParams.sellingCurrency &&
-          set.quality_control_percent === currentParams.qualityControlPercent &&
-          set.transport_insurance_cost ===
-            currentParams.transportInsuranceCost &&
-          set.duty === currentParams.duty &&
-          set.exchange_rate === currentParams.exchangeRate &&
-          set.italy_accessory_costs === currentParams.italyAccessoryCosts &&
-          set.company_multiplier === currentParams.companyMultiplier &&
-          set.retail_multiplier === currentParams.retailMultiplier &&
-          set.optimal_margin === currentParams.optimalMargin
-        );
-      });
+      try {
+        const currentParams = await pricingApi.getParams();
+        const matchingSet = sets.find((set) => {
+          return (
+            set.purchase_currency === currentParams.purchaseCurrency &&
+            set.selling_currency === currentParams.sellingCurrency &&
+            set.quality_control_percent === currentParams.qualityControlPercent &&
+            set.transport_insurance_cost ===
+              currentParams.transportInsuranceCost &&
+            set.duty === currentParams.duty &&
+            set.exchange_rate === currentParams.exchangeRate &&
+            set.italy_accessory_costs === currentParams.italyAccessoryCosts &&
+            set.company_multiplier === currentParams.companyMultiplier &&
+            set.retail_multiplier === currentParams.retailMultiplier &&
+            set.optimal_margin === currentParams.optimalMargin
+          );
+        });
 
-      if (matchingSet) {
-        setSelectedParameterSetId(matchingSet.id);
-        setCurrentParamsMatchSet(true);
-      } else {
-        setCurrentParamsMatchSet(false);
-        // Se non trova una corrispondenza, seleziona il default
-        const defaultSet = sets.find(
-          (set) => set.description === "Parametri Default"
-        );
-        if (defaultSet) {
-          setSelectedParameterSetId(defaultSet.id);
+        if (matchingSet) {
+          setSelectedParameterSetId(matchingSet.id);
+          setCurrentParamsMatchSet(true);
         } else {
-          setSelectedParameterSetId(null);
+          setCurrentParamsMatchSet(false);
+          // Se non trova una corrispondenza, carica automaticamente i parametri di default
+          await loadDefaultParameters();
         }
+      } catch (paramsErr) {
+        // Se non riesce a caricare i parametri attuali, carica i parametri di default
+        console.log("Caricamento parametri di default all'avvio...");
+        await loadDefaultParameters();
       }
     } catch (err) {
+      console.error("Errore nel caricamento dei set di parametri:", err);
       setError("Errore nel caricamento dei set di parametri");
     } finally {
       setLoadingParameterSets(false);
@@ -480,10 +518,22 @@ const Calculator: React.FC = () => {
         </div>
 
         {/* Dettagli Set di Parametri Caricato */}
-        {selectedParameterSetId && params && (
+        {params && (
           <div className="parameter-set-details">
             <div className="parameter-details-header">
-              <h4>Parametri Attivi</h4>
+              <h4>
+                Parametri Attivi
+                {selectedParameterSetId && (
+                  <span className="parameter-set-badge">
+                    {parameterSets.find(set => set.id === selectedParameterSetId)?.description || "Set Caricato"}
+                  </span>
+                )}
+                {!selectedParameterSetId && (
+                  <span className="parameter-set-badge default">
+                    Parametri di Default
+                  </span>
+                )}
+              </h4>
               <button
                 className="btn btn-sm btn-secondary"
                 onClick={() => setShowParameterDetails(!showParameterDetails)}
