@@ -352,20 +352,25 @@ const Calculator: React.FC = () => {
     // Trova il multiplo di 5 più vicino
     const baseValue = Math.round(value / 5) * 5;
     
-    // Se il valore è esattamente un multiplo di 5, arrotonda al 4.9 o 9.9 più vicino
-    if (value % 5 === 0) {
+    // Se il valore è molto vicino a un multiplo di 5, arrotonda al 4.9 o 9.9 più vicino
+    if (Math.abs(value - baseValue) < 0.01) {
       // Se è un multiplo di 10, arrotonda al 9.9
-      if (value % 10 === 0) {
-        return value - 0.1; // 10 -> 9.9, 20 -> 19.9, etc.
+      if (baseValue % 10 === 0) {
+        return baseValue - 0.1; // 10 -> 9.9, 20 -> 19.9, etc.
       } else {
         // Se è un multiplo di 5 ma non di 10, arrotonda al 4.9
-        return value - 0.1; // 5 -> 4.9, 15 -> 14.9, etc.
+        return baseValue - 0.1; // 5 -> 4.9, 15 -> 14.9, etc.
       }
     }
     
     // Per valori non multipli di 5, arrotonda al 4.9 o 9.9 più vicino
     const integerPart = Math.floor(value);
     const decimalPart = value - integerPart;
+    
+    // Se la parte decimale è .9 o .90, è già al 9.9 più vicino
+    if (Math.abs(decimalPart - 0.9) < 0.01) {
+      return value;
+    }
     
     if (decimalPart <= 0.5) {
       return integerPart + 0.49;
