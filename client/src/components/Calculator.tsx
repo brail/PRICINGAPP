@@ -348,21 +348,21 @@ const Calculator: React.FC = () => {
   // Funzione per arrotondare al 4.9 o 9.9 più vicino
   const roundToNearestRetailStep = (value: number): number => {
     if (isNaN(value) || !isFinite(value)) return 0;
-    
+
     const integerPart = Math.floor(value);
     const decimalPart = value - integerPart;
     const unitsDigit = integerPart % 10;
-    
+
     // Se il valore è già al .90, non cambiarlo
     if (Math.abs(decimalPart - 0.9) < 0.01) {
       return value;
     }
-    
+
     // Se il valore è già al .49, non cambiarlo
     if (Math.abs(decimalPart - 0.49) < 0.01) {
       return value;
     }
-    
+
     // Per tutti gli altri casi, arrotonda al 4.9 o 9.9 più vicino
     if (unitsDigit <= 5) {
       // Se la cifra delle unità è 0-5, arrotonda al 4.9 più vicino

@@ -773,7 +773,7 @@ const Settings: React.FC = () => {
             />
             <small className="form-help">Margine aziendale ottimale</small>
           </div>
-        </div> */}
+        </div>
 
         {/* Gestione Set di Parametri */}
         <div className="settings-card">
