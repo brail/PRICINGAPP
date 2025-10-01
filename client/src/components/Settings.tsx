@@ -1,8 +1,175 @@
 import React, { useState, useEffect } from "react";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import {
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { pricingApi } from "../services/api";
 import { CalculationParams, CURRENCIES, ExchangeRates } from "../types";
 import "./Settings.css";
+
+// Componente per gli elementi sortabili
+interface SortableItemProps {
+  set: any;
+  onClick: (id: number) => void;
+  expandedCards: Set<number>;
+  saving: boolean;
+  startDuplicatingParameterSet: (set: any) => void;
+  handleLoadParameterSet: (id: number) => void;
+  startEditingParameterSet: (set: any) => void;
+  startDeleteParameterSet: (set: any) => void;
+  handleSetDefaultParameterSet: (id: number) => void;
+}
+
+const SortableItem: React.FC<SortableItemProps> = ({
+  set,
+  onClick,
+  expandedCards,
+  saving,
+  startDuplicatingParameterSet,
+  handleLoadParameterSet,
+  startEditingParameterSet,
+  startDeleteParameterSet,
+  handleSetDefaultParameterSet,
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: set.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`parameter-set-card ${isDragging ? "dragging" : ""}`}
+      onClick={() => onClick(set.id)}
+    >
+      <div className="parameter-set-header">
+        <div className="drag-handle" {...attributes} {...listeners}>
+          <span>⋮⋮</span>
+        </div>
+        <h5>{set.description}</h5>
+        <div className="parameter-set-actions">
+          <button
+            className="btn btn-sm btn-info"
+            onClick={(e) => {
+              e.stopPropagation();
+              startDuplicatingParameterSet(set);
+            }}
+            disabled={saving}
+            title="Duplica questo set di parametri"
+          >
+            Duplica
+          </button>
+          <button
+            className="btn btn-sm btn-primary"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleLoadParameterSet(set.id);
+            }}
+            disabled={saving}
+          >
+            Carica
+          </button>
+          <button
+            className="btn btn-sm btn-secondary"
+            onClick={(e) => {
+              e.stopPropagation();
+              startEditingParameterSet(set);
+            }}
+            disabled={saving}
+          >
+            Modifica
+          </button>
+          <button
+            className="btn btn-sm btn-danger"
+            onClick={(e) => {
+              e.stopPropagation();
+              startDeleteParameterSet(set);
+            }}
+            disabled={saving || set.is_default}
+          >
+            Elimina
+          </button>
+          <button
+            className="btn btn-sm btn-star"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSetDefaultParameterSet(set.id);
+            }}
+            disabled={saving}
+            title={
+              set.is_default
+                ? "Set di parametri predefinito"
+                : "Imposta come predefinito"
+            }
+            data-is-default={set.is_default ? "true" : "false"}
+          >
+            {set.is_default ? "⭐" : "☆"}
+          </button>
+        </div>
+      </div>
+      {expandedCards.has(set.id) && (
+        <div className="parameter-set-details">
+          <p>
+            <strong>Valute:</strong> {set.purchase_currency} →{" "}
+            {set.selling_currency}
+          </p>
+          <p>
+            <strong>Quality Control:</strong> {set.quality_control_percent}%
+          </p>
+          <p>
+            <strong>Trasporto + Assicurazione:</strong>{" "}
+            {set.transport_insurance_cost}
+          </p>
+          <p>
+            <strong>Dazio:</strong> {set.duty}%
+          </p>
+          <p>
+            <strong>Tasso di Cambio:</strong> {set.exchange_rate}
+          </p>
+          <p>
+            <strong>Costi Accessori Italia:</strong>{" "}
+            {set.italy_accessory_costs}
+          </p>
+          <p>
+            <strong>Tools:</strong> {set.tools}
+          </p>
+          <p>
+            <strong>Moltiplicatore Retail:</strong> {set.retail_multiplier}
+          </p>
+          <p>
+            <strong>Margine ottimale:</strong> {set.optimal_margin}%
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Settings: React.FC = () => {
   const [params, setParams] = useState<CalculationParams>({
@@ -148,25 +315,33 @@ const Settings: React.FC = () => {
     }
   };
 
+  // Configura i sensori per il drag and drop
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   // Gestisce il drag and drop per riordinare i set di parametri
-  const handleDragEnd = async (result: any) => {
-    if (!result.destination) {
-      return;
-    }
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
 
-    const items = Array.from(parameterSets);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+    if (over && active.id !== over.id) {
+      const oldIndex = parameterSets.findIndex((item) => item.id === active.id);
+      const newIndex = parameterSets.findIndex((item) => item.id === over.id);
 
-    setParameterSets(items);
+      const newItems = arrayMove(parameterSets, oldIndex, newIndex);
+      setParameterSets(newItems);
 
-    try {
-      await pricingApi.updateParameterSetsOrder(items);
-      setSuccess("Ordine aggiornato con successo");
-    } catch (err) {
-      setError("Errore nell'aggiornamento dell'ordine");
-      // Ripristina l'ordine originale in caso di errore
-      await loadParameterSets();
+      try {
+        await pricingApi.updateParameterSetsOrder(newItems);
+        setSuccess("Ordine aggiornato con successo");
+      } catch (err) {
+        setError("Errore nell'aggiornamento dell'ordine");
+        // Ripristina l'ordine originale in caso di errore
+        await loadParameterSets();
+      }
     }
   };
 
@@ -867,143 +1042,33 @@ const Settings: React.FC = () => {
               {parameterSets.length === 0 ? (
                 <p className="text-muted">Nessun set di parametri trovato.</p>
               ) : (
-                <DragDropContext onDragEnd={handleDragEnd}>
-                  <Droppable droppableId="parameter-sets">
-                    {(provided) => (
-                      <div
-                        className="parameter-sets-grid"
-                        {...provided.droppableProps}
-                        ref={provided.innerRef}
-                      >
-                        {parameterSets.map((set, index) => (
-                          <Draggable
-                            key={set.id}
-                            draggableId={set.id.toString()}
-                            index={index}
-                          >
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className={`parameter-set-card ${
-                                  snapshot.isDragging ? "dragging" : ""
-                                }`}
-                                onClick={() => toggleCardExpansion(set.id)}
-                                style={{ cursor: "pointer" }}
-                              >
-                                <div className="parameter-set-header">
-                                  <div className="drag-handle">
-                                    <span>⋮⋮</span>
-                                  </div>
-                                  <h5>{set.description}</h5>
-                                  <div className="parameter-set-actions">
-                                    <button
-                                      className="btn btn-sm btn-info"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        startDuplicatingParameterSet(set);
-                                      }}
-                                      disabled={saving}
-                                      title="Duplica questo set di parametri"
-                                    >
-                                      Duplica
-                                    </button>
-                                    <button
-                                      className="btn btn-sm btn-primary"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleLoadParameterSet(set.id);
-                                      }}
-                                      disabled={saving}
-                                    >
-                                      Carica
-                                    </button>
-                                    <button
-                                      className="btn btn-sm btn-secondary"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        startEditingParameterSet(set);
-                                      }}
-                                      disabled={saving}
-                                    >
-                                      Modifica
-                                    </button>
-                                    <button
-                                      className="btn btn-sm btn-danger"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        startDeleteParameterSet(set);
-                                      }}
-                                      disabled={saving || set.is_default}
-                                    >
-                                      Elimina
-                                    </button>
-                                    <button
-                                      className="btn btn-sm btn-star"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleSetDefaultParameterSet(set.id);
-                                      }}
-                                      disabled={saving}
-                                      title={
-                                        set.is_default
-                                          ? "Set di parametri predefinito"
-                                          : "Imposta come predefinito"
-                                      }
-                                      data-is-default={set.is_default ? "true" : "false"}
-                                    >
-                                      {set.is_default ? "⭐" : "☆"}
-                                    </button>
-                                  </div>
-                                </div>
-                                {expandedCards.has(set.id) && (
-                                  <div className="parameter-set-details">
-                                    <p>
-                                      <strong>Valute:</strong> {set.purchase_currency} →{" "}
-                                      {set.selling_currency}
-                                    </p>
-                                    <p>
-                                      <strong>Quality Control:</strong>{" "}
-                                      {set.quality_control_percent}%
-                                    </p>
-                                    <p>
-                                      <strong>Trasporto + Assicurazione:</strong>{" "}
-                                      {set.transport_insurance_cost}
-                                    </p>
-                                    <p>
-                                      <strong>Dazio:</strong> {set.duty}%
-                                    </p>
-                                    <p>
-                                      <strong>Tasso di Cambio:</strong>{" "}
-                                      {set.exchange_rate}
-                                    </p>
-                                    <p>
-                                      <strong>Costi Accessori Italia:</strong>{" "}
-                                      {set.italy_accessory_costs}
-                                    </p>
-                                    <p>
-                                      <strong>Tools:</strong> {set.tools}
-                                    </p>
-                                    <p>
-                                      <strong>Moltiplicatore Retail:</strong>{" "}
-                                      {set.retail_multiplier}
-                                    </p>
-                                    <p>
-                                      <strong>Margine ottimale:</strong>{" "}
-                                      {set.optimal_margin}%
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </DragDropContext>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={parameterSets.map((set) => set.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="parameter-sets-grid">
+                      {parameterSets.map((set) => (
+                        <SortableItem
+                          key={set.id}
+                          set={set}
+                          onClick={toggleCardExpansion}
+                          expandedCards={expandedCards}
+                          saving={saving}
+                          startDuplicatingParameterSet={startDuplicatingParameterSet}
+                          handleLoadParameterSet={handleLoadParameterSet}
+                          startEditingParameterSet={startEditingParameterSet}
+                          startDeleteParameterSet={startDeleteParameterSet}
+                          handleSetDefaultParameterSet={handleSetDefaultParameterSet}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
               )}
             </div>
 

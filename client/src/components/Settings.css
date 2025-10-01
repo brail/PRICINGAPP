@@ -599,9 +599,10 @@
   }
 }
 
-/* Stili per Drag and Drop */
+/* Stili per Drag and Drop con @dnd-kit */
 .parameter-set-card.dragging {
-  transform: rotate(5deg);
+  opacity: 0.5;
+  transform: rotate(2deg);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   z-index: 1000;
 }
@@ -616,6 +617,7 @@
   color: #6c757d;
   margin-right: 8px;
   flex-shrink: 0;
+  touch-action: none;
 }
 
 .drag-handle:active {

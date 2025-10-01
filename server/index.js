@@ -539,7 +539,7 @@ app.post("/api/parameter-sets", async (req, res) => {
 app.put("/api/parameter-sets/order", async (req, res) => {
   try {
     const { parameterSets } = req.body;
-    
+
     if (!parameterSets || !Array.isArray(parameterSets)) {
       return res.status(400).json({ error: "Lista parametri non valida" });
     }
