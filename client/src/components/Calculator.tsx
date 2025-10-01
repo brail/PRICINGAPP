@@ -347,6 +347,23 @@ const Calculator: React.FC = () => {
 
   // Funzione per arrotondare al 4.9 o 9.9 più vicino
   const roundToNearestRetailStep = (value: number): number => {
+    if (isNaN(value) || !isFinite(value)) return 0;
+    
+    // Trova il multiplo di 5 più vicino
+    const baseValue = Math.round(value / 5) * 5;
+    
+    // Se il valore è esattamente un multiplo di 5, arrotonda al 4.9 o 9.9 più vicino
+    if (value % 5 === 0) {
+      // Se è un multiplo di 10, arrotonda al 9.9
+      if (value % 10 === 0) {
+        return value - 0.1; // 10 -> 9.9, 20 -> 19.9, etc.
+      } else {
+        // Se è un multiplo di 5 ma non di 10, arrotonda al 4.9
+        return value - 0.1; // 5 -> 4.9, 15 -> 14.9, etc.
+      }
+    }
+    
+    // Per valori non multipli di 5, arrotonda al 4.9 o 9.9 più vicino
     const integerPart = Math.floor(value);
     const decimalPart = value - integerPart;
     
@@ -358,18 +375,18 @@ const Calculator: React.FC = () => {
   };
 
   // Gestore per le freccette del purchase price (step di 0.10)
-  const handlePurchasePriceArrowKey = (direction: 'up' | 'down') => {
+  const handlePurchasePriceArrowKey = (direction: "up" | "down") => {
     if (purchasePriceLocked) return;
-    
+
     const currentValue = parseFloat(purchasePrice) || 0;
-    const step = direction === 'up' ? 0.10 : -0.10;
+    const step = direction === "up" ? 0.1 : -0.1;
     const newValue = currentValue + step;
-    
+
     // Arrotonda al centesimo più vicino se necessario
     const roundedValue = roundToNearestCent(newValue);
     setPurchasePrice(roundedValue.toFixed(2));
     setMode("purchase");
-    
+
     // Se il retail price è bloccato, calcola automaticamente il margine
     if (retailPriceLocked) {
       setTimeout(() => calculateMarginFromLockedPrice(), 100);
@@ -377,18 +394,18 @@ const Calculator: React.FC = () => {
   };
 
   // Gestore per le freccette del retail price (step di 5.00)
-  const handleRetailPriceArrowKey = (direction: 'up' | 'down') => {
+  const handleRetailPriceArrowKey = (direction: "up" | "down") => {
     if (retailPriceLocked) return;
-    
+
     const currentValue = parseFloat(retailPrice) || 0;
-    const step = direction === 'up' ? 5.00 : -5.00;
+    const step = direction === "up" ? 5.0 : -5.0;
     const newValue = currentValue + step;
-    
+
     // Arrotonda al 4.9 o 9.9 più vicino
     const roundedValue = roundToNearestRetailStep(newValue);
     setRetailPrice(roundedValue.toFixed(2));
     setMode("selling");
-    
+
     // Se il purchase price è bloccato, calcola automaticamente il margine
     if (purchasePriceLocked) {
       setTimeout(() => calculateMarginFromLockedPrice(), 100);
@@ -418,10 +435,10 @@ const Calculator: React.FC = () => {
       handleCalculate();
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      handlePurchasePriceArrowKey('up');
+      handlePurchasePriceArrowKey("up");
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
-      handlePurchasePriceArrowKey('down');
+      handlePurchasePriceArrowKey("down");
     }
   };
 
@@ -431,10 +448,10 @@ const Calculator: React.FC = () => {
       handleCalculate();
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      handleRetailPriceArrowKey('up');
+      handleRetailPriceArrowKey("up");
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
-      handleRetailPriceArrowKey('down');
+      handleRetailPriceArrowKey("down");
     }
   };
 
