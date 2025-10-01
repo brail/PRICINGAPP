@@ -30,6 +30,7 @@ const initDatabase = () => {
           duty REAL NOT NULL,
           exchange_rate REAL NOT NULL,
           italy_accessory_costs REAL NOT NULL,
+          tools REAL NOT NULL,
           company_multiplier REAL NOT NULL,
           retail_multiplier REAL NOT NULL,
           optimal_margin REAL NOT NULL,
@@ -97,6 +98,7 @@ const seedDatabase = () => {
       duty: 8,
       exchange_rate: 1.07,
       italy_accessory_costs: 1,
+      tools: 1.0,
       company_multiplier: calculateCompanyMultiplier(optimalMargin),
       retail_multiplier: 2.48,
       optimal_margin: optimalMargin,
@@ -120,9 +122,9 @@ const seedDatabase = () => {
             INSERT INTO parameter_sets (
               description, purchase_currency, selling_currency,
               quality_control_percent, transport_insurance_cost, duty,
-              exchange_rate, italy_accessory_costs, company_multiplier,
+              exchange_rate, italy_accessory_costs, tools, company_multiplier,
               retail_multiplier, optimal_margin, is_default
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `,
             [
               defaultParams.description,
@@ -133,6 +135,7 @@ const seedDatabase = () => {
               defaultParams.duty,
               defaultParams.exchange_rate,
               defaultParams.italy_accessory_costs,
+              defaultParams.tools,
               defaultParams.company_multiplier,
               defaultParams.retail_multiplier,
               defaultParams.optimal_margin,
@@ -212,9 +215,9 @@ const createParameterSet = (params) => {
       INSERT INTO parameter_sets (
         description, purchase_currency, selling_currency,
         quality_control_percent, transport_insurance_cost, duty,
-        exchange_rate, italy_accessory_costs, company_multiplier,
+        exchange_rate, italy_accessory_costs, tools, company_multiplier,
         retail_multiplier, optimal_margin, is_default
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
       [
         params.description,
@@ -225,6 +228,7 @@ const createParameterSet = (params) => {
         params.duty,
         params.exchange_rate,
         params.italy_accessory_costs,
+        params.tools,
         params.company_multiplier,
         params.retail_multiplier,
         params.optimal_margin,
@@ -249,7 +253,7 @@ const updateParameterSet = (id, params) => {
       UPDATE parameter_sets SET
         description = ?, purchase_currency = ?, selling_currency = ?,
         quality_control_percent = ?, transport_insurance_cost = ?, duty = ?,
-        exchange_rate = ?, italy_accessory_costs = ?, company_multiplier = ?,
+        exchange_rate = ?, italy_accessory_costs = ?, tools = ?, company_multiplier = ?,
         retail_multiplier = ?, optimal_margin = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `,
@@ -262,6 +266,7 @@ const updateParameterSet = (id, params) => {
         params.duty,
         params.exchange_rate,
         params.italy_accessory_costs,
+        params.tools,
         params.company_multiplier,
         params.retail_multiplier,
         params.optimal_margin,

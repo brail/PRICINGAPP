@@ -6,6 +6,7 @@ export interface CalculationParams {
   duty: number;
   exchangeRate: number;
   italyAccessoryCosts: number;
+  tools: number;
   companyMultiplier: number;
   retailMultiplier: number;
   optimalMargin: number;

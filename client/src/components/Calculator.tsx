@@ -19,6 +19,7 @@ const Calculator: React.FC = () => {
     duty: 0,
     exchangeRate: 1,
     italyAccessoryCosts: 0,
+    tools: 0,
     companyMultiplier: 1.5,
     retailMultiplier: 2.0,
     optimalMargin: 25,
@@ -402,17 +403,17 @@ const Calculator: React.FC = () => {
     if (retailPriceLocked) return;
 
     const currentValue = parseFloat(retailPrice) || 0;
-    
+
     // Prima arrotonda usando la logica del server
     const roundedCurrentValue = roundRetailPrice(currentValue);
-    
+
     // Poi aggiungi o sottrai 5.0
     const step = direction === "up" ? 5.0 : -5.0;
     const newValue = roundedCurrentValue + step;
-    
+
     // Arrotonda nuovamente usando la logica del server
     const finalValue = roundRetailPrice(newValue);
-    
+
     setRetailPrice(finalValue.toFixed(2));
     setMode("selling");
 
@@ -704,6 +705,12 @@ const Calculator: React.FC = () => {
                   </span>
                 </div>
                 <div className="parameter-item">
+                  <span className="parameter-label">Tools:</span>
+                  <span className="parameter-value">
+                    {params.tools} {params.purchaseCurrency}
+                  </span>
+                </div>
+                <div className="parameter-item">
                   <span className="parameter-label">
                     Moltiplicatore Retail:
                   </span>
@@ -960,6 +967,15 @@ const Calculator: React.FC = () => {
                     </span>
                   </div>
                   <div className="result-item">
+                    <span className="result-label">Tools:</span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        params.tools,
+                        params.purchaseCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
                     <span className="result-label">Valore Landed:</span>
                     <span className="result-value">
                       {formatCurrency(
@@ -1053,6 +1069,15 @@ const Calculator: React.FC = () => {
                       {formatCurrency(
                         calculation.italyAccessoryCosts,
                         calculation.sellingCurrency
+                      )}
+                    </span>
+                  </div>
+                  <div className="result-item">
+                    <span className="result-label">Tools:</span>
+                    <span className="result-value">
+                      {formatCurrency(
+                        params.tools,
+                        params.purchaseCurrency
                       )}
                     </span>
                   </div>
