@@ -624,13 +624,11 @@ const Calculator: React.FC = () => {
                 : "Parametri personalizzati (non salvati)"}
             </option>
             */}
-            {parameterSets
-              .sort((a, b) => a.description.localeCompare(b.description))
-              .map((set) => (
-                <option key={set.id} value={set.id}>
-                  {set.description}
-                </option>
-              ))}
+            {parameterSets.map((set) => (
+              <option key={set.id} value={set.id}>
+                {set.description}
+              </option>
+            ))}
           </select>
           {loadingParameterSets && (
             <span className="loading-text">Caricamento...</span>

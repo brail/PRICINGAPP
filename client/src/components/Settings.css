@@ -545,22 +545,22 @@
   .modal-overlay {
     padding: 10px;
   }
-  
+
   .modal-dialog {
     max-width: 100%;
   }
-  
+
   .modal-header,
   .modal-body,
   .modal-footer {
     padding-left: 20px;
     padding-right: 20px;
   }
-  
+
   .modal-footer {
     flex-direction: column;
   }
-  
+
   .modal-footer .btn {
     width: 100%;
   }

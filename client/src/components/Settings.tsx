@@ -14,9 +14,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import {
-  useSortable,
-} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { pricingApi } from "../services/api";
 import { CalculationParams, CURRENCIES, ExchangeRates } from "../types";
@@ -153,8 +151,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
             <strong>Tasso di Cambio:</strong> {set.exchange_rate}
           </p>
           <p>
-            <strong>Costi Accessori Italia:</strong>{" "}
-            {set.italy_accessory_costs}
+            <strong>Costi Accessori Italia:</strong> {set.italy_accessory_costs}
           </p>
           <p>
             <strong>Tools:</strong> {set.tools}
@@ -1059,11 +1056,15 @@ const Settings: React.FC = () => {
                           onClick={toggleCardExpansion}
                           expandedCards={expandedCards}
                           saving={saving}
-                          startDuplicatingParameterSet={startDuplicatingParameterSet}
+                          startDuplicatingParameterSet={
+                            startDuplicatingParameterSet
+                          }
                           handleLoadParameterSet={handleLoadParameterSet}
                           startEditingParameterSet={startEditingParameterSet}
                           startDeleteParameterSet={startDeleteParameterSet}
-                          handleSetDefaultParameterSet={handleSetDefaultParameterSet}
+                          handleSetDefaultParameterSet={
+                            handleSetDefaultParameterSet
+                          }
                         />
                       ))}
                     </div>
