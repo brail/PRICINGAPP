@@ -340,6 +340,61 @@ const Calculator: React.FC = () => {
     }
   };
 
+  // Funzione per arrotondare al centesimo più vicino (0.10)
+  const roundToNearestCent = (value: number): number => {
+    return Math.round(value * 10) / 10;
+  };
+
+  // Funzione per arrotondare al 4.9 o 9.9 più vicino
+  const roundToNearestRetailStep = (value: number): number => {
+    const integerPart = Math.floor(value);
+    const decimalPart = value - integerPart;
+    
+    if (decimalPart <= 0.5) {
+      return integerPart + 0.49;
+    } else {
+      return integerPart + 0.99;
+    }
+  };
+
+  // Gestore per le freccette del purchase price (step di 0.10)
+  const handlePurchasePriceArrowKey = (direction: 'up' | 'down') => {
+    if (purchasePriceLocked) return;
+    
+    const currentValue = parseFloat(purchasePrice) || 0;
+    const step = direction === 'up' ? 0.10 : -0.10;
+    const newValue = currentValue + step;
+    
+    // Arrotonda al centesimo più vicino se necessario
+    const roundedValue = roundToNearestCent(newValue);
+    setPurchasePrice(roundedValue.toFixed(2));
+    setMode("purchase");
+    
+    // Se il retail price è bloccato, calcola automaticamente il margine
+    if (retailPriceLocked) {
+      setTimeout(() => calculateMarginFromLockedPrice(), 100);
+    }
+  };
+
+  // Gestore per le freccette del retail price (step di 5.00)
+  const handleRetailPriceArrowKey = (direction: 'up' | 'down') => {
+    if (retailPriceLocked) return;
+    
+    const currentValue = parseFloat(retailPrice) || 0;
+    const step = direction === 'up' ? 5.00 : -5.00;
+    const newValue = currentValue + step;
+    
+    // Arrotonda al 4.9 o 9.9 più vicino
+    const roundedValue = roundToNearestRetailStep(newValue);
+    setRetailPrice(roundedValue.toFixed(2));
+    setMode("selling");
+    
+    // Se il purchase price è bloccato, calcola automaticamente il margine
+    if (purchasePriceLocked) {
+      setTimeout(() => calculateMarginFromLockedPrice(), 100);
+    }
+  };
+
   const handleCalculate = async () => {
     // Se c'è un prezzo bloccato, calcola il margine
     if (purchasePriceLocked || retailPriceLocked) {
@@ -354,6 +409,32 @@ const Calculator: React.FC = () => {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleCalculate();
+    }
+  };
+
+  // Gestore specifico per le freccette del purchase price
+  const handlePurchasePriceKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleCalculate();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      handlePurchasePriceArrowKey('up');
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      handlePurchasePriceArrowKey('down');
+    }
+  };
+
+  // Gestore specifico per le freccette del retail price
+  const handleRetailPriceKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleCalculate();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      handleRetailPriceArrowKey('up');
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      handleRetailPriceArrowKey('down');
     }
   };
 
@@ -626,9 +707,9 @@ const Calculator: React.FC = () => {
                 value={purchasePrice}
                 onChange={(e) => handlePurchasePriceChange(e.target.value)}
                 onBlur={handlePurchasePriceBlur}
-                onKeyDown={handleKeyPress}
+                onKeyDown={handlePurchasePriceKeyDown}
                 placeholder="0.00"
-                step="0.01"
+                step="0.10"
                 min="0"
                 disabled={purchasePriceLocked}
               />
@@ -657,9 +738,9 @@ const Calculator: React.FC = () => {
                 value={retailPrice}
                 onChange={(e) => handleRetailPriceChange(e.target.value)}
                 onBlur={handleRetailPriceBlur}
-                onKeyDown={handleKeyPress}
+                onKeyDown={handleRetailPriceKeyDown}
                 placeholder="0.00"
-                step="0.01"
+                step="5.00"
                 min="0"
                 disabled={retailPriceLocked}
               />
