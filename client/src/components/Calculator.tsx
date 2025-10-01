@@ -206,7 +206,6 @@ const Calculator: React.FC = () => {
     }
   };
 
-
   const handleParameterSetChange = async (parameterSetId: number) => {
     try {
       setLoadingParameterSets(true);
