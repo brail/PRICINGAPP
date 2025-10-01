@@ -6,8 +6,12 @@ import {
   ExchangeRates,
 } from "../types";
 
-const API_BASE_URL =
-  process.env.REACT_APP_API_URL || "http://localhost:5001/api";
+// Configurazione dell'URL dell'API - Forza l'URL di rete per il test
+const API_BASE_URL = "http://192.168.1.71:5001/api";
+
+// Debug: log dell'URL dell'API
+console.log("API_BASE_URL:", API_BASE_URL);
+console.log("REACT_APP_API_URL:", process.env.REACT_APP_API_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -120,7 +124,9 @@ export const pricingApi = {
   },
 
   // Aggiorna l'ordine dei set di parametri
-  updateParameterSetsOrder: async (parameterSets: any[]): Promise<{ message: string }> => {
+  updateParameterSetsOrder: async (
+    parameterSets: any[]
+  ): Promise<{ message: string }> => {
     const response = await api.put("/parameter-sets/order", { parameterSets });
     return response.data;
   },

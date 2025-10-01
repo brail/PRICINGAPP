@@ -52,35 +52,37 @@ const Calculator: React.FC = () => {
       const sets = await pricingApi.getParameterSets();
       setParameterSets(sets);
 
-      // Trova il set che corrisponde ai parametri attualmente caricati
-      try {
-        const currentParams = await pricingApi.getParams();
-        const matchingSet = sets.find((set) => {
-          return (
-            set.purchase_currency === currentParams.purchaseCurrency &&
-            set.selling_currency === currentParams.sellingCurrency &&
-            set.quality_control_percent ===
-              currentParams.qualityControlPercent &&
-            set.transport_insurance_cost ===
-              currentParams.transportInsuranceCost &&
-            set.duty === currentParams.duty &&
-            set.exchange_rate === currentParams.exchangeRate &&
-            set.italy_accessory_costs === currentParams.italyAccessoryCosts &&
-            set.tools === currentParams.tools &&
-            set.retail_multiplier === currentParams.retailMultiplier &&
-            set.optimal_margin === currentParams.optimalMargin
-          );
-        });
+      // Se non c'è già un set selezionato, trova il set che corrisponde ai parametri attualmente caricati
+      if (!selectedParameterSetId) {
+        try {
+          const currentParams = await pricingApi.getParams();
+          const matchingSet = sets.find((set) => {
+            return (
+              set.purchase_currency === currentParams.purchaseCurrency &&
+              set.selling_currency === currentParams.sellingCurrency &&
+              set.quality_control_percent ===
+                currentParams.qualityControlPercent &&
+              set.transport_insurance_cost ===
+                currentParams.transportInsuranceCost &&
+              set.duty === currentParams.duty &&
+              set.exchange_rate === currentParams.exchangeRate &&
+              set.italy_accessory_costs === currentParams.italyAccessoryCosts &&
+              set.tools === currentParams.tools &&
+              set.retail_multiplier === currentParams.retailMultiplier &&
+              set.optimal_margin === currentParams.optimalMargin
+            );
+          });
 
-        if (matchingSet) {
-          setSelectedParameterSetId(matchingSet.id);
-          setCurrentParamsMatchSet(true);
-        } else {
-          setSelectedParameterSetId(null);
-          setCurrentParamsMatchSet(false);
+          if (matchingSet) {
+            setSelectedParameterSetId(matchingSet.id);
+            setCurrentParamsMatchSet(true);
+          } else {
+            setSelectedParameterSetId(null);
+            setCurrentParamsMatchSet(false);
+          }
+        } catch (err) {
+          console.error("Errore nel confronto dei parametri:", err);
         }
-      } catch (err) {
-        console.error("Errore nel confronto dei parametri:", err);
       }
     } catch (err) {
       console.error("Errore nel caricamento dei set di parametri:", err);
@@ -650,7 +652,29 @@ const Calculator: React.FC = () => {
                 )}
                 {!selectedParameterSetId && (
                   <span className="parameter-set-badge default">
-                    Parametri di Default
+                    {(() => {
+                      // Trova il set che corrisponde ai parametri attualmente caricati
+                      const activeSet = parameterSets.find((set) => {
+                        return (
+                          set.purchase_currency === params.purchaseCurrency &&
+                          set.selling_currency === params.sellingCurrency &&
+                          set.quality_control_percent ===
+                            params.qualityControlPercent &&
+                          set.transport_insurance_cost ===
+                            params.transportInsuranceCost &&
+                          set.duty === params.duty &&
+                          set.exchange_rate === params.exchangeRate &&
+                          set.italy_accessory_costs ===
+                            params.italyAccessoryCosts &&
+                          set.tools === params.tools &&
+                          set.retail_multiplier === params.retailMultiplier &&
+                          set.optimal_margin === params.optimalMargin
+                        );
+                      });
+                      return (
+                        activeSet?.description || "Parametri personalizzati"
+                      );
+                    })()}
                   </span>
                 )}
               </h4>

@@ -629,6 +629,16 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
+// Test endpoint per verificare la connessione
+app.get("/api/test-connection", (req, res) => {
+  res.json({
+    message: "Connessione riuscita!",
+    timestamp: new Date().toISOString(),
+    clientIP: req.ip,
+    userAgent: req.get("User-Agent"),
+  });
+});
+
 // Inizializza il database e avvia il server
 const startServer = async () => {
   try {
@@ -644,9 +654,10 @@ const startServer = async () => {
     await loadParametersFromDatabase();
     console.log("Parametri caricati dal database");
 
-    // Avvia il server
-    app.listen(PORT, () => {
+    // Avvia il server su tutte le interfacce di rete
+    app.listen(PORT, "0.0.0.0", () => {
       console.log(`Server in esecuzione sulla porta ${PORT}`);
+      console.log(`Accessibile da rete interna su: http://[IP_LOCALE]:${PORT}`);
     });
   } catch (error) {
     console.error("Errore nell'inizializzazione del server:", error);

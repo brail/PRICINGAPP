@@ -5,8 +5,10 @@
   "main": "server/index.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "dev:network": "concurrently \"npm run server\" \"npm run client:network\"",
     "server": "cd server && npm run dev",
     "client": "cd client && npm start",
+    "client:network": "cd client && HOST=0.0.0.0 REACT_APP_API_URL=http://192.168.1.71:5001 npm start",
     "build": "cd client && npm run build",
     "install-all": "npm install && cd server && npm install && cd ../client && npm install"
   },
@@ -21,5 +23,3 @@
     "concurrently": "^8.2.2"
   }
 }
-
-
