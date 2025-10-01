@@ -345,32 +345,36 @@ const Calculator: React.FC = () => {
     return Math.round(value * 10) / 10;
   };
 
-  // Funzione per arrotondare al 4.9 o 9.9 più vicino
-  const roundToNearestRetailStep = (value: number): number => {
-    if (isNaN(value) || !isFinite(value)) return 0;
-
-    const integerPart = Math.floor(value);
-    const decimalPart = value - integerPart;
-    const unitsDigit = integerPart % 10;
-
-    // Se il valore è già al .90, non cambiarlo
-    if (Math.abs(decimalPart - 0.9) < 0.01) {
-      return value;
+  // Funzione per arrotondare il prezzo retail finale (stessa logica del server)
+  const roundRetailPrice = (price: number): number => {
+    if (isNaN(price) || !isFinite(price) || price <= 0) {
+      return 0;
     }
 
-    // Se il valore è già al .49, non cambiarlo
-    if (Math.abs(decimalPart - 0.49) < 0.01) {
-      return value;
+    // Se il prezzo è molto piccolo (meno di 10), arrotonda a 9.9
+    if (price < 10) {
+      return 9.9;
     }
 
-    // Per tutti gli altri casi, arrotonda al 4.9 o 9.9 più vicino
-    // basandosi sulla cifra delle unità
-    if (unitsDigit <= 4) {
-      // Se la cifra delle unità è 0-4, arrotonda al 4.9 più vicino
-      return integerPart + 0.49;
+    const integerPart = Math.floor(price);
+    const decimalPart = price - integerPart;
+    const tens = Math.floor(integerPart / 10) * 10;
+
+    // Calcola la parte finale (cifra unità + decimale)
+    const finalPart = (integerPart % 10) + decimalPart;
+
+    if (finalPart >= 0.0 && finalPart <= 2.4) {
+      // Arrotonda alla decina precedente + 9.9
+      return Math.max(9.9, tens - 10 + 9.9);
+    } else if (finalPart >= 2.5 && finalPart <= 7.4) {
+      // Arrotonda alla decina corrente + 4.9
+      return tens + 4.9;
+    } else if (finalPart >= 7.5 && finalPart <= 9.9) {
+      // Arrotonda alla decina corrente + 9.9
+      return tens + 9.9;
     } else {
-      // Se la cifra delle unità è 5-9, arrotonda al 9.9 più vicino
-      return integerPart + 0.99;
+      // Fallback (non dovrebbe mai arrivare qui)
+      return tens + 4.9;
     }
   };
 
@@ -399,15 +403,15 @@ const Calculator: React.FC = () => {
 
     const currentValue = parseFloat(retailPrice) || 0;
     
-    // Prima arrotonda al 4.9 o 9.9 più vicino
-    const roundedCurrentValue = roundToNearestRetailStep(currentValue);
+    // Prima arrotonda usando la logica del server
+    const roundedCurrentValue = roundRetailPrice(currentValue);
     
     // Poi aggiungi o sottrai 5.0
     const step = direction === "up" ? 5.0 : -5.0;
     const newValue = roundedCurrentValue + step;
     
-    // Arrotonda nuovamente al 4.9 o 9.9 più vicino
-    const finalValue = roundToNearestRetailStep(newValue);
+    // Arrotonda nuovamente usando la logica del server
+    const finalValue = roundRetailPrice(newValue);
     
     setRetailPrice(finalValue.toFixed(2));
     setMode("selling");
