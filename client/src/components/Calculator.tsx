@@ -114,12 +114,15 @@ const Calculator: React.FC = () => {
     } catch (err) {
       console.error("Errore nel caricamento dei parametri:", err);
       setError("Errore nel caricamento dei parametri");
-      
+
       // Se c'è un errore, prova a caricare i parametri di default
       try {
         await loadDefaultParameters();
       } catch (defaultErr) {
-        console.error("Errore nel caricamento dei parametri di default:", defaultErr);
+        console.error(
+          "Errore nel caricamento dei parametri di default:",
+          defaultErr
+        );
       }
     }
   };
@@ -128,8 +131,10 @@ const Calculator: React.FC = () => {
     try {
       // Carica il set di parametri di default
       const sets = await pricingApi.getParameterSets();
-      const defaultSet = sets.find(set => set.is_default === 1 || set.description === "Parametri Default");
-      
+      const defaultSet = sets.find(
+        (set) => set.is_default === 1 || set.description === "Parametri Default"
+      );
+
       if (defaultSet) {
         const defaultParams: CalculationParams = {
           purchaseCurrency: defaultSet.purchase_currency,
@@ -143,7 +148,7 @@ const Calculator: React.FC = () => {
           retailMultiplier: defaultSet.retail_multiplier,
           optimalMargin: defaultSet.optimal_margin,
         };
-        
+
         setParams(defaultParams);
         setSelectedParameterSetId(defaultSet.id);
         setCurrentParamsMatchSet(true);
@@ -167,7 +172,8 @@ const Calculator: React.FC = () => {
           return (
             set.purchase_currency === currentParams.purchaseCurrency &&
             set.selling_currency === currentParams.sellingCurrency &&
-            set.quality_control_percent === currentParams.qualityControlPercent &&
+            set.quality_control_percent ===
+              currentParams.qualityControlPercent &&
             set.transport_insurance_cost ===
               currentParams.transportInsuranceCost &&
             set.duty === currentParams.duty &&
@@ -506,11 +512,13 @@ const Calculator: React.FC = () => {
                 : "Parametri personalizzati (non salvati)"}
             </option>
             */}
-            {parameterSets.map((set) => (
-              <option key={set.id} value={set.id}>
-                {set.description}
-              </option>
-            ))}
+            {parameterSets
+              .sort((a, b) => a.description.localeCompare(b.description))
+              .map((set) => (
+                <option key={set.id} value={set.id}>
+                  {set.description}
+                </option>
+              ))}
           </select>
           {loadingParameterSets && (
             <span className="loading-text">Caricamento...</span>
@@ -525,7 +533,9 @@ const Calculator: React.FC = () => {
                 Parametri Attivi
                 {selectedParameterSetId && (
                   <span className="parameter-set-badge">
-                    {parameterSets.find(set => set.id === selectedParameterSetId)?.description || "Set Caricato"}
+                    {parameterSets.find(
+                      (set) => set.id === selectedParameterSetId
+                    )?.description || "Set Caricato"}
                   </span>
                 )}
                 {!selectedParameterSetId && (
