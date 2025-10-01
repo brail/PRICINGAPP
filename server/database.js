@@ -67,7 +67,7 @@ const initDatabase = () => {
                     "Colonna is_default aggiunta alla tabella parameter_sets."
                   );
                 }
-                
+
                 // Aggiungi colonna order_index se non esiste (migrazione)
                 db.run(
                   `ALTER TABLE parameter_sets ADD COLUMN order_index INTEGER DEFAULT 0`,
@@ -108,78 +108,113 @@ const calculateCompanyMultiplier = (optimalMargin) => {
 // Seeding del database con parametri default
 const seedDatabase = () => {
   return new Promise((resolve, reject) => {
-    // Parametri default
-    const optimalMargin = 25;
-    const defaultParams = {
-      description: "Parametri Default",
-      purchase_currency: "USD",
-      selling_currency: "EUR",
-      quality_control_percent: 5,
-      transport_insurance_cost: 2.3,
-      duty: 8,
-      exchange_rate: 1.07,
-      italy_accessory_costs: 1,
-      tools: 1.0,
-      company_multiplier: calculateCompanyMultiplier(optimalMargin),
-      retail_multiplier: 2.48,
-      optimal_margin: optimalMargin,
-    };
-
-    // Controlla se esiste già un set con descrizione "Parametri Default"
+    // Controlla se esiste un set di parametri marcato come default
     db.get(
-      "SELECT id FROM parameter_sets WHERE description = ?",
-      [defaultParams.description],
-      (err, row) => {
+      "SELECT id FROM parameter_sets WHERE is_default = 1",
+      (err, defaultRow) => {
         if (err) {
           console.error(
-            "Errore nel controllo dei parametri default:",
+            "Errore nel controllo del set di parametri default:",
             err.message
           );
           reject(err);
-        } else if (!row) {
-          // Inserisce i parametri default se non esistono
-          db.run(
-            `
-            INSERT INTO parameter_sets (
-              description, purchase_currency, selling_currency,
-              quality_control_percent, transport_insurance_cost, duty,
-              exchange_rate, italy_accessory_costs, tools, company_multiplier,
-              retail_multiplier, optimal_margin, is_default, order_index
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          `,
-            [
-              defaultParams.description,
-              defaultParams.purchase_currency,
-              defaultParams.selling_currency,
-              defaultParams.quality_control_percent,
-              defaultParams.transport_insurance_cost,
-              defaultParams.duty,
-              defaultParams.exchange_rate,
-              defaultParams.italy_accessory_costs,
-              defaultParams.tools,
-              defaultParams.company_multiplier,
-              defaultParams.retail_multiplier,
-              defaultParams.optimal_margin,
-              1, // is_default = true
-              0, // order_index = 0 (primo elemento)
-            ],
-            function (err) {
-              if (err) {
-                console.error(
-                  "Errore nell'inserimento dei parametri default:",
-                  err.message
-                );
-                reject(err);
-              } else {
-                console.log("Parametri default inseriti con ID:", this.lastID);
-                resolve();
-              }
-            }
-          );
-        } else {
-          console.log("Parametri default già esistenti.");
-          resolve();
+          return;
         }
+
+        // Se esiste già un set di parametri default, non fare seeding
+        if (defaultRow) {
+          console.log(
+            "Set di parametri default già esistente (ID:",
+            defaultRow.id,
+            "), seeding saltato."
+          );
+          resolve();
+          return;
+        }
+
+        // Controlla se il database è completamente vuoto
+        db.get(
+          "SELECT COUNT(*) as count FROM parameter_sets",
+          (err, countRow) => {
+            if (err) {
+              console.error("Errore nel controllo del database:", err.message);
+              reject(err);
+              return;
+            }
+
+            // Se il database non è vuoto ma non c'è un set default,
+            // significa che ci sono dati ma nessun set è marcato come default
+            if (countRow.count > 0) {
+              console.log(
+                "Database popolato ma nessun set di parametri default trovato. Creazione set default..."
+              );
+            } else {
+              console.log(
+                "Database vuoto. Creazione set di parametri default..."
+              );
+            }
+
+            // Parametri default
+            const optimalMargin = 25;
+            const defaultParams = {
+              description: "Parametri Default",
+              purchase_currency: "USD",
+              selling_currency: "EUR",
+              quality_control_percent: 5,
+              transport_insurance_cost: 2.3,
+              duty: 8,
+              exchange_rate: 1.07,
+              italy_accessory_costs: 1,
+              tools: 1.0,
+              company_multiplier: calculateCompanyMultiplier(optimalMargin),
+              retail_multiplier: 2.48,
+              optimal_margin: optimalMargin,
+            };
+
+            // Inserisce i parametri default
+            db.run(
+              `
+              INSERT INTO parameter_sets (
+                description, purchase_currency, selling_currency,
+                quality_control_percent, transport_insurance_cost, duty,
+                exchange_rate, italy_accessory_costs, tools, company_multiplier,
+                retail_multiplier, optimal_margin, is_default, order_index
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `,
+              [
+                defaultParams.description,
+                defaultParams.purchase_currency,
+                defaultParams.selling_currency,
+                defaultParams.quality_control_percent,
+                defaultParams.transport_insurance_cost,
+                defaultParams.duty,
+                defaultParams.exchange_rate,
+                defaultParams.italy_accessory_costs,
+                defaultParams.tools,
+                defaultParams.company_multiplier,
+                defaultParams.retail_multiplier,
+                defaultParams.optimal_margin,
+                1, // is_default = true
+                0, // order_index = 0 (primo elemento)
+              ],
+              function (err) {
+                if (err) {
+                  console.error(
+                    "Errore nell'inserimento dei parametri default:",
+                    err.message
+                  );
+                  reject(err);
+                } else {
+                  console.log(
+                    "Set di parametri default creato con ID:",
+                    this.lastID
+                  );
+                  resolve();
+                }
+              }
+            );
+          }
+        );
       }
     );
   });
