@@ -35,6 +35,7 @@ const initDatabase = () => {
           retail_multiplier REAL NOT NULL,
           optimal_margin REAL NOT NULL,
           is_default BOOLEAN DEFAULT 0,
+          order_index INTEGER DEFAULT 0,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
@@ -66,7 +67,27 @@ const initDatabase = () => {
                     "Colonna is_default aggiunta alla tabella parameter_sets."
                   );
                 }
-                resolve();
+                
+                // Aggiungi colonna order_index se non esiste (migrazione)
+                db.run(
+                  `ALTER TABLE parameter_sets ADD COLUMN order_index INTEGER DEFAULT 0`,
+                  (orderErr) => {
+                    if (
+                      orderErr &&
+                      !orderErr.message.includes("duplicate column name")
+                    ) {
+                      console.error(
+                        "Errore nell'aggiunta della colonna order_index:",
+                        orderErr
+                      );
+                    } else if (!orderErr) {
+                      console.log(
+                        "Colonna order_index aggiunta alla tabella parameter_sets."
+                      );
+                    }
+                    resolve();
+                  }
+                );
               }
             );
           }
@@ -123,8 +144,8 @@ const seedDatabase = () => {
               description, purchase_currency, selling_currency,
               quality_control_percent, transport_insurance_cost, duty,
               exchange_rate, italy_accessory_costs, tools, company_multiplier,
-              retail_multiplier, optimal_margin, is_default
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              retail_multiplier, optimal_margin, is_default, order_index
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `,
             [
               defaultParams.description,
@@ -140,6 +161,7 @@ const seedDatabase = () => {
               defaultParams.retail_multiplier,
               defaultParams.optimal_margin,
               1, // is_default = true
+              0, // order_index = 0 (primo elemento)
             ],
             function (err) {
               if (err) {
@@ -169,7 +191,7 @@ const seedDatabase = () => {
 const getAllParameterSets = () => {
   return new Promise((resolve, reject) => {
     db.all(
-      "SELECT * FROM parameter_sets ORDER BY created_at DESC",
+      "SELECT * FROM parameter_sets ORDER BY order_index ASC, created_at DESC",
       (err, rows) => {
         if (err) {
           reject(err);
@@ -178,6 +200,35 @@ const getAllParameterSets = () => {
         }
       }
     );
+  });
+};
+
+// Aggiorna l'ordine dei set di parametri
+const updateParameterSetsOrder = (parameterSets) => {
+  return new Promise((resolve, reject) => {
+    const updatePromises = parameterSets.map((paramSet, index) => {
+      return new Promise((resolveUpdate, rejectUpdate) => {
+        db.run(
+          "UPDATE parameter_sets SET order_index = ? WHERE id = ?",
+          [index, paramSet.id],
+          function (err) {
+            if (err) {
+              rejectUpdate(err);
+            } else {
+              resolveUpdate();
+            }
+          }
+        );
+      });
+    });
+
+    Promise.all(updatePromises)
+      .then(() => {
+        resolve();
+      })
+      .catch((err) => {
+        reject(err);
+      });
   });
 };
 
@@ -216,8 +267,8 @@ const createParameterSet = (params) => {
         description, purchase_currency, selling_currency,
         quality_control_percent, transport_insurance_cost, duty,
         exchange_rate, italy_accessory_costs, tools, company_multiplier,
-        retail_multiplier, optimal_margin, is_default
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        retail_multiplier, optimal_margin, is_default, order_index
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
       [
         params.description,
@@ -233,6 +284,7 @@ const createParameterSet = (params) => {
         params.retail_multiplier,
         params.optimal_margin,
         params.is_default || 0,
+        params.order_index || 0,
       ],
       function (err) {
         if (err) {
@@ -254,7 +306,7 @@ const updateParameterSet = (id, params) => {
         description = ?, purchase_currency = ?, selling_currency = ?,
         quality_control_percent = ?, transport_insurance_cost = ?, duty = ?,
         exchange_rate = ?, italy_accessory_costs = ?, tools = ?, company_multiplier = ?,
-        retail_multiplier = ?, optimal_margin = ?, updated_at = CURRENT_TIMESTAMP
+        retail_multiplier = ?, optimal_margin = ?, order_index = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `,
       [
@@ -270,6 +322,7 @@ const updateParameterSet = (id, params) => {
         params.company_multiplier,
         params.retail_multiplier,
         params.optimal_margin,
+        params.order_index || 0,
         id,
       ],
       function (err) {
@@ -349,5 +402,6 @@ module.exports = {
   updateParameterSet,
   deleteParameterSet,
   setDefaultParameterSet,
+  updateParameterSetsOrder,
   closeDatabase,
 };

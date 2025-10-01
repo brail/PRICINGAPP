@@ -598,3 +598,47 @@
     flex-direction: column;
   }
 }
+
+/* Stili per Drag and Drop */
+.parameter-set-card.dragging {
+  transform: rotate(5deg);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+.drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  cursor: grab;
+  color: #6c757d;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.drag-handle span {
+  font-size: 12px;
+  line-height: 1;
+  user-select: none;
+}
+
+.parameter-set-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.parameter-set-header h5 {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  margin: 0;
+  margin-right: 12px;
+}

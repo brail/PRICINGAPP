@@ -118,6 +118,12 @@ export const pricingApi = {
     const response = await api.post(`/parameter-sets/${id}/set-default`);
     return response.data;
   },
+
+  // Aggiorna l'ordine dei set di parametri
+  updateParameterSetsOrder: async (parameterSets: any[]): Promise<{ message: string }> => {
+    const response = await api.put("/parameter-sets/order", { parameterSets });
+    return response.data;
+  },
 };
 
 export default api;

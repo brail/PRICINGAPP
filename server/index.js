@@ -14,6 +14,7 @@ const {
   updateParameterSet,
   deleteParameterSet,
   setDefaultParameterSet,
+  updateParameterSetsOrder,
 } = require("./database");
 
 const app = express();
@@ -531,6 +532,23 @@ app.post("/api/parameter-sets", async (req, res) => {
         .status(500)
         .json({ error: "Errore nella creazione del set di parametri" });
     }
+  }
+});
+
+// Aggiorna l'ordine dei set di parametri
+app.put("/api/parameter-sets/order", async (req, res) => {
+  try {
+    const { parameterSets } = req.body;
+    
+    if (!parameterSets || !Array.isArray(parameterSets)) {
+      return res.status(400).json({ error: "Lista parametri non valida" });
+    }
+
+    await updateParameterSetsOrder(parameterSets);
+    res.json({ message: "Ordine aggiornato con successo" });
+  } catch (error) {
+    console.error("Errore nell'aggiornamento dell'ordine:", error);
+    res.status(500).json({ error: "Errore nell'aggiornamento dell'ordine" });
   }
 });
 
