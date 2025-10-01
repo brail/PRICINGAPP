@@ -986,7 +986,7 @@ const Calculator: React.FC = () => {
                   </div>
                   <div className="result-item">
                     <span className="result-label">
-                      Prezzo aziendale (×{calculation.params.companyMultiplier}
+                      Prezzo aziendale (×{calculation.params.companyMultiplier.toFixed(2)}
                       ):
                     </span>
                     <span className="result-value">
@@ -1048,7 +1048,7 @@ const Calculator: React.FC = () => {
                   <div className="result-item">
                     <span className="result-label">
                       Prezzo senza moltiplicatori (÷
-                      {calculation.params.companyMultiplier}):
+                      {calculation.params.companyMultiplier.toFixed(2)}):
                     </span>
                     <span className="result-value">
                       {formatCurrency(
