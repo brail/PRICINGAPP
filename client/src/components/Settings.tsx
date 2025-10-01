@@ -12,6 +12,7 @@ const Settings: React.FC = () => {
     duty: 0,
     exchangeRate: 1,
     italyAccessoryCosts: 0,
+    tools: 0,
     companyMultiplier: 1.33, // Calcolato dinamicamente da optimalMargin
     retailMultiplier: 2.0,
     optimalMargin: 25,
@@ -118,6 +119,7 @@ const Settings: React.FC = () => {
       duty: 0,
       exchangeRate: 1,
       italyAccessoryCosts: 0,
+      tools: 0,
       companyMultiplier: 1.5,
       retailMultiplier: 2.0,
       optimalMargin: 25,

@@ -297,7 +297,7 @@ async function calculatePurchasePrice(retailPrice, params = currentParams) {
     priceWithoutTransport / (1 + qualityControlPercent / 100);
   const purchasePrice = roundPurchasePrice(purchasePriceRaw);
   const qualityControlCost = priceWithoutTransport - purchasePrice;
-  
+
   // 8. Rimuovi tools (ultimo passaggio dopo quality control)
   const purchasePriceWithoutTools = purchasePrice - tools;
 
@@ -357,8 +357,7 @@ app.put("/api/params", (req, res) => {
     currentParams.exchangeRate = Math.max(0.001, exchangeRate);
   if (italyAccessoryCosts !== undefined)
     currentParams.italyAccessoryCosts = Math.max(0, italyAccessoryCosts);
-  if (tools !== undefined)
-    currentParams.tools = Math.max(0, tools);
+  if (tools !== undefined) currentParams.tools = Math.max(0, tools);
   if (retailMultiplier !== undefined)
     currentParams.retailMultiplier = Math.max(0.1, retailMultiplier);
   if (optimalMargin !== undefined)
