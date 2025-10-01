@@ -602,8 +602,12 @@ const Calculator: React.FC = () => {
 
       {/* Input Unificato */}
       <div className="input-card">
-        <h3>Calcolo Prezzi</h3>
-
+        <div className="input-card-header">
+          <h3>Calcolo Prezzi</h3>
+          <button className="btn btn-secondary" onClick={clearAll}>
+            Pulisci Tutto
+          </button>
+        </div>
         {/* Selezione Set di Parametri */}
         <div className="parameter-set-selector">
           <label className="form-label">Set di Parametri:</label>
@@ -867,9 +871,6 @@ const Calculator: React.FC = () => {
               >
                 {showDetails ? "Nascondi Dettagli" : "Mostra Dettagli"}
               </button>
-              <button className="btn btn-secondary" onClick={clearAll}>
-                Pulisci Tutto
-              </button>
             </div>
           </div>
 
@@ -986,7 +987,8 @@ const Calculator: React.FC = () => {
                   </div>
                   <div className="result-item">
                     <span className="result-label">
-                      Prezzo aziendale (×{calculation.params.companyMultiplier.toFixed(2)}
+                      Prezzo aziendale (×
+                      {calculation.params.companyMultiplier.toFixed(2)}
                       ):
                     </span>
                     <span className="result-value">

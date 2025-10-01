@@ -35,9 +35,16 @@
   transform: translateY(-2px);
 }
 
+.input-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .input-card h3 {
   color: #007bff;
-  margin-bottom: 20px;
+  margin: 0;
   font-size: 20px;
   font-weight: 600;
 }
