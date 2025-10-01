@@ -31,6 +31,13 @@ interface SortableItemProps {
   startEditingParameterSet: (set: any) => void;
   startDeleteParameterSet: (set: any) => void;
   handleSetDefaultParameterSet: (id: number) => void;
+  editingParameterSet: any | null;
+  setEditingParameterSet: (set: any | null) => void;
+  handleUpdateParameterSet: () => void;
+  cancelEditingParameterSet: () => void;
+  handleWheelPrevent: (e: React.WheelEvent<HTMLInputElement>) => void;
+  handleFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
+  handleBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
 const SortableItem: React.FC<SortableItemProps> = ({
@@ -43,6 +50,13 @@ const SortableItem: React.FC<SortableItemProps> = ({
   startEditingParameterSet,
   startDeleteParameterSet,
   handleSetDefaultParameterSet,
+  editingParameterSet,
+  setEditingParameterSet,
+  handleUpdateParameterSet,
+  cancelEditingParameterSet,
+  handleWheelPrevent,
+  handleFocus,
+  handleBlur,
 }) => {
   const {
     attributes,
@@ -60,108 +74,378 @@ const SortableItem: React.FC<SortableItemProps> = ({
   };
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`parameter-set-card ${isDragging ? "dragging" : ""}`}
-      onClick={() => onClick(set.id)}
-    >
-      <div className="parameter-set-header">
-        <div className="drag-handle" {...attributes} {...listeners}>
-          <span>⋮⋮</span>
+    <div className="parameter-set-container">
+      <div
+        ref={setNodeRef}
+        style={style}
+        className={`parameter-set-card ${isDragging ? "dragging" : ""}`}
+        onClick={() => onClick(set.id)}
+      >
+        <div className="parameter-set-header">
+          <div className="drag-handle" {...attributes} {...listeners}>
+            <span>⋮⋮</span>
+          </div>
+          <h5>{set.description}</h5>
+          <div className="parameter-set-actions">
+            <button
+              className="btn btn-sm btn-info"
+              onClick={(e) => {
+                e.stopPropagation();
+                startDuplicatingParameterSet(set);
+              }}
+              disabled={saving}
+              title="Duplica questo set di parametri"
+            >
+              Duplica
+            </button>
+            <button
+              className="btn btn-sm btn-primary"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleLoadParameterSet(set.id);
+              }}
+              disabled={saving}
+            >
+              Carica
+            </button>
+            <button
+              className="btn btn-sm btn-secondary"
+              onClick={(e) => {
+                e.stopPropagation();
+                startEditingParameterSet(set);
+              }}
+              disabled={saving}
+            >
+              Modifica
+            </button>
+            <button
+              className="btn btn-sm btn-danger"
+              onClick={(e) => {
+                e.stopPropagation();
+                startDeleteParameterSet(set);
+              }}
+              disabled={saving || set.is_default}
+            >
+              Elimina
+            </button>
+            <button
+              className="btn btn-sm btn-star"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSetDefaultParameterSet(set.id);
+              }}
+              disabled={saving}
+              title={
+                set.is_default
+                  ? "Set di parametri predefinito"
+                  : "Imposta come predefinito"
+              }
+              data-is-default={set.is_default ? "true" : "false"}
+            >
+              {set.is_default ? "⭐" : "☆"}
+            </button>
+          </div>
         </div>
-        <h5>{set.description}</h5>
-        <div className="parameter-set-actions">
-          <button
-            className="btn btn-sm btn-info"
-            onClick={(e) => {
-              e.stopPropagation();
-              startDuplicatingParameterSet(set);
-            }}
-            disabled={saving}
-            title="Duplica questo set di parametri"
-          >
-            Duplica
-          </button>
-          <button
-            className="btn btn-sm btn-primary"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleLoadParameterSet(set.id);
-            }}
-            disabled={saving}
-          >
-            Carica
-          </button>
-          <button
-            className="btn btn-sm btn-secondary"
-            onClick={(e) => {
-              e.stopPropagation();
-              startEditingParameterSet(set);
-            }}
-            disabled={saving}
-          >
-            Modifica
-          </button>
-          <button
-            className="btn btn-sm btn-danger"
-            onClick={(e) => {
-              e.stopPropagation();
-              startDeleteParameterSet(set);
-            }}
-            disabled={saving || set.is_default}
-          >
-            Elimina
-          </button>
-          <button
-            className="btn btn-sm btn-star"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleSetDefaultParameterSet(set.id);
-            }}
-            disabled={saving}
-            title={
-              set.is_default
-                ? "Set di parametri predefinito"
-                : "Imposta come predefinito"
-            }
-            data-is-default={set.is_default ? "true" : "false"}
-          >
-            {set.is_default ? "⭐" : "☆"}
-          </button>
-        </div>
+        {expandedCards.has(set.id) && (
+          <div className="parameter-set-details">
+            <p>
+              <strong>Valute:</strong> {set.purchase_currency} →{" "}
+              {set.selling_currency}
+            </p>
+            <p>
+              <strong>Quality Control:</strong> {set.quality_control_percent}%
+            </p>
+            <p>
+              <strong>Trasporto + Assicurazione:</strong>{" "}
+              {set.transport_insurance_cost}
+            </p>
+            <p>
+              <strong>Dazio:</strong> {set.duty}%
+            </p>
+            <p>
+              <strong>Tasso di Cambio:</strong> {set.exchange_rate}
+            </p>
+            <p>
+              <strong>Costi Accessori Italia:</strong>{" "}
+              {set.italy_accessory_costs}
+            </p>
+            <p>
+              <strong>Tools:</strong> {set.tools}
+            </p>
+            <p>
+              <strong>Moltiplicatore Retail:</strong> {set.retail_multiplier}
+            </p>
+            <p>
+              <strong>Margine ottimale:</strong> {set.optimal_margin}%
+            </p>
+          </div>
+        )}
       </div>
-      {expandedCards.has(set.id) && (
-        <div className="parameter-set-details">
-          <p>
-            <strong>Valute:</strong> {set.purchase_currency} →{" "}
-            {set.selling_currency}
-          </p>
-          <p>
-            <strong>Quality Control:</strong> {set.quality_control_percent}%
-          </p>
-          <p>
-            <strong>Trasporto + Assicurazione:</strong>{" "}
-            {set.transport_insurance_cost}
-          </p>
-          <p>
-            <strong>Dazio:</strong> {set.duty}%
-          </p>
-          <p>
-            <strong>Tasso di Cambio:</strong> {set.exchange_rate}
-          </p>
-          <p>
-            <strong>Costi Accessori Italia:</strong> {set.italy_accessory_costs}
-          </p>
-          <p>
-            <strong>Tools:</strong> {set.tools}
-          </p>
-          <p>
-            <strong>Moltiplicatore Retail:</strong> {set.retail_multiplier}
-          </p>
-          <p>
-            <strong>Margine ottimale:</strong> {set.optimal_margin}%
-          </p>
+
+      {/* Form di modifica posizionato sotto la card specifica */}
+      {editingParameterSet && editingParameterSet.id === set.id && (
+        <div className="edit-parameter-set-form">
+          <h4>Modifica Set di Parametri: {editingParameterSet.description}</h4>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Descrizione *</label>
+              <input
+                type="text"
+                className="form-input"
+                value={editingParameterSet.description}
+                onChange={(e) =>
+                  setEditingParameterSet({
+                    ...editingParameterSet,
+                    description: e.target.value,
+                  })
+                }
+                placeholder="Nome del set di parametri"
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Valuta acquisto *</label>
+              <select
+                className="form-select"
+                value={editingParameterSet.purchase_currency}
+                onChange={(e) =>
+                  setEditingParameterSet({
+                    ...editingParameterSet,
+                    purchase_currency: e.target.value,
+                  })
+                }
+              >
+                <option value="">Seleziona valuta</option>
+                {CURRENCIES.map((currency) => (
+                  <option key={currency.code} value={currency.code}>
+                    {currency.code} - {currency.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Valuta vendita *</label>
+              <select
+                className="form-select"
+                value={editingParameterSet.selling_currency}
+                onChange={(e) =>
+                  setEditingParameterSet({
+                    ...editingParameterSet,
+                    selling_currency: e.target.value,
+                  })
+                }
+              >
+                <option value="">Seleziona valuta</option>
+                {CURRENCIES.map((currency) => (
+                  <option key={currency.code} value={currency.code}>
+                    {currency.code} - {currency.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Quality Control (%) *</label>
+              <input
+                type="number"
+                className="form-input"
+                value={editingParameterSet.quality_control_percent}
+                onChange={(e) =>
+                  setEditingParameterSet({
+                    ...editingParameterSet,
+                    quality_control_percent:
+                      e.target.value === "" ? "" : Number(e.target.value),
+                  })
+                }
+                onWheel={handleWheelPrevent}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                min="0"
+                step="0.1"
+                placeholder="Es. 5"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Trasporto + Assicurazione *</label>
+              <input
+                type="number"
+                className="form-input"
+                value={editingParameterSet.transport_insurance_cost}
+                onChange={(e) =>
+                  setEditingParameterSet({
+                    ...editingParameterSet,
+                    transport_insurance_cost:
+                      e.target.value === "" ? "" : Number(e.target.value),
+                  })
+                }
+                onWheel={handleWheelPrevent}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                min="0"
+                step="0.01"
+                placeholder="Es. 2.3"
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Dazio (%) *</label>
+              <input
+                type="number"
+                className="form-input"
+                value={editingParameterSet.duty}
+                onChange={(e) =>
+                  setEditingParameterSet({
+                    ...editingParameterSet,
+                    duty: e.target.value === "" ? "" : Number(e.target.value),
+                  })
+                }
+                onWheel={handleWheelPrevent}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                min="0"
+                step="0.1"
+                placeholder="Es. 8"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Cambio *</label>
+              <input
+                type="number"
+                className="form-input"
+                value={editingParameterSet.exchange_rate}
+                onChange={(e) =>
+                  setEditingParameterSet({
+                    ...editingParameterSet,
+                    exchange_rate:
+                      e.target.value === "" ? "" : Number(e.target.value),
+                  })
+                }
+                onWheel={handleWheelPrevent}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                min="0"
+                step="0.0001"
+                placeholder="Es. 1.07"
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Costi accessori Italia *</label>
+              <input
+                type="number"
+                className="form-input"
+                value={editingParameterSet.italy_accessory_costs}
+                onChange={(e) =>
+                  setEditingParameterSet({
+                    ...editingParameterSet,
+                    italy_accessory_costs:
+                      e.target.value === "" ? "" : Number(e.target.value),
+                  })
+                }
+                onWheel={handleWheelPrevent}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                min="0"
+                step="0.01"
+                placeholder="Es. 1"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Tools *</label>
+              <input
+                type="number"
+                className="form-input"
+                value={editingParameterSet.tools}
+                onChange={(e) =>
+                  setEditingParameterSet({
+                    ...editingParameterSet,
+                    tools: e.target.value === "" ? "" : Number(e.target.value),
+                  })
+                }
+                onWheel={handleWheelPrevent}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                min="0"
+                step="0.01"
+                placeholder="Es. 1.0"
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Moltiplicatore retail *</label>
+              <input
+                type="number"
+                className="form-input"
+                value={editingParameterSet.retail_multiplier}
+                onChange={(e) =>
+                  setEditingParameterSet({
+                    ...editingParameterSet,
+                    retail_multiplier:
+                      e.target.value === "" ? "" : Number(e.target.value),
+                  })
+                }
+                onWheel={handleWheelPrevent}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                min="0"
+                step="0.01"
+                placeholder="Es. 2.48"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Margine ottimale (%) *</label>
+              <input
+                type="number"
+                className="form-input"
+                value={editingParameterSet.optimal_margin}
+                onChange={(e) =>
+                  setEditingParameterSet({
+                    ...editingParameterSet,
+                    optimal_margin:
+                      e.target.value === "" ? "" : Number(e.target.value),
+                  })
+                }
+                onWheel={handleWheelPrevent}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                min="0"
+                step="0.1"
+                placeholder="Es. 25"
+              />
+            </div>
+          </div>
+
+          <div className="form-actions">
+            <button
+              className="btn btn-secondary"
+              onClick={cancelEditingParameterSet}
+              disabled={saving}
+            >
+              Annulla
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={handleUpdateParameterSet}
+              disabled={saving}
+            >
+              {saving ? "Salvando..." : "Salva Modifiche"}
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -169,6 +453,31 @@ const SortableItem: React.FC<SortableItemProps> = ({
 };
 
 const Settings: React.FC = () => {
+  // Funzione helper per disabilitare lo scroll del mouse sui campi numerici
+  const handleWheelPrevent = (e: React.WheelEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  // Funzione per disabilitare lo scroll quando il campo è attivo
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.addEventListener(
+      "wheel",
+      (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      },
+      { passive: false }
+    );
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.removeEventListener("wheel", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    });
+  };
+
   const [params, setParams] = useState<CalculationParams>({
     purchaseCurrency: "EUR",
     sellingCurrency: "EUR",
@@ -683,6 +992,9 @@ const Settings: React.FC = () => {
   };
 
   const startDuplicatingParameterSet = (set: any) => {
+    // Chiudi tutti gli altri form prima di aprire quello di duplicazione
+    setShowCreateForm(false);
+    setEditingParameterSet(null);
     setDuplicatingParameterSet(set);
     setDuplicateDescription(`${set.description} (Copia)`);
   };
@@ -752,6 +1064,9 @@ const Settings: React.FC = () => {
   };
 
   const startEditingParameterSet = (parameterSet: any) => {
+    // Chiudi tutti gli altri form prima di aprire quello di modifica
+    setShowCreateForm(false);
+    setDuplicatingParameterSet(null);
     setEditingParameterSet({ ...parameterSet });
   };
 
@@ -844,6 +1159,7 @@ const Settings: React.FC = () => {
             <input
               type="number"
               className="form-input"
+              onWheel={handleWheelPrevent}
               value={params.qualityControlPercent}
               onChange={(e) =>
                 setParams({
@@ -851,6 +1167,9 @@ const Settings: React.FC = () => {
                   qualityControlPercent: Number(e.target.value),
                 })
               }
+              onWheel={handleWheelPrevent}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
               min="0"
               max="100"
               step="0.1"
@@ -867,6 +1186,7 @@ const Settings: React.FC = () => {
             <input
               type="number"
               className="form-input"
+              onWheel={handleWheelPrevent}
               value={params.transportInsuranceCost}
               onChange={(e) =>
                 setParams({
@@ -874,6 +1194,9 @@ const Settings: React.FC = () => {
                   transportInsuranceCost: Number(e.target.value),
                 })
               }
+              onWheel={handleWheelPrevent}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
               min="0"
               step="0.01"
             />
@@ -887,6 +1210,7 @@ const Settings: React.FC = () => {
             <input
               type="number"
               className="form-input"
+              onWheel={handleWheelPrevent}
               value={params.duty}
               onChange={(e) =>
                 setParams({ ...params, duty: Number(e.target.value) })
@@ -903,6 +1227,7 @@ const Settings: React.FC = () => {
             <input
               type="number"
               className="form-input"
+              onWheel={handleWheelPrevent}
               value={params.exchangeRate}
               onChange={(e) =>
                 setParams({ ...params, exchangeRate: Number(e.target.value) })
@@ -920,6 +1245,7 @@ const Settings: React.FC = () => {
             <input
               type="number"
               className="form-input"
+              onWheel={handleWheelPrevent}
               value={params.italyAccessoryCosts}
               onChange={(e) =>
                 setParams({
@@ -940,6 +1266,7 @@ const Settings: React.FC = () => {
             <input
               type="number"
               className="form-input"
+              onWheel={handleWheelPrevent}
               value={params.tools}
               onChange={(e) =>
                 setParams({
@@ -960,6 +1287,7 @@ const Settings: React.FC = () => {
             <input
               type="number"
               className="form-input"
+              onWheel={handleWheelPrevent}
               value={params.companyMultiplier}
               onChange={(e) =>
                 setParams({
@@ -980,6 +1308,7 @@ const Settings: React.FC = () => {
             <input
               type="number"
               className="form-input"
+              onWheel={handleWheelPrevent}
               value={params.retailMultiplier}
               onChange={(e) =>
                 setParams({
@@ -1000,6 +1329,7 @@ const Settings: React.FC = () => {
             <input
               type="number"
               className="form-input"
+              onWheel={handleWheelPrevent}
               value={params.optimalMargin}
               onChange={(e) =>
                 setParams({
@@ -1023,6 +1353,9 @@ const Settings: React.FC = () => {
               className="btn btn-primary"
               onClick={() => {
                 if (!showCreateForm) {
+                  // Chiudi tutti gli altri form prima di aprire quello di creazione
+                  setEditingParameterSet(null);
+                  setDuplicatingParameterSet(null);
                   resetCreateForm();
                 }
                 setShowCreateForm(!showCreateForm);
@@ -1065,6 +1398,13 @@ const Settings: React.FC = () => {
                           handleSetDefaultParameterSet={
                             handleSetDefaultParameterSet
                           }
+                          editingParameterSet={editingParameterSet}
+                          setEditingParameterSet={setEditingParameterSet}
+                          handleUpdateParameterSet={handleUpdateParameterSet}
+                          cancelEditingParameterSet={cancelEditingParameterSet}
+                          handleWheelPrevent={handleWheelPrevent}
+                          handleFocus={handleFocus}
+                          handleBlur={handleBlur}
                         />
                       ))}
                     </div>
@@ -1352,8 +1692,8 @@ const Settings: React.FC = () => {
               </div>
             )}
 
-            {/* Form per Modificare Set Esistente */}
-            {editingParameterSet && (
+            {/* Form di modifica rimosso - ora è posizionato sotto ogni card */}
+            {false && (
               <div className="edit-parameter-set-form">
                 <h4>
                   Modifica Set di Parametri: {editingParameterSet.description}

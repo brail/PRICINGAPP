@@ -765,8 +765,25 @@ const Calculator: React.FC = () => {
                 className={`form-input ${purchasePriceLocked ? "locked" : ""}`}
                 value={purchasePrice}
                 onChange={(e) => handlePurchasePriceChange(e.target.value)}
-                onBlur={handlePurchasePriceBlur}
                 onKeyDown={handlePurchasePriceKeyDown}
+                onWheel={(e) => e.preventDefault()}
+                onFocus={(e) => {
+                  e.target.addEventListener(
+                    "wheel",
+                    (event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                    },
+                    { passive: false }
+                  );
+                }}
+                onBlur={(e) => {
+                  handlePurchasePriceBlur();
+                  e.target.removeEventListener("wheel", (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                  });
+                }}
                 placeholder="0.00"
                 step="0.10"
                 min="0"
@@ -796,8 +813,25 @@ const Calculator: React.FC = () => {
                 className={`form-input ${retailPriceLocked ? "locked" : ""}`}
                 value={retailPrice}
                 onChange={(e) => handleRetailPriceChange(e.target.value)}
-                onBlur={handleRetailPriceBlur}
                 onKeyDown={handleRetailPriceKeyDown}
+                onWheel={(e) => e.preventDefault()}
+                onFocus={(e) => {
+                  e.target.addEventListener(
+                    "wheel",
+                    (event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                    },
+                    { passive: false }
+                  );
+                }}
+                onBlur={(e) => {
+                  handleRetailPriceBlur();
+                  e.target.removeEventListener("wheel", (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                  });
+                }}
                 placeholder="0.00"
                 step="5.00"
                 min="0"
