@@ -364,11 +364,12 @@ const Calculator: React.FC = () => {
     }
 
     // Per tutti gli altri casi, arrotonda al 4.9 o 9.9 più vicino
-    if (unitsDigit <= 5) {
-      // Se la cifra delle unità è 0-5, arrotonda al 4.9 più vicino
+    // basandosi sulla cifra delle unità
+    if (unitsDigit <= 4) {
+      // Se la cifra delle unità è 0-4, arrotonda al 4.9 più vicino
       return integerPart + 0.49;
     } else {
-      // Se la cifra delle unità è 6-9, arrotonda al 9.9 più vicino
+      // Se la cifra delle unità è 5-9, arrotonda al 9.9 più vicino
       return integerPart + 0.99;
     }
   };
@@ -397,12 +398,18 @@ const Calculator: React.FC = () => {
     if (retailPriceLocked) return;
 
     const currentValue = parseFloat(retailPrice) || 0;
+    
+    // Prima arrotonda al 4.9 o 9.9 più vicino
+    const roundedCurrentValue = roundToNearestRetailStep(currentValue);
+    
+    // Poi aggiungi o sottrai 5.0
     const step = direction === "up" ? 5.0 : -5.0;
-    const newValue = currentValue + step;
-
-    // Arrotonda al 4.9 o 9.9 più vicino
-    const roundedValue = roundToNearestRetailStep(newValue);
-    setRetailPrice(roundedValue.toFixed(2));
+    const newValue = roundedCurrentValue + step;
+    
+    // Arrotonda nuovamente al 4.9 o 9.9 più vicino
+    const finalValue = roundToNearestRetailStep(newValue);
+    
+    setRetailPrice(finalValue.toFixed(2));
     setMode("selling");
 
     // Se il purchase price è bloccato, calcola automaticamente il margine
