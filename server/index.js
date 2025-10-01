@@ -106,7 +106,8 @@ function calculateCompanyMultiplier(optimalMargin) {
   if (optimalMargin <= 0 || optimalMargin >= 100) {
     return 1; // Valore di fallback per margini non validi
   }
-  return 1 / (1 - optimalMargin / 100);
+  const multiplier = 1 / (1 - optimalMargin / 100);
+  return Math.round(multiplier * 100) / 100; // Tronca a 2 cifre decimali
 }
 
 // Funzione per arrotondare il prezzo retail finale
@@ -296,7 +297,7 @@ async function calculatePurchasePrice(retailPrice, params = currentParams) {
   const purchasePriceBeforeTools =
     priceWithoutTransport / (1 + qualityControlPercent / 100);
   const qualityControlCost = priceWithoutTransport - purchasePriceBeforeTools;
-  
+
   // 8. Rimuovi tools (ultimo passaggio dopo quality control)
   const purchasePriceRaw = purchasePriceBeforeTools - tools;
   const purchasePrice = roundPurchasePrice(purchasePriceRaw);
