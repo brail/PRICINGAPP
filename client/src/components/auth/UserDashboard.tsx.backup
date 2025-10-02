@@ -54,6 +54,7 @@ const UserDashboard: React.FC = () => {
       email: user?.email || "",
     });
     setEditDialogOpen(true);
+    setError(null);
   };
 
   const handleSaveProfile = async () => {
@@ -63,9 +64,7 @@ const UserDashboard: React.FC = () => {
       await updateUser(editForm);
       setEditDialogOpen(false);
     } catch (err: any) {
-      setError(
-        err.response?.data?.error || "Errore nell'aggiornamento del profilo"
-      );
+      setError(err.message || "Errore nell'aggiornamento del profilo");
     } finally {
       setSaving(false);
     }
@@ -129,117 +128,136 @@ const UserDashboard: React.FC = () => {
         <div className="dashboard-grid">
           {/* Card Profilo */}
           <GridBox>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                  <Avatar sx={{ bgcolor: "primary.main", mr: 2 }}>
-                    {getRoleIcon(user.role)}
-                  </Avatar>
-                  <Box>
-                    <Typography variant="h6">{user.username}</Typography>
-                    <Chip
-                      icon={getRoleIcon(user.role)}
-                      label={user.role.toUpperCase()}
-                      color={getRoleColor(user.role)}
-                      size="small"
-                    />
-                  </Box>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <Avatar sx={{ bgcolor: "primary.main", mr: 2 }}>
+                  {getRoleIcon(user.role)}
+                </Avatar>
+                <Box>
+                  <Typography variant="h6">{user.username}</Typography>
+                  <Chip
+                    icon={getRoleIcon(user.role)}
+                    label={user.role.toUpperCase()}
+                    color={getRoleColor(user.role)}
+                    size="small"
+                  />
                 </Box>
+              </Box>
 
-                <Divider sx={{ my: 2 }} />
+              <Divider sx={{ my: 2 }} />
 
-                <Box sx={{ mb: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Email
-                  </Typography>
-                  <Typography variant="body1">{user.email}</Typography>
-                </Box>
+              <Box sx={{ mb: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Email
+                </Typography>
+                <Typography variant="body1">{user.email}</Typography>
+              </Box>
 
-                <Box sx={{ mb: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Membro dal
-                  </Typography>
-                  <Typography variant="body1">
-                    {formatDate(user.created_at)}
-                  </Typography>
-                </Box>
+              <Box sx={{ mb: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Membro dal
+                </Typography>
+                <Typography variant="body1">
+                  {formatDate(user.created_at)}
+                </Typography>
+              </Box>
 
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Ultimo accesso
-                  </Typography>
-                  <Typography variant="body1">
-                    {formatDate(user.last_login)}
-                  </Typography>
-                </Box>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Ultimo accesso
+                </Typography>
+                <Typography variant="body1">
+                  {formatDate(user.last_login)}
+                </Typography>
+              </Box>
 
-                <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-                  <Button
-                    variant="outlined"
-                    startIcon={<Edit />}
-                    onClick={handleEditProfile}
-                    disabled={isLoading}
-                  >
-                    Modifica Profilo
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={<Lock />}
-                    onClick={() => setChangePasswordDialogOpen(true)}
-                    disabled={isLoading}
-                    color="secondary"
-                  >
-                    Cambia Password
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
-          </GridBox>
+              <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<Edit />}
+                  onClick={handleEditProfile}
+                  disabled={isLoading}
+                >
+                  Modifica Profilo
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<Lock />}
+                  onClick={() => setChangePasswordDialogOpen(true)}
+                  disabled={isLoading}
+                  color="secondary"
+                >
+                  Cambia Password
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
+        </GridBox>
 
-          {/* Card Statistiche */}
-          <GridBox>
+        {/* Card Statistiche */}
+        <GridBox>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Statistiche Account
+              </Typography>
+
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Ruolo
+                </Typography>
+                <Chip
+                  icon={getRoleIcon(user.role)}
+                  label={
+                    user.role === "admin"
+                      ? "Amministratore"
+                      : user.role === "user"
+                      ? "Utente"
+                      : "Ospite"
+                  }
+                  color={getRoleColor(user.role)}
+                />
+              </Box>
+
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Permessi
+                </Typography>
+                <Typography variant="body1">
+                  {user.role === "admin"
+                    ? "Accesso completo"
+                    : user.role === "user"
+                    ? "Accesso standard"
+                    : "Accesso limitato"}
+                </Typography>
+              </Box>
+
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Versione App
+                </Typography>
+                <Typography variant="body1">v0.2.0-dev</Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </GridBox>
+
+        {/* Card Preferenze */}
+        {user.preferences && Object.keys(user.preferences).length > 0 && (
+          <GridBox sx={{ gridColumn: "1 / -1" }}>
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
-                  Statistiche Account
+                  Preferenze
                 </Typography>
-                <Box sx={{ mb: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Ruolo
-                  </Typography>
-                  <Typography variant="body1">{user.role}</Typography>
-                </Box>
-                <Box sx={{ mb: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Stato
-                  </Typography>
-                  <Typography variant="body1">Attivo</Typography>
-                </Box>
-                <Box sx={{ mb: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Versione App
-                  </Typography>
-                  <Typography variant="body1">v0.2.0-dev</Typography>
-                </Box>
+                <Typography variant="body2" color="text.secondary">
+                  {JSON.stringify(user.preferences, null, 2)}
+                </Typography>
               </CardContent>
             </Card>
           </GridBox>
-
-          {/* Card Preferenze */}
-          {user.preferences && Object.keys(user.preferences).length > 0 && (
-            <GridBox sx={{ gridColumn: "1 / -1" }}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Preferenze
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {JSON.stringify(user.preferences, null, 2)}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </GridBox>
-          )}
+        )}
         </div>
       </div>
 
@@ -253,6 +271,12 @@ const UserDashboard: React.FC = () => {
         <DialogTitle>Modifica Profilo</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2 }}>
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+
             <TextField
               fullWidth
               label="Username"
@@ -262,6 +286,7 @@ const UserDashboard: React.FC = () => {
               }
               sx={{ mb: 2 }}
             />
+
             <TextField
               fullWidth
               label="Email"
@@ -301,6 +326,7 @@ const UserDashboard: React.FC = () => {
           // Opzionale: mostra messaggio di successo o aggiorna qualcosa
         }}
       />
+      </div>
     </div>
   );
 };

@@ -3,8 +3,14 @@
  * Componente principale per utenti autenticati
  */
 
-import React, { useState } from 'react';
-import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import {
+  Routes,
+  Route,
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import {
   AppBar,
   Toolbar,
@@ -15,21 +21,21 @@ import {
   MenuItem,
   IconButton,
   Avatar,
-  Divider
-} from '@mui/material';
+  Divider,
+} from "@mui/material";
 import {
   Calculate,
-  Settings,
+  Settings as SettingsIcon,
   Dashboard,
   People,
   Logout,
-  AccountCircle
-} from '@mui/icons-material';
-import { useAuth } from '../../contexts/AuthContext';
-import Calculator from '../Calculator';
-import Settings from '../Settings';
-import UserDashboard from './UserDashboard';
-import UserManagement from './UserManagement';
+  AccountCircle,
+} from "@mui/icons-material";
+import { useAuth } from "../../contexts/AuthContext";
+import Calculator from "../Calculator";
+import Settings from "../Settings";
+import UserDashboard from "./UserDashboard";
+import UserManagement from "./UserManagement";
 
 const AuthenticatedApp: React.FC = () => {
   const { user, logout } = useAuth();
@@ -47,30 +53,38 @@ const AuthenticatedApp: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
     handleMenuClose();
   };
 
   const handleProfile = () => {
-    navigate('/dashboard');
+    navigate("/dashboard");
     handleMenuClose();
   };
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'admin': return <People />;
-      case 'user': return <AccountCircle />;
-      case 'guest': return <AccountCircle />;
-      default: return <AccountCircle />;
+      case "admin":
+        return <People />;
+      case "user":
+        return <AccountCircle />;
+      case "guest":
+        return <AccountCircle />;
+      default:
+        return <AccountCircle />;
     }
   };
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return 'error';
-      case 'user': return 'primary';
-      case 'guest': return 'default';
-      default: return 'default';
+      case "admin":
+        return "error";
+      case "user":
+        return "primary";
+      case "guest":
+        return "default";
+      default:
+        return "default";
     }
   };
 
@@ -81,8 +95,8 @@ const AuthenticatedApp: React.FC = () => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Pricing Calculator v0.2
           </Typography>
-          
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Button
               color="inherit"
               component={Link}
@@ -92,17 +106,17 @@ const AuthenticatedApp: React.FC = () => {
             >
               Calcolatrice
             </Button>
-            
+
             <Button
               color="inherit"
               component={Link}
               to="/settings"
-              startIcon={<Settings />}
+              startIcon={<SettingsIcon />}
               className={location.pathname === "/settings" ? "active" : ""}
             >
               Impostazioni
             </Button>
-            
+
             <Button
               color="inherit"
               component={Link}
@@ -112,8 +126,8 @@ const AuthenticatedApp: React.FC = () => {
             >
               Dashboard
             </Button>
-            
-            {user?.role === 'admin' && (
+
+            {user?.role === "admin" && (
               <Button
                 color="inherit"
                 component={Link}
@@ -124,14 +138,10 @@ const AuthenticatedApp: React.FC = () => {
                 Utenti
               </Button>
             )}
-            
-            <IconButton
-              color="inherit"
-              onClick={handleMenuOpen}
-              sx={{ ml: 1 }}
-            >
-              <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
-                {getRoleIcon(user?.role || 'user')}
+
+            <IconButton color="inherit" onClick={handleMenuOpen} sx={{ ml: 1 }}>
+              <Avatar sx={{ width: 32, height: 32, bgcolor: "secondary.main" }}>
+                {getRoleIcon(user?.role || "user")}
               </Avatar>
             </IconButton>
           </Box>
@@ -143,12 +153,12 @@ const AuthenticatedApp: React.FC = () => {
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
         anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
+          vertical: "bottom",
+          horizontal: "right",
         }}
         transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
+          vertical: "top",
+          horizontal: "right",
         }}
       >
         <MenuItem disabled>
@@ -161,14 +171,14 @@ const AuthenticatedApp: React.FC = () => {
             </Typography>
           </Box>
         </MenuItem>
-        
+
         <Divider />
-        
+
         <MenuItem onClick={handleProfile}>
           <AccountCircle sx={{ mr: 1 }} />
           Profilo
         </MenuItem>
-        
+
         <MenuItem onClick={handleLogout}>
           <Logout sx={{ mr: 1 }} />
           Logout
@@ -180,7 +190,7 @@ const AuthenticatedApp: React.FC = () => {
           <Route path="/" element={<Calculator />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/dashboard" element={<UserDashboard />} />
-          {user?.role === 'admin' && (
+          {user?.role === "admin" && (
             <Route path="/users" element={<UserManagement />} />
           )}
         </Routes>

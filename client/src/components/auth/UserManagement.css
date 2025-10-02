@@ -1,0 +1,114 @@
+/* Gestione Utenti - Stile consistente con Calculator e Settings */
+
+.user-management {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.user-management-header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.user-management-header h2 {
+  color: #333;
+  margin-bottom: 8px;
+  font-size: 28px;
+}
+
+.user-management-header .text-muted {
+  color: #6c757d;
+  margin: 0 0 10px 0;
+}
+
+.user-management-content {
+  width: 100%;
+  padding: 20px;
+}
+
+.user-management-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.user-management-actions .MuiButton-root {
+  margin-left: 10px;
+}
+
+.user-management-actions .MuiButton-root:first-child {
+  margin-left: 0;
+}
+
+/* Tabella utenti */
+.user-management .MuiTableContainer-root {
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-management .MuiTableHead-root {
+  background-color: #f5f5f5;
+}
+
+.user-management .MuiTableHead-root .MuiTableCell-root {
+  font-weight: 600;
+  color: #333;
+}
+
+.user-management .MuiTableBody-root .MuiTableRow-root:hover {
+  background-color: #f9f9f9;
+}
+
+/* Azioni utente */
+.user-management .MuiIconButton-root {
+  margin: 0 2px;
+}
+
+/* Messaggi di errore e successo */
+.user-management .MuiAlert-root {
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .user-management-content {
+    padding: 15px;
+  }
+
+  .user-management-header h2 {
+    font-size: 24px;
+  }
+
+  .user-management-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .user-management-actions .MuiButton-root {
+    margin: 5px 0;
+    width: 100%;
+  }
+
+  .user-management .MuiTableContainer-root {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-management-content {
+    padding: 10px;
+  }
+
+  .user-management-header h2 {
+    font-size: 20px;
+  }
+
+  .user-management-actions {
+    gap: 5px;
+  }
+}
