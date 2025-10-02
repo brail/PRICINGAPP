@@ -1,7 +1,21 @@
+/**
+ * ===========================================
+ * PRICING CALCULATOR v0.1 - Server
+ * ===========================================
+ *
+ * Express.js server per l'applicazione Pricing Calculator
+ * Gestisce API per calcoli prezzi, parametri e set di configurazione
+ *
+ * @version 0.1.0
+ * @author Pricing Calculator Team
+ * @since 2024
+ */
+
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 // Importa il modulo database
 const {
@@ -17,12 +31,31 @@ const {
   updateParameterSetsOrder,
 } = require("./database");
 
+// ===========================================
+// CONFIGURAZIONE SERVER
+// ===========================================
+
 const app = express();
 const PORT = process.env.PORT || 5001;
+const HOST = process.env.HOST || "0.0.0.0";
+const NODE_ENV = process.env.NODE_ENV || "development";
+
+// Configurazione CORS dinamica
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",")
+  : ["http://localhost:3000", "http://127.0.0.1:3000"];
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
 
 // Configurazione parametri attuali (caricati dal database)
 let currentParams = {
@@ -63,7 +96,7 @@ const loadParametersFromDatabase = async () => {
         retailMultiplier: defaultSet.retail_multiplier,
         optimalMargin: defaultSet.optimal_margin,
       };
-      console.log("Parametri caricati dal database:", currentParams);
+      // Parametri caricati dal database
     }
   } catch (error) {
     console.error("Errore nel caricamento dei parametri dal database:", error);
@@ -234,9 +267,7 @@ async function calculateSellingPrice(purchasePrice, params = currentParams) {
 
   // 7. Moltiplicatore retail
   const retailPriceRaw = wholesalePrice * retailMultiplier;
-  console.log("Retail price raw:", retailPriceRaw);
   const retailPrice = roundRetailPrice(retailPriceRaw);
-  console.log("Retail price rounded:", retailPrice);
 
   // 8. Calcola il margine reale
   const companyMargin = (wholesalePrice - landedCost) / wholesalePrice;
@@ -639,31 +670,59 @@ app.get("/api/test-connection", (req, res) => {
   });
 });
 
-// Inizializza il database e avvia il server
+// ===========================================
+// INIZIALIZZAZIONE E AVVIO SERVER
+// ===========================================
+
+/**
+ * Inizializza il database e avvia il server
+ * @async
+ * @function startServer
+ */
 const startServer = async () => {
   try {
+    console.log("🚀 Avvio Pricing Calculator v0.1...");
+    console.log(`📊 Ambiente: ${NODE_ENV}`);
+    console.log(`🌐 Host: ${HOST}`);
+    console.log(`🔌 Porta: ${PORT}`);
+    console.log(`🔗 Origini consentite: ${allowedOrigins.join(", ")}`);
+
     // Inizializza il database
     await initDatabase();
-    console.log("Database inizializzato con successo");
+    console.log("✅ Database inizializzato con successo");
 
     // Seeding del database
     await seedDatabase();
-    console.log("Seeding del database completato");
+    console.log("✅ Seeding del database completato");
 
     // Carica i parametri dal database
     await loadParametersFromDatabase();
-    console.log("Parametri caricati dal database");
+    console.log("✅ Parametri caricati dal database");
 
-    // Avvia il server su tutte le interfacce di rete
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`Server in esecuzione sulla porta ${PORT}`);
-      console.log(`Accessibile da rete interna su: http://[IP_LOCALE]:${PORT}`);
+    // Avvia il server
+    app.listen(PORT, HOST, () => {
+      console.log("🎉 Server avviato con successo!");
+      console.log(`📍 URL locale: http://localhost:${PORT}`);
+      console.log(`🌍 URL rete: http://[IP_LOCALE]:${PORT}`);
+      console.log(`🔍 Health check: http://localhost:${PORT}/api/health`);
+      console.log("📝 Logs disponibili in console");
     });
   } catch (error) {
-    console.error("Errore nell'inizializzazione del server:", error);
+    console.error("❌ Errore nell'inizializzazione del server:", error);
     process.exit(1);
   }
 };
+
+// Gestione graceful shutdown
+process.on("SIGTERM", () => {
+  console.log("🛑 Ricevuto SIGTERM, chiusura graceful del server...");
+  process.exit(0);
+});
+
+process.on("SIGINT", () => {
+  console.log("🛑 Ricevuto SIGINT, chiusura graceful del server...");
+  process.exit(0);
+});
 
 // Avvia il server
 startServer();

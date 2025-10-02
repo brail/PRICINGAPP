@@ -42,7 +42,7 @@ const Calculator: React.FC = () => {
     number | null
   >(null);
   const [loadingParameterSets, setLoadingParameterSets] = useState(false);
-  const [currentParamsMatchSet, setCurrentParamsMatchSet] = useState(false);
+  // Stato per mostrare i dettagli dei parametri
   const [showParameterDetails, setShowParameterDetails] = useState(false);
 
   // Funzione per caricare i set di parametri
@@ -75,10 +75,8 @@ const Calculator: React.FC = () => {
 
           if (matchingSet) {
             setSelectedParameterSetId(matchingSet.id);
-            setCurrentParamsMatchSet(true);
           } else {
             setSelectedParameterSetId(null);
-            setCurrentParamsMatchSet(false);
           }
         } catch (err) {
           console.error("Errore nel confronto dei parametri:", err);
@@ -117,12 +115,12 @@ const Calculator: React.FC = () => {
       });
 
       if (matchingSet) {
-        setCurrentParamsMatchSet(true);
+        // Parametri caricati da set salvato
         if (matchingSet.id !== selectedParameterSetId) {
           setSelectedParameterSetId(matchingSet.id);
         }
       } else {
-        setCurrentParamsMatchSet(false);
+        // Parametri personalizzati
         setSelectedParameterSetId(null);
       }
     }
@@ -154,9 +152,9 @@ const Calculator: React.FC = () => {
 
         if (matchingSet) {
           setSelectedParameterSetId(matchingSet.id);
-          setCurrentParamsMatchSet(true);
+          // Parametri caricati da set salvato
         } else {
-          setCurrentParamsMatchSet(false);
+          // Parametri personalizzati
         }
       }
     } catch (err) {
@@ -200,7 +198,7 @@ const Calculator: React.FC = () => {
 
         setParams(defaultParams);
         setSelectedParameterSetId(defaultSet.id);
-        setCurrentParamsMatchSet(true);
+        // Parametri caricati da set salvato
         console.log("Parametri di default caricati:", defaultParams);
       }
     } catch (err) {
@@ -435,12 +433,6 @@ const Calculator: React.FC = () => {
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleCalculate();
-    }
-  };
-
   // Gestore specifico per le freccette del purchase price
   const handlePurchasePriceKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -619,13 +611,7 @@ const Calculator: React.FC = () => {
             onChange={(e) => handleParameterSetChange(Number(e.target.value))}
             disabled={loadingParameterSets}
           >
-            {/*
-            <option value="">
-              {currentParamsMatchSet
-                ? "Seleziona un set di parametri..."
-                : "Parametri personalizzati (non salvati)"}
-            </option>
-            */}
+            <option value="">Seleziona un set di parametri...</option>
             {parameterSets.map((set) => (
               <option key={set.id} value={set.id}>
                 {set.description}

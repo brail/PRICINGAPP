@@ -1,6 +1,6 @@
 {
-  "name": "pricing-app-client",
-  "version": "1.0.0",
+  "name": "pricing-calculator-client",
+  "version": "0.1.0",
   "private": true,
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -19,7 +19,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "start:network": "HOST=0.0.0.0 REACT_APP_API_URL=http://192.168.1.71:5001 react-scripts start",
+    "start:network": "HOST=0.0.0.0 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

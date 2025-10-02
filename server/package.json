@@ -1,6 +1,6 @@
 {
-  "name": "pricing-app-server",
-  "version": "1.0.0",
+  "name": "pricing-calculator-server",
+  "version": "0.1.0",
   "description": "Backend per applicazione calcolo prezzi",
   "main": "index.js",
   "scripts": {

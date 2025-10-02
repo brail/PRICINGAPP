@@ -17,7 +17,7 @@ import {
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { pricingApi } from "../services/api";
-import { CalculationParams, CURRENCIES, ExchangeRates } from "../types";
+import { CalculationParams, CURRENCIES } from "../types";
 import "./Settings.css";
 
 // Componente per gli elementi sortabili
@@ -478,21 +478,21 @@ const Settings: React.FC = () => {
     });
   };
 
-  const [params, setParams] = useState<CalculationParams>({
-    purchaseCurrency: "EUR",
-    sellingCurrency: "EUR",
-    qualityControlPercent: 5,
-    transportInsuranceCost: 0,
-    duty: 0,
-    exchangeRate: 1,
-    italyAccessoryCosts: 0,
-    tools: 0,
-    companyMultiplier: 1.33, // Calcolato dinamicamente da optimalMargin
-    retailMultiplier: 2.0,
-    optimalMargin: 25,
-  });
+  // const [params, setParams] = useState<CalculationParams>({
+  //   purchaseCurrency: "EUR",
+  //   sellingCurrency: "EUR",
+  //   qualityControlPercent: 5,
+  //   transportInsuranceCost: 0,
+  //   duty: 0,
+  //   exchangeRate: 1,
+  //   italyAccessoryCosts: 0,
+  //   tools: 0,
+  //   companyMultiplier: 1.33, // Calcolato dinamicamente da optimalMargin
+  //   retailMultiplier: 2.0,
+  //   optimalMargin: 25,
+  // });
 
-  const [exchangeRates, setExchangeRates] = useState<ExchangeRates>({});
+  // const [exchangeRates, setExchangeRates] = useState<ExchangeRates>({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string>("");
@@ -541,7 +541,7 @@ const Settings: React.FC = () => {
 
   useEffect(() => {
     loadSettings();
-    loadExchangeRates();
+    // loadExchangeRates();
     loadParameterSets();
   }, []);
 
@@ -557,59 +557,59 @@ const Settings: React.FC = () => {
     }
   };
 
-  const loadExchangeRates = async () => {
-    try {
-      const rates = await pricingApi.getExchangeRates();
-      setExchangeRates(rates);
-    } catch (err) {
-      console.error("Errore nel caricamento dei tassi di cambio:", err);
-    }
-  };
+  // const loadExchangeRates = async () => {
+  //   try {
+  //     const rates = await pricingApi.getExchangeRates();
+  //     setExchangeRates(rates);
+  //   } catch (err) {
+  //     console.error("Errore nel caricamento dei tassi di cambio:", err);
+  //   }
+  // };
 
-  const handleSave = async () => {
-    try {
-      setSaving(true);
-      setError("");
-      setSuccess("");
+  // const handleSave = async () => {
+  //   try {
+  //     setSaving(true);
+  //     setError("");
+  //     setSuccess("");
 
-      await pricingApi.updateParams(params);
-      setSuccess("Impostazioni salvate con successo!");
+  //     await pricingApi.updateParams(params);
+  //     setSuccess("Impostazioni salvate con successo!");
 
-      // Pulisci il messaggio di successo dopo 3 secondi
-      setTimeout(() => setSuccess(""), 3000);
-    } catch (err) {
-      setError("Errore nel salvataggio delle impostazioni");
-    } finally {
-      setSaving(false);
-    }
-  };
+  //     // Pulisci il messaggio di successo dopo 3 secondi
+  //     setTimeout(() => setSuccess(""), 3000);
+  //   } catch (err) {
+  //     setError("Errore nel salvataggio delle impostazioni");
+  //   } finally {
+  //     setSaving(false);
+  //   }
+  // };
 
-  const handleReset = () => {
-    setParams({
-      purchaseCurrency: "EUR",
-      sellingCurrency: "EUR",
-      qualityControlPercent: 5,
-      transportInsuranceCost: 0,
-      duty: 0,
-      exchangeRate: 1,
-      italyAccessoryCosts: 0,
-      tools: 0,
-      companyMultiplier: 1.5,
-      retailMultiplier: 2.0,
-      optimalMargin: 25,
-    });
-    setError("");
-    setSuccess("");
-  };
+  // const handleReset = () => {
+  //   setParams({
+  //     purchaseCurrency: "EUR",
+  //     sellingCurrency: "EUR",
+  //     qualityControlPercent: 5,
+  //     transportInsuranceCost: 0,
+  //     duty: 0,
+  //     exchangeRate: 1,
+  //     italyAccessoryCosts: 0,
+  //     tools: 0,
+  //     companyMultiplier: 1.5,
+  //     retailMultiplier: 2.0,
+  //     optimalMargin: 25,
+  //   });
+  //   setError("");
+  //   setSuccess("");
+  // };
 
-  const formatExchangeRate = (rate: number): string => {
-    return rate.toFixed(4);
-  };
+  // const formatExchangeRate = (rate: number): string => {
+  //   return rate.toFixed(4);
+  // };
 
-  const getCurrencyName = (code: string): string => {
-    const currency = CURRENCIES.find((c) => c.code === code);
-    return currency ? currency.name : code;
-  };
+  // const getCurrencyName = (code: string): string => {
+  //   const currency = CURRENCIES.find((c) => c.code === code);
+  //   return currency ? currency.name : code;
+  // };
 
   // Funzioni per la gestione dei set di parametri
   const loadParameterSets = async () => {
@@ -1962,7 +1962,7 @@ const Settings: React.FC = () => {
 
           <button
             className="btn btn-outline mt-4"
-            onClick={loadExchangeRates}
+            // onClick={loadExchangeRates}
             disabled={loading}
           >
             {loading ? <span className="loading"></span> : "Aggiorna Tassi"}

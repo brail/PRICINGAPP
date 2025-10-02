@@ -1,0 +1,16 @@
+# ===========================================
+# PRICING CALCULATOR v0.1 - Frontend .dockerignore
+# ===========================================
+
+node_modules
+npm-debug.log
+.env
+.env.local
+.env.network
+*.log
+.git
+.gitignore
+README.md
+Dockerfile
+.dockerignore
+build

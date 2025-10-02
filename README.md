@@ -1,143 +1,245 @@
-# Pricing Calculator
+# Pricing Calculator v0.1
 
-Un'applicazione web completa per il calcolo dei prezzi con funzionalità bidirezionali e supporto multivaluta.
+<div align="center">
+  <h3>🚀 Calcolatrice Prezzi Avanzata</h3>
+  <p>Applicazione web completa per il calcolo dei prezzi con funzionalità bidirezionali e supporto multivaluta</p>
+  
+  ![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
+  ![Node](https://img.shields.io/badge/node-%3E%3D16.0.0-green.svg)
+  ![React](https://img.shields.io/badge/react-18.0.0-blue.svg)
+  ![License](https://img.shields.io/badge/license-MIT-green.svg)
+</div>
 
-## Funzionalità
+---
 
-- **Calcolo bidirezionale**: Calcola il prezzo di vendita dal prezzo di acquisto e viceversa
-- **Gestione margine**: Modifica il margine e aggiorna automaticamente i calcoli
-- **Supporto multivaluta**: Calcoli in diverse valute con tassi di cambio aggiornati
-- **Interfaccia responsive**: Design minimale e ottimizzato per tutti i dispositivi
-- **Pagina impostazioni**: Configurazione parametri di calcolo (margine, IVA, spedizione)
+## ✨ Funzionalità
 
-## Struttura del Progetto
+- **🔄 Calcolo bidirezionale**: Calcola il prezzo di vendita dal prezzo di acquisto e viceversa
+- **📊 Gestione margine**: Modifica il margine e aggiorna automaticamente i calcoli
+- **🌍 Supporto multivaluta**: Calcoli in diverse valute con tassi di cambio aggiornati
+- **📱 Interfaccia responsive**: Design minimale e ottimizzato per tutti i dispositivi
+- **⚙️ Pagina impostazioni**: Configurazione parametri di calcolo (margine, IVA, spedizione)
+- **💾 Gestione set di parametri**: Salva e carica diverse configurazioni di calcolo
+- **🔧 Configurazione dinamica**: Supporto per variabili d'ambiente e deploy in produzione
+
+## 🏗️ Architettura
 
 ```
 PRICINGAPP/
 ├── server/                 # Backend Node.js/Express
 │   ├── index.js           # Server principale
-│   └── package.json       # Dipendenze backend
+│   ├── database.js        # Gestione database SQLite
+│   ├── package.json       # Dipendenze backend
+│   └── env.example        # Configurazione ambiente
 ├── client/                # Frontend React/TypeScript
 │   ├── src/
 │   │   ├── components/    # Componenti React
 │   │   ├── services/      # Servizi API
 │   │   ├── types/         # Tipi TypeScript
 │   │   └── ...
-│   └── package.json       # Dipendenze frontend
-└── package.json           # Script principali
+│   ├── package.json       # Dipendenze frontend
+│   └── env.example        # Configurazione ambiente
+├── docker/                # Configurazioni Docker
+├── package.json           # Script principali
+└── README.md             # Documentazione
 ```
 
-## Installazione
+## 🚀 Installazione e Avvio
 
-1. **Installa tutte le dipendenze**:
+### Prerequisiti
 
-   ```bash
-   npm run install-all
-   ```
+- Node.js >= 16.0.0
+- npm >= 8.0.0
 
-2. **Avvia l'applicazione in modalità sviluppo**:
+### 1. Clona il repository
 
-   ```bash
-   npm run dev
-   ```
+```bash
+git clone <repository-url>
+cd PRICINGAPP
+```
 
-   Questo comando avvierà:
+### 2. Installa le dipendenze
 
-   - Backend su `http://localhost:5000`
-   - Frontend su `http://localhost:3000`
+```bash
+npm run install-all
+```
 
-## Script Disponibili
+### 3. Configura l'ambiente
+
+```bash
+# Copia i file di configurazione
+cp server/env.example server/.env
+cp client/env.example client/.env
+
+# Modifica le configurazioni se necessario
+nano server/.env
+nano client/.env
+```
+
+### 4. Avvia l'applicazione
+
+#### Sviluppo locale
+
+```bash
+npm run dev
+```
+
+#### Sviluppo con accesso di rete
+
+```bash
+npm run dev:network
+```
+
+Questo comando avvierà:
+
+- **Backend** su `http://localhost:5001`
+- **Frontend** su `http://localhost:3000`
+
+## 🔧 Configurazione
+
+### Variabili d'Ambiente
+
+#### Server (.env)
+
+```env
+NODE_ENV=development
+PORT=5001
+HOST=0.0.0.0
+DATABASE_PATH=./pricing.db
+FRONTEND_URL=http://localhost:3000
+ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+```
+
+#### Client (.env)
+
+```env
+REACT_APP_API_URL=http://localhost:5001/api
+HOST=0.0.0.0
+```
+
+### Configurazione Produzione
+
+Per il deploy in produzione, modifica le variabili d'ambiente:
+
+```env
+NODE_ENV=production
+PORT=80
+FRONTEND_URL=https://yourdomain.com
+ALLOWED_ORIGINS=https://yourdomain.com
+REACT_APP_API_URL=https://yourdomain.com/api
+```
+
+## 📡 API Endpoints
+
+### Backend (Porta 5001)
+
+#### Parametri
+
+- `GET /api/params` - Ottieni parametri attuali
+- `PUT /api/params` - Aggiorna parametri
+
+#### Calcoli
+
+- `POST /api/calculate-selling` - Calcola prezzo di vendita
+- `POST /api/calculate-purchase` - Calcola prezzo di acquisto
+
+#### Set di Parametri
+
+- `GET /api/parameter-sets` - Lista set di parametri
+- `POST /api/parameter-sets` - Crea nuovo set
+- `PUT /api/parameter-sets/:id` - Aggiorna set
+- `DELETE /api/parameter-sets/:id` - Elimina set
+- `POST /api/parameter-sets/:id/set-default` - Imposta come default
+
+#### Utility
+
+- `GET /api/health` - Health check
+- `GET /api/exchange-rates` - Tassi di cambio
+
+## 🐳 Deploy con Docker
+
+### Build e avvio
+
+```bash
+# Build delle immagini
+docker-compose build
+
+# Avvio dei servizi
+docker-compose up -d
+
+# Visualizza logs
+docker-compose logs -f
+```
+
+### Configurazione Docker
+
+Il progetto include:
+
+- `Dockerfile` per backend e frontend
+- `docker-compose.yml` per orchestrazione
+- Configurazione nginx per reverse proxy
+
+## 🧪 Testing
+
+### Test API
+
+```bash
+# Health check
+curl http://localhost:5001/api/health
+
+# Test connessione
+curl http://localhost:5001/api/test-connection
+```
+
+### Test Frontend
+
+```bash
+# Avvia in modalità test
+npm run test
+```
+
+## 📊 Monitoraggio
+
+### Health Check
+
+- **Backend**: `GET /api/health`
+- **Frontend**: Accessibile su porta 3000
+
+### Logs
+
+I logs sono disponibili in console durante lo sviluppo e nei container Docker in produzione.
+
+## 🔄 Script Disponibili
 
 - `npm run dev` - Avvia backend e frontend in modalità sviluppo
+- `npm run dev:network` - Avvia con accesso di rete
 - `npm run server` - Avvia solo il backend
 - `npm run client` - Avvia solo il frontend
 - `npm run build` - Compila il frontend per la produzione
 - `npm run install-all` - Installa tutte le dipendenze
 
-## API Endpoints
-
-### Backend (Porta 5000)
-
-- `GET /api/params` - Ottieni parametri attuali
-- `PUT /api/params` - Aggiorna parametri
-- `POST /api/calculate-selling` - Calcola prezzo di vendita
-- `POST /api/calculate-purchase` - Calcola prezzo di acquisto
-- `GET /api/exchange-rates` - Ottieni tassi di cambio
-- `GET /api/health` - Health check
-
-## Come Usare l'Applicazione
-
-### Calcolatrice
-
-1. **Inserisci un prezzo di acquisto** per calcolare automaticamente il prezzo di vendita
-2. **Inserisci un prezzo di vendita** per calcolare il prezzo di acquisto necessario
-3. **Modifica il margine** per aggiornare i calcoli in tempo reale
-4. **Seleziona la valuta** per i calcoli
-
-### Impostazioni
-
-1. **Configura il margine di profitto** (percentuale)
-2. **Imposta l'aliquota IVA** (percentuale)
-3. **Definisci il costo di spedizione** (importo fisso)
-4. **Scegli la valuta predefinita**
-5. **Visualizza i tassi di cambio** aggiornati
-
-## Formula di Calcolo
-
-```
-Prezzo di Vendita = (Prezzo di Acquisto + Margine + Spedizione) × (1 + IVA/100)
-
-Dove:
-- Margine = Prezzo di Acquisto × (Margine%/100)
-- IVA = (Prezzo + Margine + Spedizione) × (IVA%/100)
-```
-
-## Tecnologie Utilizzate
-
-### Backend
-
-- **Node.js** - Runtime JavaScript
-- **Express.js** - Framework web
-- **Axios** - Client HTTP per tassi di cambio
-- **CORS** - Gestione CORS
-
-### Frontend
-
-- **React 18** - Libreria UI
-- **TypeScript** - Tipizzazione statica
-- **React Router** - Navigazione
-- **Axios** - Client HTTP
-
-### Styling
-
-- **CSS3** - Styling personalizzato
-- **Responsive Design** - Design adattivo
-- **CSS Grid/Flexbox** - Layout moderno
-
-## Supporto Valute
-
-- EUR (Euro)
-- USD (Dollaro USA)
-- GBP (Sterlina)
-- JPY (Yen Giapponese)
-- CHF (Franco Svizzero)
-- CAD (Dollaro Canadese)
-- AUD (Dollaro Australiano)
-
-I tassi di cambio vengono aggiornati automaticamente ogni ora tramite API esterne.
-
-## Sviluppo
-
-Per contribuire al progetto:
+## 🤝 Contribuire
 
 1. Fork del repository
-2. Crea un branch per la feature (`git checkout -b feature/nuova-feature`)
-3. Commit delle modifiche (`git commit -am 'Aggiunge nuova feature'`)
-4. Push del branch (`git push origin feature/nuova-feature`)
-5. Crea una Pull Request
+2. Crea un branch per la feature (`git checkout -b feature/AmazingFeature`)
+3. Commit delle modifiche (`git commit -m 'Add some AmazingFeature'`)
+4. Push al branch (`git push origin feature/AmazingFeature`)
+5. Apri una Pull Request
 
-## Licenza
+## 📄 Licenza
 
-MIT License - vedi file LICENSE per dettagli.
+Distribuito sotto licenza MIT. Vedi `LICENSE` per maggiori informazioni.
 
+## 📞 Supporto
 
+Per supporto e domande:
+
+- Apri una issue su GitHub
+- Contatta il team di sviluppo
+
+---
+
+<div align="center">
+  <p>Realizzato con ❤️ dal team Pricing Calculator</p>
+  <p>Versione 0.1.0 - 2024</p>
+</div>
