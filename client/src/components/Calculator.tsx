@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { pricingApi } from "../services/api";
 import {
   CalculationParams,
@@ -46,7 +46,7 @@ const Calculator: React.FC = () => {
   const [showParameterDetails, setShowParameterDetails] = useState(false);
 
   // Funzione per caricare i set di parametri
-  const loadParameterSets = useCallback(async () => {
+  const loadParameterSets = async () => {
     try {
       setLoadingParameterSets(true);
       const sets = await pricingApi.getParameterSets();
@@ -87,13 +87,13 @@ const Calculator: React.FC = () => {
     } finally {
       setLoadingParameterSets(false);
     }
-  }, [selectedParameterSetId]);
+  };
 
   // Carica parametri iniziali e set di parametri
   useEffect(() => {
     loadParams();
     loadParameterSets();
-  }, [loadParams, loadParameterSets]);
+  }, []);
 
   // Aggiorna la selezione del set quando i parametri cambiano
   useEffect(() => {
@@ -126,7 +126,7 @@ const Calculator: React.FC = () => {
     }
   }, [params, parameterSets, selectedParameterSetId]);
 
-  const loadParams = useCallback(async () => {
+  const loadParams = async () => {
     try {
       const currentParams = await pricingApi.getParams();
       setParams(currentParams);
@@ -171,7 +171,7 @@ const Calculator: React.FC = () => {
         );
       }
     }
-  }, [parameterSets]);
+  };
 
   const loadDefaultParameters = async () => {
     try {
@@ -751,7 +751,11 @@ const Calculator: React.FC = () => {
                 className={`form-input ${purchasePriceLocked ? "locked" : ""}`}
                 value={purchasePrice}
                 onChange={(e) => handlePurchasePriceChange(e.target.value)}
-                onKeyDown={handlePurchasePriceKeyDown}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleCalculate();
+                  }
+                }}
                 onWheel={(e) => e.preventDefault()}
                 onFocus={(e) => {
                   e.target.addEventListener(

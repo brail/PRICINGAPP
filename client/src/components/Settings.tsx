@@ -17,7 +17,7 @@ import {
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { pricingApi } from "../services/api";
-import { CalculationParams, CURRENCIES } from "../types";
+import { CURRENCIES } from "../types";
 import "./Settings.css";
 
 // Componente per gli elementi sortabili
@@ -549,7 +549,7 @@ const Settings: React.FC = () => {
     try {
       setLoading(true);
       const currentParams = await pricingApi.getParams();
-      setParams(currentParams);
+      // setParams(currentParams); // Commentato per v0.2 - gestito dal Calculator
     } catch (err) {
       setError("Errore nel caricamento delle impostazioni");
     } finally {
@@ -963,7 +963,7 @@ const Settings: React.FC = () => {
     try {
       setSaving(true);
       const result = await pricingApi.loadParameterSet(id);
-      setParams(result.params);
+      // setParams(result.params); // Commentato per v0.2 - gestito dal Calculator
       setSuccess("Set di parametri caricato con successo");
     } catch (err: any) {
       setError(

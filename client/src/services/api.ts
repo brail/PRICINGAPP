@@ -1,12 +1,12 @@
 /**
  * ===========================================
- * PRICING CALCULATOR v0.1 - API Service
+ * PRICING CALCULATOR v0.2 - API Service
  * ===========================================
  *
  * Servizio per le chiamate API al backend
- * Gestisce configurazione dinamica degli endpoint
+ * Gestisce configurazione dinamica degli endpoint e autenticazione
  *
- * @version 0.1.0
+ * @version 0.2.0-dev
  * @author Pricing Calculator Team
  * @since 2024
  */
@@ -33,10 +33,52 @@ const api = axios.create({
   timeout: 10000,
 });
 
-// Interceptor per gestire errori
+// Interceptor per aggiungere token di autenticazione
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Interceptor per gestire errori e refresh token
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+    
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (refreshToken) {
+          const response = await api.post('/api/auth/refresh', {
+            refreshToken
+          });
+          
+          const newToken = response.data.token;
+          localStorage.setItem('token', newToken);
+          
+          // Riprova la richiesta originale
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          return api(originalRequest);
+        }
+      } catch (refreshError) {
+        // Refresh fallito, logout
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
+    }
+    
     console.error("API Error:", error);
     return Promise.reject(error);
   }
@@ -145,6 +187,72 @@ export const pricingApi = {
     const response = await api.put("/api/parameter-sets/order", {
       parameterSets,
     });
+    return response.data;
+  },
+
+  // ===========================================
+  // API DI AUTENTICAZIONE
+  // ===========================================
+
+  // Login utente
+  login: async (username: string, password: string) => {
+    const response = await api.post("/api/auth/login", {
+      username,
+      password
+    });
+    return response.data;
+  },
+
+  // Registrazione utente
+  register: async (username: string, email: string, password: string, confirmPassword: string) => {
+    const response = await api.post("/api/auth/register", {
+      username,
+      email,
+      password,
+      confirmPassword
+    });
+    return response.data;
+  },
+
+  // Logout utente
+  logout: async () => {
+    const response = await api.post("/api/auth/logout");
+    return response.data;
+  },
+
+  // Ottieni informazioni utente corrente
+  getCurrentUser: async () => {
+    const response = await api.get("/api/auth/me");
+    return response.data;
+  },
+
+  // Aggiorna profilo utente
+  updateProfile: async (userData: any) => {
+    const response = await api.put("/api/auth/me", userData);
+    return response.data;
+  },
+
+  // Refresh token
+  refreshToken: async (refreshToken: string) => {
+    const response = await api.post("/api/auth/refresh", { refreshToken });
+    return response.data;
+  },
+
+  // Ottieni tutti gli utenti (solo admin)
+  getUsers: async () => {
+    const response = await api.get("/api/auth/users");
+    return response.data;
+  },
+
+  // Aggiorna utente (solo admin)
+  updateUser: async (userId: number, userData: any) => {
+    const response = await api.put(`/api/auth/users/${userId}`, userData);
+    return response.data;
+  },
+
+  // Elimina utente (solo admin)
+  deleteUser: async (userId: number) => {
+    const response = await api.delete(`/api/auth/users/${userId}`);
     return response.data;
   },
 };

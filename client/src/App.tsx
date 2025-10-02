@@ -1,60 +1,72 @@
-import React from "react";
+import React, { useState } from "react";
 import { Routes, Route, Link, useLocation } from "react-router-dom";
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { Box, Typography } from '@mui/material';
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Calculator from "./components/Calculator";
 import Settings from "./components/Settings";
+import LoginForm from "./components/auth/LoginForm";
+import RegisterForm from "./components/auth/RegisterForm";
+import UserDashboard from "./components/auth/UserDashboard";
+import UserManagement from "./components/auth/UserManagement";
+import AuthenticatedApp from "./components/auth/AuthenticatedApp";
 import "./App.css";
 
+// Tema Material-UI
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+});
+
+// Componente per la gestione dell'autenticazione
+const AppContent: React.FC = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+  const [showRegister, setShowRegister] = useState(false);
+
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+        }}
+      >
+        <Typography variant="h6" color="white">
+          Caricamento...
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return showRegister ? (
+      <RegisterForm onSwitchToLogin={() => setShowRegister(false)} />
+    ) : (
+      <LoginForm onSwitchToRegister={() => setShowRegister(true)} />
+    );
+  }
+
+  return <AuthenticatedApp />;
+};
+
 function App() {
-  const location = useLocation();
-
   return (
-    <div className="App">
-      <nav className="navbar">
-        <div className="container">
-          <div className="nav-content">
-            <Link to="/" className="nav-title-link">
-              <h1 className="nav-title">Pricing Calculator</h1>
-            </Link>
-            <div className="nav-links">
-              <Link
-                to="/"
-                className={`nav-link ${
-                  location.pathname === "/" ? "active" : ""
-                }`}
-              >
-                Calcolatrice
-              </Link>
-              <Link
-                to="/settings"
-                className={`nav-link ${
-                  location.pathname === "/settings" ? "active" : ""
-                }`}
-              >
-                Impostazioni
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <main className="main-content">
-        <div className="container">
-          <Routes>
-            <Route path="/" element={<Calculator />} />
-            <Route path="/settings" element={<Settings />} />
-          </Routes>
-        </div>
-      </main>
-
-      <footer className="footer">
-        <div className="container">
-          <p className="text-center text-muted">
-            © 2025 LB Pricing Calculator - Calcolatrice prezzi con supporto
-            multivaluta
-          </p>
-        </div>
-      </footer>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
