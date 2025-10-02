@@ -17,6 +17,12 @@ RUN npm ci
 # Copia il codice sorgente
 COPY . .
 
+# Argomenti di build per le variabili d'ambiente
+ARG REACT_APP_API_URL=http://localhost:5001/api
+
+# Imposta le variabili d'ambiente per il build
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+
 # Build dell'applicazione
 RUN npm run build
 
