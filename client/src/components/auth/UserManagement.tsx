@@ -3,7 +3,7 @@
  * Gestione utenti per admin
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -29,22 +29,17 @@ import {
   FormControl,
   InputLabel,
   Alert,
-  CircularProgress
-} from '@mui/material';
-import {
-  Edit,
-  Delete,
-  Add,
-  Refresh
-} from '@mui/icons-material';
-import { useAuth } from '../../contexts/AuthContext';
-import { pricingApi } from '../../services/api';
+  CircularProgress,
+} from "@mui/material";
+import { Edit, Delete, Refresh } from "@mui/icons-material";
+import { useAuth } from "../../contexts/AuthContext";
+import { pricingApi } from "../../services/api";
 
 interface User {
   id: number;
   username: string;
   email: string;
-  role: 'admin' | 'user' | 'guest';
+  role: "admin" | "user" | "guest";
   is_active: boolean;
   created_at: string;
   last_login: string | null;
@@ -58,10 +53,10 @@ const UserManagement: React.FC = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editForm, setEditForm] = useState({
-    username: '',
-    email: '',
-    role: 'user' as 'admin' | 'user' | 'guest',
-    is_active: true
+    username: "",
+    email: "",
+    role: "user" as "admin" | "user" | "guest",
+    is_active: true,
   });
 
   // Carica la lista utenti
@@ -69,17 +64,17 @@ const UserManagement: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await pricingApi.get('/auth/users');
+      const response = await pricingApi.get("/api/auth/users");
       setUsers(response.data.users);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Errore nel caricamento utenti');
+      setError(err.response?.data?.error || "Errore nel caricamento utenti");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (currentUser?.role === 'admin') {
+    if (currentUser?.role === "admin") {
       loadUsers();
     }
   }, [currentUser]);
@@ -91,7 +86,7 @@ const UserManagement: React.FC = () => {
       username: user.username,
       email: user.email,
       role: user.role,
-      is_active: user.is_active
+      is_active: user.is_active,
     });
     setEditDialogOpen(true);
   };
@@ -106,7 +101,7 @@ const UserManagement: React.FC = () => {
       setEditDialogOpen(false);
       setEditingUser(null);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Errore nell\'aggiornamento utente');
+      setError(err.response?.data?.error || "Errore nell'aggiornamento utente");
     } finally {
       setLoading(false);
     }
@@ -114,7 +109,7 @@ const UserManagement: React.FC = () => {
 
   // Gestione eliminazione utente
   const handleDeleteUser = async (userId: number) => {
-    if (!window.confirm('Sei sicuro di voler eliminare questo utente?')) {
+    if (!window.confirm("Sei sicuro di voler eliminare questo utente?")) {
       return;
     }
 
@@ -123,7 +118,7 @@ const UserManagement: React.FC = () => {
       await pricingApi.delete(`/auth/users/${userId}`);
       await loadUsers();
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Errore nell\'eliminazione utente');
+      setError(err.response?.data?.error || "Errore nell'eliminazione utente");
     } finally {
       setLoading(false);
     }
@@ -131,19 +126,23 @@ const UserManagement: React.FC = () => {
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return 'error';
-      case 'user': return 'primary';
-      case 'guest': return 'default';
-      default: return 'default';
+      case "admin":
+        return "error";
+      case "user":
+        return "primary";
+      case "guest":
+        return "default";
+      default:
+        return "default";
     }
   };
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'Mai';
-    return new Date(dateString).toLocaleDateString('it-IT');
+    if (!dateString) return "Mai";
+    return new Date(dateString).toLocaleDateString("it-IT");
   };
 
-  if (currentUser?.role !== 'admin') {
+  if (currentUser?.role !== "admin") {
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="error">
@@ -155,7 +154,14 @@ const UserManagement: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
         <Typography variant="h4" component="h1">
           Gestione Utenti
         </Typography>
@@ -217,8 +223,8 @@ const UserManagement: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         <Chip
-                          label={user.is_active ? 'Attivo' : 'Disattivato'}
-                          color={user.is_active ? 'success' : 'default'}
+                          label={user.is_active ? "Attivo" : "Disattivato"}
+                          color={user.is_active ? "success" : "default"}
                           size="small"
                         />
                       </TableCell>
@@ -251,7 +257,12 @@ const UserManagement: React.FC = () => {
       </Card>
 
       {/* Dialog per modifica utente */}
-      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Modifica Utente</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2 }}>
@@ -259,7 +270,9 @@ const UserManagement: React.FC = () => {
               fullWidth
               label="Username"
               value={editForm.username}
-              onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
+              onChange={(e) =>
+                setEditForm((prev) => ({ ...prev, username: e.target.value }))
+              }
               sx={{ mb: 2 }}
             />
             <TextField
@@ -267,14 +280,21 @@ const UserManagement: React.FC = () => {
               label="Email"
               type="email"
               value={editForm.email}
-              onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
+              onChange={(e) =>
+                setEditForm((prev) => ({ ...prev, email: e.target.value }))
+              }
               sx={{ mb: 2 }}
             />
             <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel>Ruolo</InputLabel>
               <Select
                 value={editForm.role}
-                onChange={(e) => setEditForm(prev => ({ ...prev, role: e.target.value as any }))}
+                onChange={(e) =>
+                  setEditForm((prev) => ({
+                    ...prev,
+                    role: e.target.value as any,
+                  }))
+                }
                 label="Ruolo"
               >
                 <MenuItem value="user">User</MenuItem>
@@ -285,12 +305,17 @@ const UserManagement: React.FC = () => {
             <FormControl fullWidth>
               <InputLabel>Stato</InputLabel>
               <Select
-                value={editForm.is_active}
-                onChange={(e) => setEditForm(prev => ({ ...prev, is_active: e.target.value as boolean }))}
+                value={editForm.is_active ? "true" : "false"}
+                onChange={(e) =>
+                  setEditForm((prev) => ({
+                    ...prev,
+                    is_active: e.target.value === "true",
+                  }))
+                }
                 label="Stato"
               >
-                <MenuItem value={true}>Attivo</MenuItem>
-                <MenuItem value={false}>Disattivato</MenuItem>
+                <MenuItem value="true">Attivo</MenuItem>
+                <MenuItem value="false">Disattivato</MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -299,8 +324,12 @@ const UserManagement: React.FC = () => {
           <Button onClick={() => setEditDialogOpen(false)} disabled={loading}>
             Annulla
           </Button>
-          <Button onClick={handleSaveUser} variant="contained" disabled={loading}>
-            {loading ? <CircularProgress size={20} /> : 'Salva'}
+          <Button
+            onClick={handleSaveUser}
+            variant="contained"
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={20} /> : "Salva"}
           </Button>
         </DialogActions>
       </Dialog>

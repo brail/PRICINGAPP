@@ -31,6 +31,9 @@ const {
   updateParameterSetsOrder,
 } = require("./database");
 
+// Importa le route di autenticazione
+const { router: authRoutes, initUserModel } = require("./routes/auth");
+
 // ===========================================
 // CONFIGURAZIONE SERVER
 // ===========================================
@@ -356,6 +359,9 @@ async function calculatePurchasePrice(retailPrice, params = currentParams) {
 }
 
 // API Routes
+
+// Route di autenticazione
+app.use("/api/auth", authRoutes);
 
 // Ottieni parametri attuali
 app.get("/api/params", (req, res) => {
@@ -691,9 +697,20 @@ const startServer = async () => {
     await initDatabase();
     console.log("✅ Database inizializzato con successo");
 
+    // Inizializza il modello User
+    initUserModel(require("./database").db);
+    console.log("✅ Modello User inizializzato");
+
     // Seeding del database
     await seedDatabase();
     console.log("✅ Seeding del database completato");
+
+    // Seeding utenti di default
+    const User = require("./models/User");
+    const userModel = new User(require("./database").db);
+    await userModel.initTable();
+    await userModel.seedDefaultUsers();
+    console.log("✅ Seeding utenti completato");
 
     // Carica i parametri dal database
     await loadParametersFromDatabase();
