@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { pricingApi } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
 import {
   CalculationParams,
   SellingPriceCalculation,
@@ -11,6 +12,8 @@ import "./Calculator.css";
 type CalculationMode = "purchase" | "selling" | "margin";
 
 const Calculator: React.FC = () => {
+  const { user } = useAuth();
+
   const [params, setParams] = useState<CalculationParams>({
     purchaseCurrency: "EUR",
     sellingCurrency: "EUR",
@@ -45,6 +48,17 @@ const Calculator: React.FC = () => {
   // Stato per mostrare i dettagli dei parametri
   const [showParameterDetails, setShowParameterDetails] = useState(false);
 
+  // Funzioni per gestire i parametri per utente
+  const loadUserParameters = (): CalculationParams | null => {
+    if (user) {
+      const userSavedParams = localStorage.getItem(`userParams_${user.id}`);
+      if (userSavedParams) {
+        return JSON.parse(userSavedParams);
+      }
+    }
+    return null;
+  };
+
   // Funzione per caricare i set di parametri
   const loadParameterSets = async () => {
     try {
@@ -52,34 +66,17 @@ const Calculator: React.FC = () => {
       const sets = await pricingApi.getParameterSets();
       setParameterSets(sets);
 
-      // Se non c'è già un set selezionato, trova il set che corrisponde ai parametri attualmente caricati
-      if (!selectedParameterSetId) {
-        try {
-          const currentParams = await pricingApi.getParams();
-          const matchingSet = sets.find((set) => {
-            return (
-              set.purchase_currency === currentParams.purchaseCurrency &&
-              set.selling_currency === currentParams.sellingCurrency &&
-              set.quality_control_percent ===
-                currentParams.qualityControlPercent &&
-              set.transport_insurance_cost ===
-                currentParams.transportInsuranceCost &&
-              set.duty === currentParams.duty &&
-              set.exchange_rate === currentParams.exchangeRate &&
-              set.italy_accessory_costs === currentParams.italyAccessoryCosts &&
-              set.tools === currentParams.tools &&
-              set.retail_multiplier === currentParams.retailMultiplier &&
-              set.optimal_margin === currentParams.optimalMargin
-            );
-          });
+      // Se non c'è già un set selezionato, carica automaticamente il primo set (default)
+      if (!selectedParameterSetId && sets.length > 0) {
+        const defaultSet = sets[0]; // Il primo set dovrebbe essere il default
+        setSelectedParameterSetId(defaultSet.id);
 
-          if (matchingSet) {
-            setSelectedParameterSetId(matchingSet.id);
-          } else {
-            setSelectedParameterSetId(null);
-          }
+        // Carica i parametri del set di default
+        try {
+          const result = await pricingApi.loadParameterSet(defaultSet.id);
+          setParams(result.params);
         } catch (err) {
-          console.error("Errore nel confronto dei parametri:", err);
+          console.error("Errore nel caricamento del set di default:", err);
         }
       }
     } catch (err) {
@@ -94,6 +91,13 @@ const Calculator: React.FC = () => {
     loadParams();
     loadParameterSets();
   }, []);
+
+  // Carica i parametri quando cambia l'utente
+  useEffect(() => {
+    if (user) {
+      loadParams();
+    }
+  }, [user]);
 
   // Aggiorna la selezione del set quando i parametri cambiano
   useEffect(() => {
@@ -128,6 +132,15 @@ const Calculator: React.FC = () => {
 
   const loadParams = async () => {
     try {
+      // Prima prova a caricare i parametri salvati per questo utente
+      const userParams = loadUserParameters();
+      if (userParams) {
+        setParams(userParams);
+        setSelectedParameterSetId(null); // Parametri personalizzati dell'utente
+        return;
+      }
+
+      // Se non ci sono parametri salvati per l'utente, carica i parametri globali
       const currentParams = await pricingApi.getParams();
       setParams(currentParams);
 
@@ -207,6 +220,10 @@ const Calculator: React.FC = () => {
   };
 
   const handleParameterSetChange = async (parameterSetId: number) => {
+    if (!parameterSetId) {
+      return; // Non fare nulla se non è selezionato un set valido
+    }
+
     try {
       setLoadingParameterSets(true);
       const result = await pricingApi.loadParameterSet(parameterSetId);
@@ -611,7 +628,6 @@ const Calculator: React.FC = () => {
             onChange={(e) => handleParameterSetChange(Number(e.target.value))}
             disabled={loadingParameterSets}
           >
-            <option value="">Seleziona un set di parametri...</option>
             {parameterSets.map((set) => (
               <option key={set.id} value={set.id}>
                 {set.description}
@@ -639,6 +655,12 @@ const Calculator: React.FC = () => {
                 {!selectedParameterSetId && (
                   <span className="parameter-set-badge default">
                     {(() => {
+                      // Controlla se ci sono parametri salvati per questo utente
+                      const userParams = loadUserParameters();
+                      if (userParams) {
+                        return "Parametri personalizzati utente";
+                      }
+
                       // Trova il set che corrisponde ai parametri attualmente caricati
                       const activeSet = parameterSets.find((set) => {
                         return (

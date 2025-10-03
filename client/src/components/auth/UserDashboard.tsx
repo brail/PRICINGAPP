@@ -6,13 +6,6 @@
 import React, { useState } from "react";
 import {
   Box,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Avatar,
-  Chip,
-  Divider,
   TextField,
   Dialog,
   DialogTitle,
@@ -20,6 +13,7 @@ import {
   DialogActions,
   Alert,
   CircularProgress,
+  Button,
 } from "@mui/material";
 import {
   Person,
@@ -28,12 +22,17 @@ import {
   Edit,
   Save,
   Cancel,
+  Lock,
 } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
+import ChangePasswordDialog from "./ChangePasswordDialog";
+import "./UserDashboard.css";
 
 const UserDashboard: React.FC = () => {
   const { user, updateUser, isLoading } = useAuth();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [changePasswordDialogOpen, setChangePasswordDialogOpen] =
+    useState(false);
   const [editForm, setEditForm] = useState({
     username: user?.username || "",
     email: user?.email || "",
@@ -69,8 +68,6 @@ const UserDashboard: React.FC = () => {
         return <AdminPanelSettings />;
       case "user":
         return <Person />;
-      case "guest":
-        return <PersonAdd />;
       default:
         return <Person />;
     }
@@ -82,8 +79,6 @@ const UserDashboard: React.FC = () => {
         return "error";
       case "user":
         return "primary";
-      case "guest":
-        return "default";
       default:
         return "default";
     }
@@ -109,134 +104,104 @@ const UserDashboard: React.FC = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Dashboard Utente
-      </Typography>
+    <div className="dashboard">
+      <div className="dashboard-header">
+        <h2>Dashboard Utente</h2>
+        <p className="text-muted">
+          Gestisci il tuo profilo e le impostazioni dell'account.
+        </p>
+      </div>
 
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-        {/* Card Profilo */}
-        <Box sx={{ flex: "1 1 300px", minWidth: "300px" }}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                <Avatar sx={{ bgcolor: "primary.main", mr: 2 }}>
-                  {getRoleIcon(user.role)}
-                </Avatar>
-                <Box>
-                  <Typography variant="h6">{user.username}</Typography>
-                  <Chip
-                    icon={getRoleIcon(user.role)}
-                    label={user.role.toUpperCase()}
-                    color={getRoleColor(user.role)}
-                    size="small"
-                  />
-                </Box>
-              </Box>
+      <div className="dashboard-content">
+        <div className="dashboard-grid">
+          {/* Card Profilo */}
+          <div className="dashboard-card">
+            <div className="profile-header">
+              <div className="profile-avatar">{getRoleIcon(user.role)}</div>
+              <div className="profile-info">
+                <h4>{user.username}</h4>
+                <span className={`profile-role ${user.role}`}>
+                  {user.role.toUpperCase()}
+                </span>
+              </div>
+            </div>
 
-              <Divider sx={{ my: 2 }} />
+            <div className="profile-divider"></div>
 
-              <Box sx={{ mb: 1 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Email
-                </Typography>
-                <Typography variant="body1">{user.email}</Typography>
-              </Box>
+            <div className="profile-field">
+              <span className="profile-field-label">Email</span>
+              <span className="profile-field-value">{user.email}</span>
+            </div>
 
-              <Box sx={{ mb: 1 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Membro dal
-                </Typography>
-                <Typography variant="body1">
-                  {formatDate(user.created_at)}
-                </Typography>
-              </Box>
+            <div className="profile-field">
+              <span className="profile-field-label">Membro dal</span>
+              <span className="profile-field-value">
+                {formatDate(user.created_at)}
+              </span>
+            </div>
 
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Ultimo accesso
-                </Typography>
-                <Typography variant="body1">
-                  {formatDate(user.last_login)}
-                </Typography>
-              </Box>
+            <div className="profile-field">
+              <span className="profile-field-label">Ultimo accesso</span>
+              <span className="profile-field-value">
+                {formatDate(user.last_login)}
+              </span>
+            </div>
 
-              <Button
-                variant="outlined"
-                startIcon={<Edit />}
+            <div className="profile-actions">
+              <button
+                className="btn btn-outlined"
                 onClick={handleEditProfile}
                 disabled={isLoading}
               >
+                <Edit className="btn-icon" />
                 Modifica Profilo
-              </Button>
-            </CardContent>
-          </Card>
-        </Box>
+              </button>
+              <button
+                className="btn btn-outlined"
+                onClick={() => setChangePasswordDialogOpen(true)}
+                disabled={isLoading}
+              >
+                <Lock className="btn-icon" />
+                Cambia Password
+              </button>
+            </div>
+          </div>
 
-        {/* Card Statistiche */}
-        <Box sx={{ flex: "1 1 300px", minWidth: "300px" }}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Statistiche Account
-              </Typography>
+          {/* Card Statistiche */}
+          <div className="dashboard-card">
+            <h3>Statistiche Account</h3>
 
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Ruolo
-                </Typography>
-                <Chip
-                  icon={getRoleIcon(user.role)}
-                  label={
-                    user.role === "admin"
-                      ? "Amministratore"
-                      : user.role === "user"
-                      ? "Utente"
-                      : "Ospite"
-                  }
-                  color={getRoleColor(user.role)}
-                />
-              </Box>
+            <div className="stats-grid">
+              <div className="stat-item">
+                <span className="stat-label">Ruolo</span>
+                <span className={`stat-chip ${user.role}`}>
+                  {user.role === "admin"
+                    ? "Amministratore"
+                    : user.role === "user"
+                    ? "Utente"
+                    : "Ospite"}
+                </span>
+              </div>
 
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Permessi
-                </Typography>
-                <Typography variant="body1">
+              <div className="stat-item">
+                <span className="stat-label">Permessi</span>
+                <span className="stat-value">
                   {user.role === "admin"
                     ? "Accesso completo"
                     : user.role === "user"
                     ? "Accesso standard"
                     : "Accesso limitato"}
-                </Typography>
-              </Box>
+                </span>
+              </div>
 
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Versione App
-                </Typography>
-                <Typography variant="body1">v0.2.0-dev</Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
-
-        {/* Card Preferenze */}
-        {user.preferences && Object.keys(user.preferences).length > 0 && (
-          <Box sx={{ flex: "1 1 100%", minWidth: "100%" }}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Preferenze
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {JSON.stringify(user.preferences, null, 2)}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Box>
-        )}
-      </Box>
+              <div className="stat-item">
+                <span className="stat-label">Versione App</span>
+                <span className="stat-value">v0.2.0-dev</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Dialog per modifica profilo */}
       <Dialog
@@ -293,7 +258,16 @@ const UserDashboard: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+
+      {/* Dialog per cambio password */}
+      <ChangePasswordDialog
+        open={changePasswordDialogOpen}
+        onClose={() => setChangePasswordDialogOpen(false)}
+        onSuccess={() => {
+          // Opzionale: mostra un messaggio di successo
+        }}
+      />
+    </div>
   );
 };
 

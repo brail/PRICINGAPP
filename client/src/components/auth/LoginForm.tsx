@@ -19,11 +19,9 @@ import {
 import { Visibility, VisibilityOff, Person, Lock } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
 
-interface LoginFormProps {
-  onSwitchToRegister?: () => void;
-}
+interface LoginFormProps {}
 
-const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
+const LoginForm: React.FC<LoginFormProps> = () => {
   const { login, isLoading, error, clearError } = useAuth();
   const [formData, setFormData] = useState({
     username: "",
@@ -189,22 +187,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
                 "Accedi"
               )}
             </Button>
-
-            {onSwitchToRegister && (
-              <Box sx={{ textAlign: "center" }}>
-                <Typography variant="body2" color="text.secondary">
-                  Non hai un account?{" "}
-                  <Button
-                    variant="text"
-                    onClick={onSwitchToRegister}
-                    disabled={isLoading}
-                    sx={{ textTransform: "none" }}
-                  >
-                    Registrati
-                  </Button>
-                </Typography>
-              </Box>
-            )}
           </form>
         </CardContent>
       </Card>

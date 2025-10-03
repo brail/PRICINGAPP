@@ -277,6 +277,33 @@ export const pricingApi = {
     const response = await api.delete(`/api/auth/users/${userId}`);
     return response.data;
   },
+
+  // Cambia password utente corrente
+  changePassword: async (
+    currentPassword: string,
+    newPassword: string,
+    confirmPassword: string
+  ) => {
+    const response = await api.put("/api/auth/me/password", {
+      currentPassword,
+      newPassword,
+      confirmPassword,
+    });
+    return response.data;
+  },
+
+  // Cambia password di un altro utente (solo admin)
+  changeUserPassword: async (
+    userId: number,
+    newPassword: string,
+    confirmPassword: string
+  ) => {
+    const response = await api.put(`/api/auth/users/${userId}/password`, {
+      newPassword,
+      confirmPassword,
+    });
+    return response.data;
+  },
 };
 
 export default api;

@@ -276,4 +276,93 @@ router.delete(
   }
 );
 
+// PUT /api/auth/me/password - Cambia password utente corrente
+router.put("/me/password", authenticateToken, async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    const userId = req.user.id;
+
+    // Validazione
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({ error: "Tutti i campi sono obbligatori" });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ error: "Le password non coincidono" });
+    }
+
+    if (newPassword.length < 6) {
+      return res
+        .status(400)
+        .json({ error: "La password deve essere di almeno 6 caratteri" });
+    }
+
+    // Verifica password corrente
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "Utente non trovato" });
+    }
+
+    const isCurrentPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+    if (!isCurrentPasswordValid) {
+      return res.status(400).json({ error: "Password corrente non corretta" });
+    }
+
+    // Aggiorna password
+    await userModel.update(userId, { password: newPassword });
+
+    res.json({ message: "Password aggiornata con successo" });
+  } catch (error) {
+    console.error("Errore nel cambio password:", error);
+    res.status(500).json({ error: "Errore interno del server" });
+  }
+});
+
+// PUT /api/auth/users/:id/password - Cambia password di un altro utente (solo admin)
+router.put(
+  "/users/:id/password",
+  authenticateToken,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { newPassword, confirmPassword } = req.body;
+
+      // Validazione
+      if (!newPassword || !confirmPassword) {
+        return res
+          .status(400)
+          .json({ error: "Tutti i campi sono obbligatori" });
+      }
+
+      if (newPassword !== confirmPassword) {
+        return res.status(400).json({ error: "Le password non coincidono" });
+      }
+
+      if (newPassword.length < 6) {
+        return res
+          .status(400)
+          .json({ error: "La password deve essere di almeno 6 caratteri" });
+      }
+
+      // Verifica che l'utente esista
+      const user = await userModel.findById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "Utente non trovato" });
+      }
+
+      // Aggiorna password
+      await userModel.update(userId, { password: newPassword });
+
+      res.json({ message: "Password aggiornata con successo" });
+    } catch (error) {
+      console.error("Errore nel cambio password utente:", error);
+      res.status(500).json({ error: "Errore interno del server" });
+    }
+  }
+);
+
 module.exports = { router, initUserModel };

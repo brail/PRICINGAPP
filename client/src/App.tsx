@@ -11,9 +11,8 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { Box, Typography } from "@mui/material";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Calculator from "./components/Calculator";
-import Settings from "./components/Settings";
+import Parameters from "./components/Parameters";
 import LoginForm from "./components/auth/LoginForm";
-import RegisterForm from "./components/auth/RegisterForm";
 import UserDashboard from "./components/auth/UserDashboard";
 import UserManagement from "./components/auth/UserManagement";
 import AuthenticatedApp from "./components/auth/AuthenticatedApp";
@@ -34,7 +33,6 @@ const theme = createTheme({
 // Componente per la gestione dell'autenticazione
 const AppContent: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
-  const [showRegister, setShowRegister] = useState(false);
   const [hasRedirected, setHasRedirected] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -43,12 +41,8 @@ const AppContent: React.FC = () => {
   // Non fare redirect se l'utente è già su una pagina autenticata
   useEffect(() => {
     if (isAuthenticated && !isLoading && !hasRedirected) {
-      // Solo se l'utente è sulla pagina di login/register o sulla root
-      if (
-        location.pathname === "/" ||
-        location.pathname === "/login" ||
-        location.pathname === "/register"
-      ) {
+      // Solo se l'utente è sulla pagina di login o sulla root
+      if (location.pathname === "/" || location.pathname === "/login") {
         setHasRedirected(true);
         navigate("/");
       } else {
@@ -84,11 +78,7 @@ const AppContent: React.FC = () => {
   }
 
   if (!isAuthenticated) {
-    return showRegister ? (
-      <RegisterForm onSwitchToLogin={() => setShowRegister(false)} />
-    ) : (
-      <LoginForm onSwitchToRegister={() => setShowRegister(true)} />
-    );
+    return <LoginForm />;
   }
 
   return <AuthenticatedApp />;

@@ -6,19 +6,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Box,
-  Card,
-  CardContent,
-  Typography,
   Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Chip,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -30,16 +18,27 @@ import {
   InputLabel,
   Alert,
   CircularProgress,
+  Typography,
+  IconButton,
 } from "@mui/material";
-import { Edit, Delete, Refresh } from "@mui/icons-material";
+import {
+  Edit,
+  Delete,
+  Refresh,
+  Lock,
+  PersonAdd,
+  Warning,
+} from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
 import { pricingApi } from "../../services/api";
+import ChangePasswordDialog from "./ChangePasswordDialog";
+import "./UserManagement.css";
 
 interface User {
   id: number;
   username: string;
   email: string;
-  role: "admin" | "user" | "guest";
+  role: "admin" | "user";
   is_active: boolean;
   created_at: string;
   last_login: string | null;
@@ -51,11 +50,24 @@ const UserManagement: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [changePasswordDialogOpen, setChangePasswordDialogOpen] =
+    useState(false);
+  const [deleteConfirmDialogOpen, setDeleteConfirmDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editForm, setEditForm] = useState({
     username: "",
     email: "",
-    role: "user" as "admin" | "user" | "guest",
+    role: "user" as "admin" | "user",
+    is_active: true,
+  });
+  const [createForm, setCreateForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "user" as "admin" | "user",
     is_active: true,
   });
 
@@ -91,12 +103,67 @@ const UserManagement: React.FC = () => {
     setEditDialogOpen(true);
   };
 
+  // Gestione cambio password
+  const handleChangePassword = (user: User) => {
+    setEditingUser(user);
+    setChangePasswordDialogOpen(true);
+  };
+
+  // Gestione creazione utente
+  const handleCreateUser = () => {
+    setCreateForm({
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      role: "user",
+      is_active: true,
+    });
+    setCreateDialogOpen(true);
+    setError(null);
+  };
+
+  const handleSaveNewUser = async () => {
+    // Validazione
+    if (!createForm.username || !createForm.email || !createForm.password) {
+      setError("Tutti i campi sono obbligatori");
+      return;
+    }
+
+    if (createForm.password !== createForm.confirmPassword) {
+      setError("Le password non coincidono");
+      return;
+    }
+
+    if (createForm.password.length < 6) {
+      setError("La password deve essere di almeno 6 caratteri");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      await pricingApi.post("/api/auth/register", {
+        username: createForm.username,
+        email: createForm.email,
+        password: createForm.password,
+        role: createForm.role,
+      });
+      await loadUsers();
+      setCreateDialogOpen(false);
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Errore nella creazione utente");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSaveUser = async () => {
     if (!editingUser) return;
 
     try {
       setLoading(true);
-      await pricingApi.put(`/auth/users/${editingUser.id}`, editForm);
+      await pricingApi.put(`/api/auth/users/${editingUser.id}`, editForm);
       await loadUsers();
       setEditDialogOpen(false);
       setEditingUser(null);
@@ -108,15 +175,20 @@ const UserManagement: React.FC = () => {
   };
 
   // Gestione eliminazione utente
-  const handleDeleteUser = async (userId: number) => {
-    if (!window.confirm("Sei sicuro di voler eliminare questo utente?")) {
-      return;
-    }
+  const handleDeleteUser = (user: User) => {
+    setUserToDelete(user);
+    setDeleteConfirmDialogOpen(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return;
 
     try {
       setLoading(true);
-      await pricingApi.delete(`/auth/users/${userId}`);
+      await pricingApi.delete(`/api/auth/users/${userToDelete.id}`);
       await loadUsers();
+      setDeleteConfirmDialogOpen(false);
+      setUserToDelete(null);
     } catch (err: any) {
       setError(err.response?.data?.error || "Errore nell'eliminazione utente");
     } finally {
@@ -130,8 +202,6 @@ const UserManagement: React.FC = () => {
         return "error";
       case "user":
         return "primary";
-      case "guest":
-        return "default";
       default:
         return "default";
     }
@@ -144,117 +214,136 @@ const UserManagement: React.FC = () => {
 
   if (currentUser?.role !== "admin") {
     return (
-      <Box sx={{ p: 3 }}>
-        <Alert severity="error">
-          Accesso negato. Solo gli amministratori possono gestire gli utenti.
-        </Alert>
-      </Box>
+      <div className="user-management">
+        <div className="user-management-content">
+          <Alert severity="error">
+            Accesso negato. Solo gli amministratori possono gestire gli utenti.
+          </Alert>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 3,
-        }}
-      >
-        <Typography variant="h4" component="h1">
-          Gestione Utenti
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<Refresh />}
-          onClick={loadUsers}
-          disabled={loading}
-        >
-          Aggiorna
-        </Button>
-      </Box>
+    <div className="user-management">
+      <div className="user-management-header">
+        <h2>Gestione Utenti</h2>
+        <p className="text-muted">
+          Gestisci gli utenti del sistema e i loro permessi.
+        </p>
+      </div>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
+      <div className="user-management-content">
+        <div className="user-management-actions">
+          <h3>Lista Utenti</h3>
+          <div className="action-buttons">
+            <button
+              className="btn btn-primary"
+              onClick={handleCreateUser}
+              disabled={loading}
+            >
+              <PersonAdd className="btn-icon" />
+              Crea Utente
+            </button>
+            <button
+              className="btn btn-secondary"
+              onClick={loadUsers}
+              disabled={loading}
+            >
+              <Refresh className="btn-icon" />
+              Aggiorna
+            </button>
+          </div>
+        </div>
 
-      <Card>
-        <CardContent>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Username</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Ruolo</TableCell>
-                  <TableCell>Stato</TableCell>
-                  <TableCell>Creato</TableCell>
-                  <TableCell>Ultimo Login</TableCell>
-                  <TableCell>Azioni</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={7} align="center">
-                      <CircularProgress />
-                    </TableCell>
-                  </TableRow>
-                ) : users.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} align="center">
-                      Nessun utente trovato
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>{user.username}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        <Chip
-                          label={user.role}
-                          color={getRoleColor(user.role)}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={user.is_active ? "Attivo" : "Disattivato"}
-                          color={user.is_active ? "success" : "default"}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>{formatDate(user.created_at)}</TableCell>
-                      <TableCell>{formatDate(user.last_login)}</TableCell>
-                      <TableCell>
-                        <IconButton
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        <div className="user-management-card">
+          <table className="users-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Ruolo</th>
+                <th>Stato</th>
+                <th>Creato</th>
+                <th>Ultimo Login</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="loading-container">
+                    <CircularProgress />
+                  </td>
+                </tr>
+              ) : users.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="empty-state">
+                    Nessun utente trovato
+                  </td>
+                </tr>
+              ) : (
+                users.map((user) => (
+                  <tr key={user.id}>
+                    <td>{user.username}</td>
+                    <td>{user.email}</td>
+                    <td>
+                      <span className={`user-chip ${user.role}`}>
+                        {user.role}
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        className={`user-chip ${
+                          user.is_active ? "active" : "inactive"
+                        }`}
+                      >
+                        {user.is_active ? "Attivo" : "Disattivato"}
+                      </span>
+                    </td>
+                    <td>{formatDate(user.created_at)}</td>
+                    <td>{formatDate(user.last_login)}</td>
+                    <td>
+                      <div className="user-actions">
+                        <button
+                          className="action-btn edit"
                           onClick={() => handleEditUser(user)}
                           disabled={loading}
-                          size="small"
+                          title="Modifica utente"
                         >
                           <Edit />
-                        </IconButton>
-                        <IconButton
-                          onClick={() => handleDeleteUser(user.id)}
+                        </button>
+                        <button
+                          className="action-btn password"
+                          onClick={() => handleChangePassword(user)}
+                          disabled={loading}
+                          title="Cambia password"
+                        >
+                          <Lock />
+                        </button>
+                        <button
+                          className="action-btn delete"
+                          onClick={() => handleDeleteUser(user)}
                           disabled={loading || user.id === currentUser?.id}
-                          size="small"
-                          color="error"
+                          title="Elimina utente"
                         >
                           <Delete />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </CardContent>
-      </Card>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* Dialog per modifica utente */}
       <Dialog
@@ -299,7 +388,6 @@ const UserManagement: React.FC = () => {
               >
                 <MenuItem value="user">User</MenuItem>
                 <MenuItem value="admin">Admin</MenuItem>
-                <MenuItem value="guest">Guest</MenuItem>
               </Select>
             </FormControl>
             <FormControl fullWidth>
@@ -333,7 +421,147 @@ const UserManagement: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+
+      {/* Dialog per cambio password */}
+      <ChangePasswordDialog
+        open={changePasswordDialogOpen}
+        onClose={() => {
+          setChangePasswordDialogOpen(false);
+          setEditingUser(null);
+        }}
+        userId={editingUser?.id}
+        username={editingUser?.username}
+        onSuccess={() => {
+          // Opzionale: mostra un messaggio di successo
+        }}
+      />
+
+      {/* Dialog per creazione nuovo utente */}
+      <Dialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Crea Nuovo Utente</DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 1 }}>
+            <TextField
+              fullWidth
+              label="Username"
+              value={createForm.username}
+              onChange={(e) =>
+                setCreateForm({ ...createForm, username: e.target.value })
+              }
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Email"
+              type="email"
+              value={createForm.email}
+              onChange={(e) =>
+                setCreateForm({ ...createForm, email: e.target.value })
+              }
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Password"
+              type="password"
+              value={createForm.password}
+              onChange={(e) =>
+                setCreateForm({ ...createForm, password: e.target.value })
+              }
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Conferma Password"
+              type="password"
+              value={createForm.confirmPassword}
+              onChange={(e) =>
+                setCreateForm({
+                  ...createForm,
+                  confirmPassword: e.target.value,
+                })
+              }
+              margin="normal"
+              required
+            />
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Ruolo</InputLabel>
+              <Select
+                value={createForm.role}
+                onChange={(e) =>
+                  setCreateForm({
+                    ...createForm,
+                    role: e.target.value as "admin" | "user",
+                  })
+                }
+                label="Ruolo"
+              >
+                <MenuItem value="user">Utente</MenuItem>
+                <MenuItem value="admin">Amministratore</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCreateDialogOpen(false)}>Annulla</Button>
+          <Button
+            onClick={handleSaveNewUser}
+            variant="contained"
+            disabled={loading}
+          >
+            {loading ? "Creazione..." : "Crea Utente"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog di conferma eliminazione */}
+      <Dialog
+        open={deleteConfirmDialogOpen}
+        onClose={() => setDeleteConfirmDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Warning color="error" />
+          Conferma Eliminazione
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            Sei sicuro di voler eliminare l'utente{" "}
+            <strong>{userToDelete?.username}</strong>?
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Questa azione non può essere annullata. L'utente verrà
+            permanentemente rimosso dal sistema.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setDeleteConfirmDialogOpen(false)}
+            disabled={loading}
+          >
+            Annulla
+          </Button>
+          <Button
+            onClick={confirmDeleteUser}
+            variant="contained"
+            color="error"
+            disabled={loading}
+            startIcon={loading ? <CircularProgress size={20} /> : <Delete />}
+          >
+            {loading ? "Eliminazione..." : "Elimina Utente"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
   );
 };
 

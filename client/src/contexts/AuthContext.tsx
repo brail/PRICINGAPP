@@ -17,7 +17,7 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  role: "admin" | "user" | "guest";
+  role: "admin" | "user";
   created_at?: string;
   last_login?: string;
   preferences?: Record<string, any>;

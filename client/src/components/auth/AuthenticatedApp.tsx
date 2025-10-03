@@ -33,7 +33,7 @@ import {
 } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
 import Calculator from "../Calculator";
-import Settings from "../Settings";
+import Parameters from "../Parameters";
 import UserDashboard from "./UserDashboard";
 import UserManagement from "./UserManagement";
 
@@ -68,8 +68,6 @@ const AuthenticatedApp: React.FC = () => {
         return <People />;
       case "user":
         return <AccountCircle />;
-      case "guest":
-        return <AccountCircle />;
       default:
         return <AccountCircle />;
     }
@@ -97,21 +95,11 @@ const AuthenticatedApp: React.FC = () => {
             <Button
               color="inherit"
               component={Link}
-              to="/settings"
+              to="/parameters"
               startIcon={<SettingsIcon />}
-              className={location.pathname === "/settings" ? "active" : ""}
+              className={location.pathname === "/parameters" ? "active" : ""}
             >
-              Impostazioni
-            </Button>
-
-            <Button
-              color="inherit"
-              component={Link}
-              to="/dashboard"
-              startIcon={<Dashboard />}
-              className={location.pathname === "/dashboard" ? "active" : ""}
-            >
-              Dashboard
+              Parametri
             </Button>
 
             {user?.role === "admin" && (
@@ -175,7 +163,7 @@ const AuthenticatedApp: React.FC = () => {
       <Box sx={{ p: 3 }}>
         <Routes>
           <Route path="/" element={<Calculator />} />
-          <Route path="/settings" element={<Settings />} />
+          <Route path="/parameters" element={<Parameters />} />
           <Route path="/dashboard" element={<UserDashboard />} />
           {user?.role === "admin" && (
             <Route path="/users" element={<UserManagement />} />
