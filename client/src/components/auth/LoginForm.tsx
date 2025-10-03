@@ -3,7 +3,7 @@
  * Form di login con Material-UI
  */
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Card,
@@ -14,15 +14,10 @@ import {
   Alert,
   CircularProgress,
   InputAdornment,
-  IconButton
-} from '@mui/material';
-import {
-  Visibility,
-  VisibilityOff,
-  Person,
-  Lock
-} from '@mui/icons-material';
-import { useAuth } from '../../contexts/AuthContext';
+  IconButton,
+} from "@mui/material";
+import { Visibility, VisibilityOff, Person, Lock } from "@mui/icons-material";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface LoginFormProps {
   onSwitchToRegister?: () => void;
@@ -31,38 +26,41 @@ interface LoginFormProps {
 const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
   const { login, isLoading, error, clearError } = useAuth();
   const [formData, setFormData] = useState({
-    username: '',
-    password: ''
+    username: "",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
 
-  const handleInputChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
-    // Pulisci errori di validazione quando l'utente inizia a digitare
-    if (validationErrors[field]) {
-      setValidationErrors(prev => ({ ...prev, [field]: '' }));
-    }
-    
-    // Pulisci errori di autenticazione
-    if (error) {
-      clearError();
-    }
-  };
+  const handleInputChange =
+    (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value;
+      setFormData((prev) => ({ ...prev, [field]: value }));
+
+      // Pulisci errori di validazione quando l'utente inizia a digitare
+      if (validationErrors[field]) {
+        setValidationErrors((prev) => ({ ...prev, [field]: "" }));
+      }
+
+      // Pulisci errori di autenticazione
+      if (error) {
+        clearError();
+      }
+    };
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
 
     if (!formData.username.trim()) {
-      errors.username = 'Username è obbligatorio';
+      errors.username = "Username è obbligatorio";
     }
 
     if (!formData.password) {
-      errors.password = 'Password è obbligatoria';
+      errors.password = "Password è obbligatoria";
     } else if (formData.password.length < 6) {
-      errors.password = 'Password deve essere di almeno 6 caratteri';
+      errors.password = "Password deve essere di almeno 6 caratteri";
     }
 
     setValidationErrors(errors);
@@ -71,7 +69,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -80,36 +78,41 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
       await login(formData.username, formData.password);
     } catch (error) {
       // L'errore è gestito dal context
-      console.error('Errore nel login:', error);
+      console.error("Errore nel login:", error);
     }
   };
 
   const handleTogglePasswordVisibility = () => {
-    setShowPassword(prev => !prev);
+    setShowPassword((prev) => !prev);
   };
 
   return (
     <Box
       sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        padding: 2
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        padding: 2,
       }}
     >
       <Card
         sx={{
           maxWidth: 400,
-          width: '100%',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-          borderRadius: 2
+          width: "100%",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+          borderRadius: 2,
         }}
       >
         <CardContent sx={{ p: 4 }}>
-          <Box sx={{ textAlign: 'center', mb: 3 }}>
-            <Typography variant="h4" component="h1" gutterBottom color="primary">
+          <Box sx={{ textAlign: "center", mb: 3 }}>
+            <Typography
+              variant="h4"
+              component="h1"
+              gutterBottom
+              color="primary"
+            >
               Pricing Calculator
             </Typography>
             <Typography variant="h6" color="text.secondary">
@@ -128,7 +131,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
               fullWidth
               label="Username"
               value={formData.username}
-              onChange={handleInputChange('username')}
+              onChange={handleInputChange("username")}
               error={!!validationErrors.username}
               helperText={validationErrors.username}
               disabled={isLoading}
@@ -138,16 +141,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
                   <InputAdornment position="start">
                     <Person color="action" />
                   </InputAdornment>
-                )
+                ),
               }}
             />
 
             <TextField
               fullWidth
               label="Password"
-              type={showPassword ? 'text' : 'password'}
+              type={showPassword ? "text" : "password"}
               value={formData.password}
-              onChange={handleInputChange('password')}
+              onChange={handleInputChange("password")}
               error={!!validationErrors.password}
               helperText={validationErrors.password}
               disabled={isLoading}
@@ -168,7 +171,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
                       {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
-                )
+                ),
               }}
             />
 
@@ -183,19 +186,19 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
               {isLoading ? (
                 <CircularProgress size={24} color="inherit" />
               ) : (
-                'Accedi'
+                "Accedi"
               )}
             </Button>
 
             {onSwitchToRegister && (
-              <Box sx={{ textAlign: 'center' }}>
+              <Box sx={{ textAlign: "center" }}>
                 <Typography variant="body2" color="text.secondary">
-                  Non hai un account?{' '}
+                  Non hai un account?{" "}
                   <Button
                     variant="text"
                     onClick={onSwitchToRegister}
                     disabled={isLoading}
-                    sx={{ textTransform: 'none' }}
+                    sx={{ textTransform: "none" }}
                   >
                     Registrati
                   </Button>
@@ -203,18 +206,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
               </Box>
             )}
           </form>
-
-          <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              <strong>Account di test:</strong>
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Admin: <code>admin</code> / <code>admin123</code>
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Demo: <code>demo</code> / <code>demo123</code>
-            </Typography>
-          </Box>
         </CardContent>
       </Card>
     </Box>
