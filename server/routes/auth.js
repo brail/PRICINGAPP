@@ -5,6 +5,7 @@
 
 const express = require("express");
 const router = express.Router();
+const bcrypt = require("bcrypt");
 const User = require("../models/User");
 const {
   authenticateToken,
@@ -325,8 +326,11 @@ router.put("/me/password", authenticateToken, async (req, res) => {
       return res.status(400).json({ error: "Password corrente non corretta" });
     }
 
+    // Hash della nuova password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
     // Aggiorna password
-    await userModel.update(userId, { password: newPassword });
+    await userModel.update(userId, { password: hashedNewPassword });
 
     res.json({ message: "Password aggiornata con successo" });
   } catch (error) {
@@ -368,8 +372,11 @@ router.put(
         return res.status(404).json({ error: "Utente non trovato" });
       }
 
+      // Hash della nuova password
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
       // Aggiorna password
-      await userModel.update(userId, { password: newPassword });
+      await userModel.update(userId, { password: hashedNewPassword });
 
       res.json({ message: "Password aggiornata con successo" });
     } catch (error) {

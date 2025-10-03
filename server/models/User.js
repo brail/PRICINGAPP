@@ -146,6 +146,10 @@ class User {
       fields.push("is_active = ?");
       values.push(userData.is_active ? 1 : 0);
     }
+    if (userData.password) {
+      fields.push("password = ?");
+      values.push(userData.password);
+    }
 
     if (fields.length === 0) {
       throw new Error("Nessun campo da aggiornare");
