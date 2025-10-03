@@ -1,12 +1,12 @@
 /**
  * ===========================================
- * PRICING CALCULATOR v0.1 - Server
+ * PRICING CALCULATOR v0.2 - Server
  * ===========================================
  *
  * Express.js server per l'applicazione Pricing Calculator
  * Gestisce API per calcoli prezzi, parametri e set di configurazione
  *
- * @version 0.1.0
+ * @version 0.2.0-dev
  * @author Pricing Calculator Team
  * @since 2024
  */
@@ -16,6 +16,9 @@ const cors = require("cors");
 const axios = require("axios");
 const path = require("path");
 require("dotenv").config({ path: path.join(__dirname, ".env") });
+
+// Importa il sistema di logging
+const { logger, loggers } = require("./utils/logger");
 
 // Importa il modulo database
 const {
@@ -102,7 +105,7 @@ const loadParametersFromDatabase = async () => {
       // Parametri caricati dal database
     }
   } catch (error) {
-    console.error("Errore nel caricamento dei parametri dal database:", error);
+    loggers.error(error, { context: "loadParametersFromDatabase" });
   }
 };
 
@@ -127,7 +130,7 @@ async function getExchangeRates() {
     lastExchangeUpdate = now;
     return exchangeRates;
   } catch (error) {
-    console.error("Errore nel recupero tassi di cambio:", error);
+    loggers.error(error, { context: "getExchangeRates" });
     // Fallback con tassi fissi
     return {
       EUR: 1,
@@ -418,6 +421,9 @@ app.post("/api/calculate-selling", async (req, res) => {
 
     const result = await calculateSellingPrice(purchasePrice, params);
 
+    // Log del calcolo
+    loggers.calculation.selling(purchasePrice, result, params);
+
     res.json({
       ...result,
       purchaseCurrency: params.purchaseCurrency,
@@ -436,6 +442,9 @@ app.post("/api/calculate-purchase", async (req, res) => {
     const params = { ...currentParams };
 
     const result = await calculatePurchasePrice(retailPrice, params);
+
+    // Log del calcolo
+    loggers.calculation.purchase(retailPrice, result, params);
 
     res.json({
       ...result,
@@ -710,34 +719,45 @@ const startServer = async () => {
     const userModel = new User(require("./database").db);
     await userModel.initTable();
     await userModel.seedDefaultUsers();
-    console.log("✅ Seeding utenti completato");
+    logger.info("Seeding utenti completato");
 
     // Carica i parametri dal database
     await loadParametersFromDatabase();
-    console.log("✅ Parametri caricati dal database");
+    logger.info("Parametri caricati dal database");
+
+    // Log di avvio sistema
+    loggers.system.startup();
 
     // Avvia il server
     app.listen(PORT, HOST, () => {
-      console.log("🎉 Server avviato con successo!");
-      console.log(`📍 URL locale: http://localhost:${PORT}`);
-      console.log(`🌍 URL rete: http://[IP_LOCALE]:${PORT}`);
-      console.log(`🔍 Health check: http://localhost:${PORT}/api/health`);
-      console.log("📝 Logs disponibili in console");
+      logger.info("Server avviato con successo", {
+        port: PORT,
+        host: HOST,
+        environment: NODE_ENV,
+      });
+
+      if (NODE_ENV === "development") {
+        console.log("🎉 Server avviato con successo!");
+        console.log(`📍 URL locale: http://localhost:${PORT}`);
+        console.log(`🌍 URL rete: http://[IP_LOCALE]:${PORT}`);
+        console.log(`🔍 Health check: http://localhost:${PORT}/api/health`);
+        console.log("📝 Logs disponibili in console e file");
+      }
     });
   } catch (error) {
-    console.error("❌ Errore nell'inizializzazione del server:", error);
+    loggers.error(error, { context: "serverInitialization" });
     process.exit(1);
   }
 };
 
 // Gestione graceful shutdown
 process.on("SIGTERM", () => {
-  console.log("🛑 Ricevuto SIGTERM, chiusura graceful del server...");
+  loggers.system.shutdown();
   process.exit(0);
 });
 
 process.on("SIGINT", () => {
-  console.log("🛑 Ricevuto SIGINT, chiusura graceful del server...");
+  loggers.system.shutdown();
   process.exit(0);
 });
 

@@ -4,6 +4,7 @@
  */
 
 const bcrypt = require("bcrypt");
+const { loggers } = require("../utils/logger");
 
 class User {
   constructor(db) {
@@ -200,7 +201,7 @@ class User {
       // Controlla se esistono già utenti
       const existingUsers = await this.getAll();
       if (existingUsers.length > 0) {
-        console.log("Utenti già esistenti, seeding saltato.");
+        loggers.system.startup();
         return;
       }
 
@@ -220,9 +221,9 @@ class User {
         role: "demo",
       });
 
-      console.log("✅ Utenti di default creati con successo");
+      loggers.system.startup();
     } catch (error) {
-      console.error("Errore nel seeding utenti:", error);
+      loggers.error(error, { context: "seedDefaultUsers" });
     }
   }
 }
