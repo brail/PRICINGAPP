@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { pricingApi } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 import {
@@ -60,7 +60,7 @@ const Calculator: React.FC = () => {
   };
 
   // Funzione per caricare i set di parametri
-  const loadParameterSets = async () => {
+  const loadParameterSets = useCallback(async () => {
     try {
       setLoadingParameterSets(true);
       const sets = await pricingApi.getParameterSets();
@@ -84,9 +84,9 @@ const Calculator: React.FC = () => {
     } finally {
       setLoadingParameterSets(false);
     }
-  };
+  }, []);
 
-  const loadParams = async () => {
+  const loadParams = useCallback(async () => {
     try {
       // Prima prova a caricare i parametri salvati per questo utente
       const userParams = loadUserParameters();
@@ -140,20 +140,55 @@ const Calculator: React.FC = () => {
         );
       }
     }
-  };
+  }, [user]);
+
+  const loadDefaultParameters = useCallback(async () => {
+    try {
+      // Carica il set di parametri di default
+      const sets = await pricingApi.getParameterSets();
+      const defaultSet = sets.find(
+        (set) => set.is_default === 1 || set.description === "Parametri Default"
+      );
+
+      if (defaultSet) {
+        const defaultParams: CalculationParams = {
+          purchaseCurrency: defaultSet.purchase_currency,
+          sellingCurrency: defaultSet.selling_currency,
+          qualityControlPercent: defaultSet.quality_control_percent,
+          transportInsuranceCost: defaultSet.transport_insurance_cost,
+          duty: defaultSet.duty,
+          exchangeRate: defaultSet.exchange_rate,
+          italyAccessoryCosts: defaultSet.italy_accessory_costs,
+          tools: defaultSet.tools,
+          companyMultiplier: defaultSet.company_multiplier,
+          retailMultiplier: defaultSet.retail_multiplier,
+          optimalMargin: defaultSet.optimal_margin,
+        };
+
+        setParams(defaultParams);
+        setSelectedParameterSetId(defaultSet.id);
+        // Parametri caricati da set salvato
+        console.log("Parametri di default caricati:", defaultParams);
+      }
+    } catch (err) {
+      console.error("Errore nel caricamento dei parametri di default:", err);
+    }
+  }, []);
 
   // Carica parametri iniziali e set di parametri
   useEffect(() => {
-    loadParams();
     loadParameterSets();
-  }, [loadParams, loadParameterSets]);
+  }, [loadParameterSets]);
 
   // Carica i parametri quando cambia l'utente
   useEffect(() => {
     if (user) {
       loadParams();
+    } else {
+      // Se non c'è utente, carica i parametri di default
+      loadDefaultParameters();
     }
-  }, [user, loadParams]);
+  }, [user, loadParams, loadDefaultParameters]);
 
   // Aggiorna la selezione del set quando i parametri cambiano
   useEffect(() => {
@@ -185,39 +220,6 @@ const Calculator: React.FC = () => {
       }
     }
   }, [params, parameterSets, selectedParameterSetId]);
-
-  const loadDefaultParameters = async () => {
-    try {
-      // Carica il set di parametri di default
-      const sets = await pricingApi.getParameterSets();
-      const defaultSet = sets.find(
-        (set) => set.is_default === 1 || set.description === "Parametri Default"
-      );
-
-      if (defaultSet) {
-        const defaultParams: CalculationParams = {
-          purchaseCurrency: defaultSet.purchase_currency,
-          sellingCurrency: defaultSet.selling_currency,
-          qualityControlPercent: defaultSet.quality_control_percent,
-          transportInsuranceCost: defaultSet.transport_insurance_cost,
-          duty: defaultSet.duty,
-          exchangeRate: defaultSet.exchange_rate,
-          italyAccessoryCosts: defaultSet.italy_accessory_costs,
-          tools: defaultSet.tools,
-          companyMultiplier: defaultSet.company_multiplier,
-          retailMultiplier: defaultSet.retail_multiplier,
-          optimalMargin: defaultSet.optimal_margin,
-        };
-
-        setParams(defaultParams);
-        setSelectedParameterSetId(defaultSet.id);
-        // Parametri caricati da set salvato
-        console.log("Parametri di default caricati:", defaultParams);
-      }
-    } catch (err) {
-      console.error("Errore nel caricamento dei parametri di default:", err);
-    }
-  };
 
   const handleParameterSetChange = async (parameterSetId: number) => {
     if (!parameterSetId) {
@@ -357,10 +359,6 @@ const Calculator: React.FC = () => {
     }
   };
 
-  // Funzione per arrotondare al centesimo più vicino (0.10)
-  const roundToNearestCent = (value: number): number => {
-    return Math.round(value * 10) / 10;
-  };
 
   // Funzione per arrotondare il prezzo retail finale (stessa logica del server)
   const roundRetailPrice = (price: number): number => {
