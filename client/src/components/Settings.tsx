@@ -548,8 +548,7 @@ const Parameters: React.FC = () => {
   const loadSettings = async () => {
     try {
       setLoading(true);
-      const currentParams = await pricingApi.getParams();
-      // setParams(currentParams); // Commentato per v0.2 - gestito dal Calculator
+      // const currentParams = await pricingApi.getParams(); // Commentato per v0.2 - gestito dal Calculator
     } catch (err) {
       setError("Errore nel caricamento delle impostazioni");
     } finally {
@@ -962,8 +961,7 @@ const Parameters: React.FC = () => {
   const handleLoadParameterSet = async (id: number) => {
     try {
       setSaving(true);
-      const result = await pricingApi.loadParameterSet(id);
-      // setParams(result.params); // Commentato per v0.2 - gestito dal Calculator
+      // const result = await pricingApi.loadParameterSet(id); // Commentato per v0.2 - gestito dal Calculator
       setSuccess("Set di parametri caricato con successo");
     } catch (err: any) {
       setError(

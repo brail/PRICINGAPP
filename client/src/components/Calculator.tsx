@@ -86,50 +86,6 @@ const Calculator: React.FC = () => {
     }
   };
 
-  // Carica parametri iniziali e set di parametri
-  useEffect(() => {
-    loadParams();
-    loadParameterSets();
-  }, []);
-
-  // Carica i parametri quando cambia l'utente
-  useEffect(() => {
-    if (user) {
-      loadParams();
-    }
-  }, [user]);
-
-  // Aggiorna la selezione del set quando i parametri cambiano
-  useEffect(() => {
-    if (parameterSets.length > 0 && params) {
-      const matchingSet = parameterSets.find((set) => {
-        return (
-          set.purchase_currency === params.purchaseCurrency &&
-          set.selling_currency === params.sellingCurrency &&
-          set.quality_control_percent === params.qualityControlPercent &&
-          set.transport_insurance_cost === params.transportInsuranceCost &&
-          set.duty === params.duty &&
-          set.exchange_rate === params.exchangeRate &&
-          set.italy_accessory_costs === params.italyAccessoryCosts &&
-          set.tools === params.tools &&
-          set.company_multiplier === params.companyMultiplier &&
-          set.retail_multiplier === params.retailMultiplier &&
-          set.optimal_margin === params.optimalMargin
-        );
-      });
-
-      if (matchingSet) {
-        // Parametri caricati da set salvato
-        if (matchingSet.id !== selectedParameterSetId) {
-          setSelectedParameterSetId(matchingSet.id);
-        }
-      } else {
-        // Parametri personalizzati
-        setSelectedParameterSetId(null);
-      }
-    }
-  }, [params, parameterSets, selectedParameterSetId]);
-
   const loadParams = async () => {
     try {
       // Prima prova a caricare i parametri salvati per questo utente
@@ -185,6 +141,50 @@ const Calculator: React.FC = () => {
       }
     }
   };
+
+  // Carica parametri iniziali e set di parametri
+  useEffect(() => {
+    loadParams();
+    loadParameterSets();
+  }, []);
+
+  // Carica i parametri quando cambia l'utente
+  useEffect(() => {
+    if (user) {
+      loadParams();
+    }
+  }, [user]);
+
+  // Aggiorna la selezione del set quando i parametri cambiano
+  useEffect(() => {
+    if (parameterSets.length > 0 && params) {
+      const matchingSet = parameterSets.find((set) => {
+        return (
+          set.purchase_currency === params.purchaseCurrency &&
+          set.selling_currency === params.sellingCurrency &&
+          set.quality_control_percent === params.qualityControlPercent &&
+          set.transport_insurance_cost === params.transportInsuranceCost &&
+          set.duty === params.duty &&
+          set.exchange_rate === params.exchangeRate &&
+          set.italy_accessory_costs === params.italyAccessoryCosts &&
+          set.tools === params.tools &&
+          set.company_multiplier === params.companyMultiplier &&
+          set.retail_multiplier === params.retailMultiplier &&
+          set.optimal_margin === params.optimalMargin
+        );
+      });
+
+      if (matchingSet) {
+        // Parametri caricati da set salvato
+        if (matchingSet.id !== selectedParameterSetId) {
+          setSelectedParameterSetId(matchingSet.id);
+        }
+      } else {
+        // Parametri personalizzati
+        setSelectedParameterSetId(null);
+      }
+    }
+  }, [params, parameterSets, selectedParameterSetId]);
 
   const loadDefaultParameters = async () => {
     try {

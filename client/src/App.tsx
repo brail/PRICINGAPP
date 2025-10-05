@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  Routes,
-  Route,
-  Link,
   useLocation,
   useNavigate,
 } from "react-router-dom";
@@ -10,11 +7,7 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { Box, Typography } from "@mui/material";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import Calculator from "./components/Calculator";
-import Parameters from "./components/Parameters";
 import LoginForm from "./components/auth/LoginForm";
-import UserDashboard from "./components/auth/UserDashboard";
-import UserManagement from "./components/auth/UserManagement";
 import AuthenticatedApp from "./components/auth/AuthenticatedApp";
 import "./App.css";
 
