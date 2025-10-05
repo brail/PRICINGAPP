@@ -478,7 +478,7 @@ const Parameters: React.FC = () => {
     });
   };
 
-  // const [params, setParams] = useState<CalculationParams>({
+  // const [params, setParams] = useState({
   //   purchaseCurrency: "EUR",
   //   sellingCurrency: "EUR",
   //   qualityControlPercent: 5,

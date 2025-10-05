@@ -18,7 +18,6 @@ import {
 import {
   Person,
   AdminPanelSettings,
-  PersonAdd,
   Edit,
   Save,
   Cancel,
@@ -73,16 +72,6 @@ const UserDashboard: React.FC = () => {
     }
   };
 
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case "admin":
-        return "error";
-      case "user":
-        return "primary";
-      default:
-        return "default";
-    }
-  };
 
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return "Mai";

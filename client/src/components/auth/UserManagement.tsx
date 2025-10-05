@@ -19,7 +19,6 @@ import {
   Alert,
   CircularProgress,
   Typography,
-  IconButton,
 } from "@mui/material";
 import {
   Edit,
@@ -196,16 +195,6 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case "admin":
-        return "error";
-      case "user":
-        return "primary";
-      default:
-        return "default";
-    }
-  };
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Mai";

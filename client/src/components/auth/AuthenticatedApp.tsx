@@ -26,7 +26,6 @@ import {
 import {
   Calculate,
   Settings as SettingsIcon,
-  Dashboard,
   People,
   Logout,
   AccountCircle,

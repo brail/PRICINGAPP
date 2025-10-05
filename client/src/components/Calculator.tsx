@@ -146,14 +146,14 @@ const Calculator: React.FC = () => {
   useEffect(() => {
     loadParams();
     loadParameterSets();
-  }, []);
+  }, [loadParams, loadParameterSets]);
 
   // Carica i parametri quando cambia l'utente
   useEffect(() => {
     if (user) {
       loadParams();
     }
-  }, [user]);
+  }, [user, loadParams]);
 
   // Aggiorna la selezione del set quando i parametri cambiano
   useEffect(() => {
@@ -395,24 +395,6 @@ const Calculator: React.FC = () => {
     }
   };
 
-  // Gestore per le freccette del purchase price (step di 0.10)
-  const handlePurchasePriceArrowKey = (direction: "up" | "down") => {
-    if (purchasePriceLocked) return;
-
-    const currentValue = parseFloat(purchasePrice) || 0;
-    const step = direction === "up" ? 0.1 : -0.1;
-    const newValue = currentValue + step;
-
-    // Arrotonda al centesimo più vicino se necessario
-    const roundedValue = roundToNearestCent(newValue);
-    setPurchasePrice(roundedValue.toFixed(2));
-    setMode("purchase");
-
-    // Se il retail price è bloccato, calcola automaticamente il margine
-    if (retailPriceLocked) {
-      setTimeout(() => calculateMarginFromLockedPrice(), 100);
-    }
-  };
 
   // Gestore per le freccette del retail price (step di 5.00)
   const handleRetailPriceArrowKey = (direction: "up" | "down") => {
