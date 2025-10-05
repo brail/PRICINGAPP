@@ -1107,7 +1107,7 @@ const Parameters: React.FC = () => {
       {error && <div className="error">{error}</div>}
       {success && <div className="success">{success}</div>}
 
-      <div className="settings-grid">
+      <div className="parameters-grid">
         {/* Parametri di Calcolo - Temporaneamente nascosto */}
         {/* <div className="settings-card">
           <h3>Parametri di Calcolo</h3>
@@ -1346,8 +1346,8 @@ const Parameters: React.FC = () => {
         </div>
 
         {/* Gestione Set di Parametri */}
-        <div className="settings-card">
-          <div className="settings-card-header">
+        <div className="parameters-card">
+          <div className="parameters-card-header">
             <h3>Gestione Set di Parametri</h3>
             <button
               className="btn btn-primary"
@@ -1972,7 +1972,7 @@ const Parameters: React.FC = () => {
 
       {/* Azioni */}
       {/* Azioni di salvataggio - Temporaneamente nascoste */}
-      {/* <div className="settings-actions">
+      {/* <div className="parameters-actions">
         <button
           className="btn btn-secondary"
           onClick={handleReset}
@@ -1993,7 +1993,7 @@ const Parameters: React.FC = () => {
       </div> */}
 
       {/* Informazioni - Temporaneamente nascosto */}
-      {/* <div className="settings-info">
+      {/* <div className="parameters-info">
         <h4>Come funziona il calcolo</h4>
         <div className="calculation-steps">
           <div className="step">

@@ -1,60 +1,97 @@
-import React from "react";
-import { Routes, Route, Link, useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import {
+  Routes,
+  Route,
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import { Box, Typography } from "@mui/material";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Calculator from "./components/Calculator";
-import Settings from "./components/Settings";
+import Parameters from "./components/Parameters";
+import LoginForm from "./components/auth/LoginForm";
+import UserDashboard from "./components/auth/UserDashboard";
+import UserManagement from "./components/auth/UserManagement";
+import AuthenticatedApp from "./components/auth/AuthenticatedApp";
 import "./App.css";
 
-function App() {
+// Tema Material-UI
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#1976d2",
+    },
+    secondary: {
+      main: "#dc004e",
+    },
+  },
+});
+
+// Componente per la gestione dell'autenticazione
+const AppContent: React.FC = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+  const [hasRedirected, setHasRedirected] = useState(false);
+  const navigate = useNavigate();
   const location = useLocation();
 
+  // Redirect automatico alla calcolatrice solo dopo il primo login
+  // Non fare redirect se l'utente è già su una pagina autenticata
+  useEffect(() => {
+    if (isAuthenticated && !isLoading && !hasRedirected) {
+      // Solo se l'utente è sulla pagina di login o sulla root
+      if (location.pathname === "/" || location.pathname === "/login") {
+        setHasRedirected(true);
+        navigate("/");
+      } else {
+        // Se è già su una pagina autenticata, non fare redirect
+        setHasRedirected(true);
+      }
+    }
+  }, [isAuthenticated, isLoading, hasRedirected, navigate, location.pathname]);
+
+  // Reset del flag quando l'utente fa logout
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setHasRedirected(false);
+    }
+  }, [isAuthenticated]);
+
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        }}
+      >
+        <Typography variant="h6" color="white">
+          Caricamento...
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginForm />;
+  }
+
+  return <AuthenticatedApp />;
+};
+
+function App() {
   return (
-    <div className="App">
-      <nav className="navbar">
-        <div className="container">
-          <div className="nav-content">
-            <Link to="/" className="nav-title-link">
-              <h1 className="nav-title">Pricing Calculator</h1>
-            </Link>
-            <div className="nav-links">
-              <Link
-                to="/"
-                className={`nav-link ${
-                  location.pathname === "/" ? "active" : ""
-                }`}
-              >
-                Calcolatrice
-              </Link>
-              <Link
-                to="/settings"
-                className={`nav-link ${
-                  location.pathname === "/settings" ? "active" : ""
-                }`}
-              >
-                Impostazioni
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <main className="main-content">
-        <div className="container">
-          <Routes>
-            <Route path="/" element={<Calculator />} />
-            <Route path="/settings" element={<Settings />} />
-          </Routes>
-        </div>
-      </main>
-
-      <footer className="footer">
-        <div className="container">
-          <p className="text-center text-muted">
-            © 2025 LB Pricing Calculator - Calcolatrice prezzi con supporto
-            multivaluta
-          </p>
-        </div>
-      </footer>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

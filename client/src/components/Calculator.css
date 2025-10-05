@@ -499,6 +499,13 @@
   border-bottom: 1px solid #dee2e6;
 }
 
+.parameter-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .parameter-details-header h4 {
   color: #495057;
   margin: 0;
@@ -572,6 +579,11 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+  }
+
+  .parameter-actions {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .parameter-grid {
