@@ -18,6 +18,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { pricingApi } from "../services/api";
 import { CURRENCIES } from "../types";
+import ParameterSetWizard from "./ParameterSetWizard";
 import "./Parameters.css";
 
 // Componente per gli elementi sortabili
@@ -501,6 +502,7 @@ const Parameters: React.FC = () => {
   // Stati per la gestione dei set di parametri
   const [parameterSets, setParameterSets] = useState<any[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
   const [editingParameterSet, setEditingParameterSet] = useState<any | null>(
     null
   );
@@ -874,6 +876,23 @@ const Parameters: React.FC = () => {
         err.response?.data?.error ||
           "Errore nella creazione del set di parametri"
       );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleWizardSave = async (data: any) => {
+    try {
+      setSaving(true);
+      setError("");
+
+      await pricingApi.createParameterSet(data);
+      setSuccess("Set di parametri creato con successo!");
+      setShowWizard(false);
+      loadParameterSets();
+    } catch (err: any) {
+      setError(err.message || "Errore nella creazione del set di parametri");
+      throw err; // Rilancia l'errore per il wizard
     } finally {
       setSaving(false);
     }
@@ -1350,16 +1369,17 @@ const Parameters: React.FC = () => {
             <button
               className="btn btn-primary"
               onClick={() => {
-                if (!showCreateForm) {
-                  // Chiudi tutti gli altri form prima di aprire quello di creazione
+                if (!showWizard) {
+                  // Chiudi tutti gli altri form prima di aprire il wizard
                   setEditingParameterSet(null);
                   setDuplicatingParameterSet(null);
+                  setShowCreateForm(false);
                   resetCreateForm();
                 }
-                setShowCreateForm(!showCreateForm);
+                setShowWizard(!showWizard);
               }}
             >
-              {showCreateForm ? "Annulla" : "Crea Nuovo Set"}
+              {showWizard ? "Annulla" : "Crea Nuovo Set"}
             </button>
           </div>
 
@@ -1411,238 +1431,13 @@ const Parameters: React.FC = () => {
               )}
             </div>
 
-            {/* Form per Creare Nuovo Set */}
-            {showCreateForm && (
-              <div className="new-parameter-set-form">
-                <h4>Crea Nuovo Set di Parametri</h4>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Descrizione *</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={newParameterSet.description}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          description: e.target.value,
-                        })
-                      }
-                      placeholder="Nome del set di parametri"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Valuta acquisto *</label>
-                    <select
-                      className="form-select"
-                      value={newParameterSet.purchaseCurrency}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          purchaseCurrency: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="">Seleziona valuta</option>
-                      {CURRENCIES.map((currency) => (
-                        <option key={currency.code} value={currency.code}>
-                          {currency.code} - {currency.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Valuta vendita *</label>
-                    <select
-                      className="form-select"
-                      value={newParameterSet.sellingCurrency}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          sellingCurrency: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="">Seleziona valuta</option>
-                      {CURRENCIES.map((currency) => (
-                        <option key={currency.code} value={currency.code}>
-                          {currency.code} - {currency.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Quality Control (%) *</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={newParameterSet.qualityControlPercent}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          qualityControlPercent:
-                            e.target.value === "" ? "" : Number(e.target.value),
-                        })
-                      }
-                      min="0"
-                      step="0.1"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">
-                      Trasporto + Assicurazione *
-                    </label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={newParameterSet.transportInsuranceCost}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          transportInsuranceCost:
-                            e.target.value === "" ? "" : Number(e.target.value),
-                        })
-                      }
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Dazio (%) *</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={newParameterSet.duty}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          duty:
-                            e.target.value === "" ? "" : Number(e.target.value),
-                        })
-                      }
-                      min="0"
-                      step="0.1"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Cambio *</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={newParameterSet.exchangeRate}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          exchangeRate:
-                            e.target.value === "" ? "" : Number(e.target.value),
-                        })
-                      }
-                      min="0.001"
-                      step="0.001"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">
-                      Costi accessori Italia *
-                    </label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={newParameterSet.italyAccessoryCosts}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          italyAccessoryCosts:
-                            e.target.value === "" ? "" : Number(e.target.value),
-                        })
-                      }
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Tools *</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={newParameterSet.tools}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          tools:
-                            e.target.value === "" ? "" : Number(e.target.value),
-                        })
-                      }
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">
-                      Moltiplicatore retail *
-                    </label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={newParameterSet.retailMultiplier}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          retailMultiplier:
-                            e.target.value === "" ? "" : Number(e.target.value),
-                        })
-                      }
-                      min="0.1"
-                      step="0.01"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Margine ottimale (%) *</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={newParameterSet.optimalMargin}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          optimalMargin:
-                            e.target.value === "" ? "" : Number(e.target.value),
-                        })
-                      }
-                      min="0"
-                      max="100"
-                      step="0.1"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  className="btn btn-primary"
-                  onClick={handleCreateParameterSet}
-                  disabled={saving || validateForm().length > 0}
-                >
-                  {saving ? "Creazione..." : "Crea Set di Parametri"}
-                </button>
-              </div>
+            {/* Wizard per Creare Nuovo Set */}
+            {showWizard && (
+              <ParameterSetWizard
+                onSave={handleWizardSave}
+                onCancel={() => setShowWizard(false)}
+                saving={saving}
+              />
             )}
 
             {/* Form per Duplicare Set Esistente */}
