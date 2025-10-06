@@ -66,3 +66,5 @@ export const CURRENCIES = [
 ] as const;
 
 export type CurrencyCode = (typeof CURRENCIES)[number]["code"];
+
+export type CalculationMode = "purchase" | "selling";
