@@ -1,0 +1,97 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: pricing-calculator-backend
+    environment:
+      - NODE_ENV=production
+      - PORT=5001
+      - HOST=0.0.0.0
+      - DATABASE_PATH=./pricing.db
+      - FRONTEND_URL=http://luke.febos.local/pricingapp
+      - ALLOWED_ORIGINS=http://luke.febos.local
+      - JWT_SECRET=pricing-calculator-jwt-secret-2025-production
+      - JWT_REFRESH_SECRET=pricing-calculator-refresh-secret-2025-production
+      - LOG_LEVEL=info
+    volumes:
+      - pricing_data:/app/data
+      - pricing_logs:/app/logs
+    networks:
+      - pricing_network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:5001/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=http://luke.febos.local/pricingapp/api
+        - PUBLIC_URL=/pricingapp
+    container_name: pricing-calculator-frontend
+    networks:
+      - pricing_network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  nginx:
+    image: nginx:alpine
+    container_name: pricing-calculator-nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx-production.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - pricing_network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost/pricingapp/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  pricing_data:
+    driver: local
+  pricing_logs:
+    driver: local
+
+networks:
+  pricing_network:
+    driver: bridge

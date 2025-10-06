@@ -583,167 +583,25 @@ const Calculator: React.FC = () => {
       <div className="calculator-header">
         <h2>Calcolatrice Prezzi</h2>
         <p className="text-muted">
-          Inserisci un prezzo di acquisto per calcolare il prezzo retail, oppure
-          inserisci un prezzo retail per calcolare il prezzo di acquisto
-          necessario.
+          Inserisci un prezzo per calcolare l'altro automaticamente
         </p>
       </div>
 
       {error && <div className="error">{error}</div>}
 
-      {/* Input Unificato */}
-      <div className="input-card">
+      {/* Layout principale con focus sui prezzi */}
+      <div className="calculator-main-layout">
+        {/* Sezione principale - Form prezzi */}
+        <div className="price-inputs-section">
         <div className="input-card-header">
           <h3>Calcolo Prezzi</h3>
           <button className="btn btn-secondary" onClick={clearAll}>
-            Pulisci Tutto
+            Pulisci
           </button>
         </div>
-        {/* Selezione Set di Parametri */}
-        <div className="parameter-set-selector">
-          <label className="form-label">Set di Parametri:</label>
-          <select
-            className="form-select"
-            value={selectedParameterSetId || ""}
-            onChange={(e) => handleParameterSetChange(Number(e.target.value))}
-            disabled={loadingParameterSets}
-          >
-            {parameterSets.map((set) => (
-              <option key={set.id} value={set.id}>
-                {set.description}
-              </option>
-            ))}
-          </select>
-          {loadingParameterSets && (
-            <span className="loading-text">Caricamento...</span>
-          )}
-        </div>
 
-        {/* Dettagli Set di Parametri Caricato */}
-        {params && (
-          <div className="parameter-set-details">
-            <div className="parameter-details-header">
-              <h4>
-                Parametri Attivi
-                {selectedParameterSetId && (
-                  <span className="parameter-set-badge">
-                    {parameterSets.find(
-                      (set) => set.id === selectedParameterSetId
-                    )?.description || "Set Caricato"}
-                  </span>
-                )}
-                {!selectedParameterSetId && (
-                  <span className="parameter-set-badge default">
-                    {(() => {
-                      // Controlla se ci sono parametri salvati per questo utente
-                      const userParams = loadUserParameters();
-                      if (userParams) {
-                        return "Parametri personalizzati utente";
-                      }
-
-                      // Trova il set che corrisponde ai parametri attualmente caricati
-                      const activeSet = parameterSets.find((set) => {
-                        return (
-                          set.purchase_currency === params.purchaseCurrency &&
-                          set.selling_currency === params.sellingCurrency &&
-                          set.quality_control_percent ===
-                            params.qualityControlPercent &&
-                          set.transport_insurance_cost ===
-                            params.transportInsuranceCost &&
-                          set.duty === params.duty &&
-                          set.exchange_rate === params.exchangeRate &&
-                          set.italy_accessory_costs ===
-                            params.italyAccessoryCosts &&
-                          set.tools === params.tools &&
-                          set.retail_multiplier === params.retailMultiplier &&
-                          set.optimal_margin === params.optimalMargin
-                        );
-                      });
-                      return (
-                        activeSet?.description || "Parametri personalizzati"
-                      );
-                    })()}
-                  </span>
-                )}
-              </h4>
-              <button
-                className="btn btn-sm btn-secondary"
-                onClick={() => setShowParameterDetails(!showParameterDetails)}
-              >
-                {showParameterDetails ? "Nascondi Dettagli" : "Mostra Dettagli"}
-              </button>
-            </div>
-            {showParameterDetails && (
-              <div className="parameter-grid">
-                <div className="parameter-item">
-                  <span className="parameter-label">Valuta Acquisto:</span>
-                  <span className="parameter-value">
-                    {params.purchaseCurrency}
-                  </span>
-                </div>
-                <div className="parameter-item">
-                  <span className="parameter-label">Valuta Vendita:</span>
-                  <span className="parameter-value">
-                    {params.sellingCurrency}
-                  </span>
-                </div>
-                <div className="parameter-item">
-                  <span className="parameter-label">Quality Control:</span>
-                  <span className="parameter-value">
-                    {params.qualityControlPercent}%
-                  </span>
-                </div>
-                <div className="parameter-item">
-                  <span className="parameter-label">
-                    Trasporto + Assicurazione:
-                  </span>
-                  <span className="parameter-value">
-                    {params.transportInsuranceCost} {params.purchaseCurrency}
-                  </span>
-                </div>
-                <div className="parameter-item">
-                  <span className="parameter-label">Dazio:</span>
-                  <span className="parameter-value">{params.duty}%</span>
-                </div>
-                <div className="parameter-item">
-                  <span className="parameter-label">Cambio:</span>
-                  <span className="parameter-value">{params.exchangeRate}</span>
-                </div>
-                <div className="parameter-item">
-                  <span className="parameter-label">
-                    Costi Accessori Italia:
-                  </span>
-                  <span className="parameter-value">
-                    {params.italyAccessoryCosts} {params.sellingCurrency}
-                  </span>
-                </div>
-                <div className="parameter-item">
-                  <span className="parameter-label">Tools:</span>
-                  <span className="parameter-value">
-                    {params.tools} {params.purchaseCurrency}
-                  </span>
-                </div>
-                <div className="parameter-item">
-                  <span className="parameter-label">
-                    Moltiplicatore Retail:
-                  </span>
-                  <span className="parameter-value">
-                    {params.retailMultiplier}
-                  </span>
-                </div>
-                <div className="parameter-item">
-                  <span className="parameter-label">Margine Ottimale:</span>
-                  <span className="parameter-value">
-                    {params.optimalMargin}%
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="form-grid">
-          <div className="form-group">
+        <div className="price-form-grid">
+          <div className="price-input-group">
             <label className="form-label">
               Prezzo di acquisto ({params.purchaseCurrency})
             </label>
@@ -795,7 +653,7 @@ const Calculator: React.FC = () => {
               </label>
             </div>
           </div>
-          <div className="form-group">
+          <div className="price-input-group">
             <label className="form-label">
               Prezzo retail ({params.sellingCurrency})
             </label>
@@ -905,6 +763,72 @@ const Calculator: React.FC = () => {
             "Calcola"
           )}
         </button>
+        </div>
+
+        {/* Sidebar con parametri compatti */}
+        <div className="sidebar-section">
+          {/* Selezione Set di Parametri */}
+          <div className="sidebar-card">
+            <h4>Parametri</h4>
+            <div className="form-group">
+              <label className="form-label">Set di Parametri:</label>
+              <select
+                className="form-select"
+                value={selectedParameterSetId || ""}
+                onChange={(e) => handleParameterSetChange(Number(e.target.value))}
+                disabled={loadingParameterSets}
+              >
+                {parameterSets.map((set) => (
+                  <option key={set.id} value={set.id}>
+                    {set.description}
+                  </option>
+                ))}
+              </select>
+              {loadingParameterSets && (
+                <span className="loading-text">Caricamento...</span>
+              )}
+            </div>
+          </div>
+
+          {/* Dettagli Set di Parametri Caricato - Compatti */}
+          {params && (
+            <div className="sidebar-card">
+              <h4>Parametri Attivi</h4>
+              <div className="parameter-grid">
+                <div className="parameter-item">
+                  <span className="parameter-label">Valuta:</span>
+                  <span className="parameter-value">
+                    {params.purchaseCurrency} → {params.sellingCurrency}
+                  </span>
+                </div>
+                <div className="parameter-item">
+                  <span className="parameter-label">QC:</span>
+                  <span className="parameter-value">
+                    {params.qualityControlPercent}%
+                  </span>
+                </div>
+                <div className="parameter-item">
+                  <span className="parameter-label">Dazio:</span>
+                  <span className="parameter-value">
+                    {params.duty}%
+                  </span>
+                </div>
+                <div className="parameter-item">
+                  <span className="parameter-label">Retail:</span>
+                  <span className="parameter-value">
+                    {params.retailMultiplier}x
+                  </span>
+                </div>
+                <div className="parameter-item">
+                  <span className="parameter-label">Target:</span>
+                  <span className="parameter-value">
+                    {params.optimalMargin}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Risultati Dettagliati */}

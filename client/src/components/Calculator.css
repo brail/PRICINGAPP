@@ -1,17 +1,19 @@
 .calculator {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 0 16px;
 }
 
 .calculator-header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .calculator-header h2 {
   color: #333;
   margin-bottom: 8px;
-  font-size: 28px;
+  font-size: 24px;
+  font-weight: 700;
 }
 
 .calculator-grid {
@@ -21,11 +23,40 @@
   margin-bottom: 32px;
 }
 
+/* Layout principale con focus sui prezzi */
+.calculator-main-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.price-inputs-section {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 32px;
+  border: 2px solid #e3f2fd;
+  transition: all 0.3s ease;
+}
+
+.price-inputs-section:hover {
+  border-color: #2196f3;
+  box-shadow: 0 6px 25px rgba(33, 150, 243, 0.15);
+  transform: translateY(-2px);
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .input-card {
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 24px;
+  padding: 20px;
   border: 2px solid transparent;
   transition: all 0.2s ease;
 }
@@ -47,6 +78,49 @@
   margin: 0;
   font-size: 20px;
   font-weight: 600;
+}
+
+/* Form prezzi principali - più prominenti */
+.price-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.price-input-group {
+  position: relative;
+}
+
+.price-input-group .form-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1976d2;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.price-input-group .form-input {
+  font-size: 18px;
+  padding: 16px 20px;
+  border: 2px solid #e3f2fd;
+  border-radius: 12px;
+  background: #fafafa;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.price-input-group .form-input:focus {
+  border-color: #2196f3;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.1);
+  transform: translateY(-1px);
+}
+
+.price-input-group .form-input.locked {
+  background: #f5f5f5;
+  border-color: #bdbdbd;
+  color: #757575;
 }
 
 .form-grid {
@@ -277,14 +351,50 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1024px) {
+  .calculator-main-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .price-inputs-section {
+    padding: 24px;
+  }
+}
+
 @media (max-width: 768px) {
+  .calculator {
+    padding: 0 12px;
+  }
+  
+  .calculator-header {
+    margin-bottom: 20px;
+  }
+  
+  .calculator-header h2 {
+    font-size: 22px;
+  }
+  
+  .calculator-main-layout {
+    gap: 16px;
+  }
+  
+  .price-inputs-section {
+    padding: 20px;
+  }
+  
+  .price-form-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
   .calculator-grid {
     grid-template-columns: 1fr;
     gap: 16px;
   }
 
   .input-card {
-    padding: 20px;
+    padding: 16px;
   }
 
   .input-with-currency {
@@ -319,6 +429,59 @@
 
   .result-value {
     font-size: 18px;
+  }
+}
+
+/* iPhone e dispositivi piccoli */
+@media (max-width: 480px) {
+  .calculator {
+    padding: 0 8px;
+  }
+  
+  .calculator-header h2 {
+    font-size: 20px;
+  }
+  
+  .price-inputs-section {
+    padding: 16px;
+    border-radius: 12px;
+  }
+  
+  .price-input-group .form-input {
+    font-size: 16px;
+    padding: 14px 16px;
+  }
+  
+  .sidebar-card {
+    padding: 12px;
+  }
+  
+  .input-card {
+    padding: 12px;
+  }
+}
+
+/* iPhone specifico */
+@media (max-width: 414px) {
+  .calculator-header h2 {
+    font-size: 18px;
+  }
+  
+  .price-inputs-section {
+    padding: 12px;
+  }
+  
+  .price-input-group .form-input {
+    font-size: 16px;
+    padding: 12px 14px;
+  }
+  
+  .sidebar-card {
+    padding: 10px;
+  }
+  
+  .parameter-set-details {
+    padding: 12px;
   }
 }
 
@@ -480,14 +643,47 @@
   }
 }
 
-/* Parameter Set Details Styles */
+/* Sidebar compatta */
+.sidebar-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 16px;
+  border: 1px solid #f0f0f0;
+}
+
+.sidebar-card h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-card .form-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.sidebar-card .form-select,
+.sidebar-card .form-input {
+  font-size: 14px;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+}
+
+/* Parameter Set Details Styles - compatti */
 .parameter-set-details {
   background: #f8f9fa;
   border: 1px solid #e9ecef;
   border-radius: 8px;
-  padding: 20px;
-  margin-top: 16px;
-  margin-bottom: 24px;
+  padding: 16px;
+  margin-top: 12px;
+  margin-bottom: 16px;
 }
 
 .parameter-details-header {
