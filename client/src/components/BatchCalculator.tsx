@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { CalculationMode } from "../types";
 import { pricingApi } from "../services/api";
 import * as ExcelJS from "exceljs";
@@ -34,16 +34,13 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
 }) => {
   const [calculationMode, setCalculationMode] =
     useState<CalculationMode>("purchase");
-  const [inputMethod, setInputMethod] = useState<"paste" | "upload" | "manual">(
-    "paste"
-  );
+  const [inputMethod, setInputMethod] = useState<"paste" | "upload">("paste");
   const [inputData, setInputData] = useState<number[] | number[][]>([]);
   const [results, setResults] = useState<BatchResult[]>([]);
   const [isCalculating, setIsCalculating] = useState(false);
   const [error, setError] = useState<string>("");
   const [pasteText, setPasteText] = useState("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [manualData, setManualData] = useState<number[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -106,7 +103,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       });
 
       if (hasTwoColumns && calculationMode === "margin") {
-        // Restituisci array di coppie per calcolo margine
+        // CORRETTO: Due colonne per calcolo margine
         const pairs: number[][] = [];
 
         for (const line of lines) {
@@ -123,8 +120,8 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
 
         console.log("Debug: returning pairs", pairs.length, "pairs");
         return pairs;
-      } else {
-        // Restituisci array singolo per altri calcoli
+      } else if (!hasTwoColumns && calculationMode !== "margin") {
+        // CORRETTO: Singola colonna per calcoli acquisto/vendita
         const numbers: number[] = [];
 
         for (const line of lines) {
@@ -141,6 +138,14 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
 
         console.log("Debug: returning numbers", numbers.length, "numbers");
         return numbers;
+      } else {
+        // ERRORE: Formato non compatibile con la modalità selezionata
+        console.log("Debug: formato non compatibile", {
+          hasTwoColumns,
+          calculationMode,
+          isSingleColumn,
+        });
+        return []; // Restituisce array vuoto per indicare errore
       }
     },
     [calculationMode, cleanNumericValue]
@@ -153,14 +158,48 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       setPasteText(text);
       const parsed = parsePasteData(text);
       setInputData(parsed);
+
       if (parsed.length === 0 && text.trim()) {
-        setError("Nessun numero valido trovato");
+        // Determina il tipo di errore specifico
+        if (calculationMode === "margin") {
+          setError(
+            "Per il calcolo margine sono necessarie due colonne (acquisto; vendita)"
+          );
+        } else {
+          setError(
+            "Per il calcolo acquisto/vendita è necessaria una sola colonna"
+          );
+        }
       } else {
         setError("");
       }
     },
     [parsePasteData, calculationMode]
   );
+
+  // Validazione automatica quando cambia la modalità di calcolo
+  useEffect(() => {
+    if (pasteText.trim() && inputMethod === "paste") {
+      // Rivalida i dati esistenti quando cambia la modalità
+      const parsed = parsePasteData(pasteText);
+      setInputData(parsed);
+
+      if (parsed.length === 0 && pasteText.trim()) {
+        // Determina il tipo di errore specifico
+        if (calculationMode === "margin") {
+          setError(
+            "Per il calcolo margine sono necessarie due colonne (acquisto; vendita)"
+          );
+        } else {
+          setError(
+            "Per il calcolo acquisto/vendita è necessaria una sola colonna"
+          );
+        }
+      } else {
+        setError("");
+      }
+    }
+  }, [calculationMode, pasteText, inputMethod, parsePasteData]);
 
   // Gestione upload file
   const handleFileUpload = useCallback(
@@ -273,16 +312,22 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
           );
 
           if (hasTwoColumns && calculationMode === "margin") {
-            // Due colonne per calcolo margine
+            // Due colonne per calcolo margine - CORRETTO
             setInputData(numericData as number[][]);
             console.log("Dati Excel caricati:", numericData.length, "coppie");
-          } else if (!hasTwoColumns) {
-            // Singola colonna per calcoli normali
+          } else if (!hasTwoColumns && calculationMode !== "margin") {
+            // Singola colonna per calcoli acquisto/vendita - CORRETTO
             setInputData(numericData as number[]);
             console.log("Dati Excel caricati:", numericData.length, "valori");
-          } else {
+          } else if (hasTwoColumns && calculationMode !== "margin") {
+            // ERRORE: Due colonne per calcolo acquisto/vendita
             setError(
-              "Per il calcolo margine sono necessarie due colonne nel file Excel"
+              "Per il calcolo acquisto/vendita è necessaria una sola colonna nel file"
+            );
+          } else if (!hasTwoColumns && calculationMode === "margin") {
+            // ERRORE: Una colonna per calcolo margine
+            setError(
+              "Per il calcolo margine sono necessarie due colonne nel file"
             );
           }
         } catch (error) {
@@ -301,33 +346,6 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       }
     },
     [calculationMode, cleanNumericValue]
-  );
-
-  // Gestione input manuale
-  const handleManualDataChange = useCallback(
-    (index: number, value: string) => {
-      const num = parseFloat(value);
-      if (!isNaN(num) && num >= 0) {
-        const newData = [...manualData];
-        newData[index] = num;
-        setManualData(newData);
-        setInputData(newData.filter((n) => !isNaN(n)));
-      }
-    },
-    [manualData]
-  );
-
-  const addManualRow = useCallback(() => {
-    setManualData([...manualData, 0]);
-  }, [manualData]);
-
-  const removeManualRow = useCallback(
-    (index: number) => {
-      const newData = manualData.filter((_, i) => i !== index);
-      setManualData(newData);
-      setInputData(newData.filter((n) => !isNaN(n)));
-    },
-    [manualData]
   );
 
   // Calcolo batch
@@ -419,19 +437,6 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
         { header: "PREZZO VENDITA", key: "sellingPrice", width: 18 },
         { header: "MARGINE", key: "margin", width: 12 },
       ];
-
-      // Determina quale colonna evidenziare (il dato CALCOLATO, non quello di input)
-      let highlightColumn = -1;
-      if (calculationMode === "purchase") {
-        // Input: prezzo vendita → Calcolo: prezzo acquisto → Evidenzia colonna 2 (Prezzo Acquisto)
-        highlightColumn = 2; // Prezzo Acquisto (calcolato)
-      } else if (calculationMode === "selling") {
-        // Input: prezzo acquisto → Calcolo: prezzo vendita → Evidenzia colonna 3 (Prezzo Vendita)
-        highlightColumn = 3; // Prezzo Vendita (calcolato)
-      } else if (calculationMode === "margin") {
-        // Input: entrambi → Calcolo: margine → Evidenzia colonna 4 (Margine)
-        highlightColumn = 4; // Margine (calcolato)
-      }
 
       // Formatta prima le intestazioni (riga 1)
       const headerRow = resultsSheet.getRow(1);
@@ -632,7 +637,6 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
     setResults([]);
     setPasteText("");
     setUploadedFile(null);
-    setManualData([]);
     setError("");
   }, []);
 
@@ -690,12 +694,6 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
           >
             Upload Excel
           </button>
-          <button
-            className={`method-btn ${inputMethod === "manual" ? "active" : ""}`}
-            onClick={() => setInputMethod("manual")}
-          >
-            Input Manuale
-          </button>
         </div>
       </div>
 
@@ -704,15 +702,21 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
         {inputMethod === "paste" && (
           <div className="paste-input">
             <label>
-              Incolla i dati (uno per riga o separati da punto e virgola ;):
+              {calculationMode === "margin"
+                ? "Incolla due colonne (acquisto; vendita) - una coppia per riga:"
+                : calculationMode === "purchase"
+                ? "Incolla i prezzi di acquisto (uno per riga):"
+                : "Incolla i prezzi di vendita (uno per riga):"}
             </label>
             <textarea
               value={pasteText}
               onChange={handlePasteChange}
               placeholder={
                 calculationMode === "margin"
-                  ? "Copia due colonne da Excel (acquisto e vendita) oppure usa: 10;20&#10;15;25&#10;20;30"
-                  : "Esempio: 10;20;30 oppure 10&#10;20&#10;30"
+                  ? "Copia due colonne da Excel oppure:\n10;20\n15;25\n20;30"
+                  : calculationMode === "purchase"
+                  ? "Copia una colonna da Excel oppure:\n10\n15\n20"
+                  : "Copia una colonna da Excel oppure:\n10\n15\n20"
               }
               rows={6}
             />
@@ -759,37 +763,6 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
                 <p>Dimensione: {(uploadedFile.size / 1024).toFixed(1)} KB</p>
               </div>
             )}
-          </div>
-        )}
-
-        {inputMethod === "manual" && (
-          <div className="manual-input">
-            <label>Inserisci i valori manualmente:</label>
-            <div className="manual-values">
-              {manualData.map((value, index) => (
-                <div key={index} className="manual-row">
-                  <input
-                    type="number"
-                    value={value || ""}
-                    onChange={(e) =>
-                      handleManualDataChange(index, e.target.value)
-                    }
-                    placeholder="Valore"
-                    min="0"
-                    step="0.01"
-                  />
-                  <button
-                    className="remove-btn"
-                    onClick={() => removeManualRow(index)}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-              <button className="add-btn" onClick={addManualRow}>
-                + Aggiungi Valore
-              </button>
-            </div>
           </div>
         )}
       </div>

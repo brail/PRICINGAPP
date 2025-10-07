@@ -143,13 +143,6 @@
   margin-bottom: 8px;
 }
 
-.paste-input label::after {
-  content: " (usa | per separare i valori)";
-  font-weight: 400;
-  color: #6c757d;
-  font-size: 0.85rem;
-}
-
 .paste-input textarea:focus {
   outline: none;
   border-color: #6c757d;
@@ -212,32 +205,6 @@
   margin: 4px 0;
   color: #6c757d;
   font-size: 0.85rem;
-}
-
-/* Input manuale */
-.manual-values {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.manual-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.manual-row input {
-  flex: 1;
-  padding: 8px 12px;
-  border: 2px solid #e9ecef;
-  border-radius: 6px;
-  font-size: 0.9rem;
-}
-
-.manual-row input:focus {
-  outline: none;
-  border-color: #6c757d;
 }
 
 .remove-btn {
