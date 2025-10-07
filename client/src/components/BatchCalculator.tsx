@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef } from "react";
 import { CalculationMode } from "../types";
 import { pricingApi } from "../services/api";
+import * as ExcelJS from "exceljs";
 import "./BatchCalculator.css";
 
 interface BatchResult {
@@ -163,18 +164,143 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
 
   // Gestione upload file
   const handleFileUpload = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
 
       setUploadedFile(file);
       setError("");
 
-      // TODO: Implementare parsing file Excel
-      // Per ora mostriamo solo il nome del file
-      console.log("File caricato:", file.name);
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const data = event.target?.result;
+          if (!data) return;
+
+          let jsonData: any[] = [];
+
+          // Determina il tipo di file e leggi di conseguenza
+          if (file.name.toLowerCase().endsWith(".csv")) {
+            // Per file CSV, leggi come testo e converti in array
+            const csvText = data as string;
+            const lines = csvText.split("\n");
+            jsonData = lines.map((line) => {
+              // Gestisce virgole e punti e virgola come separatori
+              const separator = line.includes(";") ? ";" : ",";
+              return line.split(separator).map((cell) => cell.trim());
+            });
+          } else {
+            // Per file Excel - usa ExcelJS
+            const workbook = new ExcelJS.Workbook();
+            await workbook.xlsx.load(data as ArrayBuffer);
+            const worksheet = workbook.getWorksheet(1);
+            if (worksheet) {
+              jsonData = [];
+              worksheet.eachRow((row, rowNumber) => {
+                const rowData: any[] = [];
+                row.eachCell((cell, colNumber) => {
+                  rowData[colNumber - 1] = cell.value;
+                });
+                jsonData.push(rowData);
+              });
+            }
+          }
+
+          // Funzione per rilevare se una riga contiene solo intestazioni (testo)
+          const isHeaderRow = (row: any): boolean => {
+            if (!Array.isArray(row)) return false;
+            return row.every((cell: any) => {
+              const str = String(cell).trim();
+              return str === "" || isNaN(Number(str)) || str === "undefined";
+            });
+          };
+
+          // Funzione per rilevare se una riga è vuota
+          const isEmptyRow = (row: any): boolean => {
+            if (!Array.isArray(row)) return true;
+            return row.every(
+              (cell: any) => !cell || String(cell).trim() === ""
+            );
+          };
+
+          // Rimuovi intestazioni e righe vuote
+          const cleanData = jsonData
+            .filter((row: any) => !isEmptyRow(row) && !isHeaderRow(row))
+            .map((row: any) => {
+              if (Array.isArray(row)) {
+                // Rimuovi celle vuote dall'inizio e dalla fine
+                const trimmedRow = row.filter(
+                  (cell: any) =>
+                    cell !== undefined && String(cell).trim() !== ""
+                );
+                return trimmedRow;
+              }
+              return row;
+            })
+            .filter((row: any) => row && row.length > 0);
+
+          console.log("Dati puliti dal file Excel:", cleanData);
+
+          // Converte in numeri
+          const numericData = cleanData
+            .map((row: any) => {
+              if (Array.isArray(row)) {
+                // Se è un array (due colonne), converte entrambi i valori
+                if (row.length >= 2) {
+                  const val1 = cleanNumericValue(String(row[0]));
+                  const val2 = cleanNumericValue(String(row[1]));
+                  return [val1, val2];
+                } else if (row.length === 1) {
+                  // Se è una singola colonna, converte solo il primo valore
+                  return cleanNumericValue(String(row[0]));
+                }
+              } else {
+                // Se è un singolo valore
+                return cleanNumericValue(String(row));
+              }
+              return null;
+            })
+            .filter((item: any) => item !== null && item !== 0);
+
+          if (numericData.length === 0) {
+            setError("Nessun dato numerico valido trovato nel file");
+            return;
+          }
+
+          // Determina se sono coppie o singoli valori
+          const hasTwoColumns = numericData.every((item: any) =>
+            Array.isArray(item)
+          );
+
+          if (hasTwoColumns && calculationMode === "margin") {
+            // Due colonne per calcolo margine
+            setInputData(numericData as number[][]);
+            console.log("Dati Excel caricati:", numericData.length, "coppie");
+          } else if (!hasTwoColumns) {
+            // Singola colonna per calcoli normali
+            setInputData(numericData as number[]);
+            console.log("Dati Excel caricati:", numericData.length, "valori");
+          } else {
+            setError(
+              "Per il calcolo margine sono necessarie due colonne nel file Excel"
+            );
+          }
+        } catch (error) {
+          console.error("Errore nel parsing del file Excel:", error);
+          setError(
+            "Errore nel leggere il file. Assicurati che sia un file .xlsx o .csv valido."
+          );
+        }
+      };
+
+      // Leggi il file come testo per CSV o come ArrayBuffer per Excel
+      if (file.name.toLowerCase().endsWith(".csv")) {
+        reader.readAsText(file);
+      } else {
+        reader.readAsArrayBuffer(file);
+      }
     },
-    []
+    [calculationMode, cleanNumericValue]
   );
 
   // Gestione input manuale
@@ -276,26 +402,229 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
   }, [inputData, calculationMode, onCalculate]);
 
   // Export Excel
-  const handleExportExcel = useCallback(() => {
+  const handleExportExcel = useCallback(async () => {
     if (results.length === 0) return;
 
-    // TODO: Implementare export Excel
-    console.log("Export Excel:", results);
+    try {
+      // Crea un nuovo workbook con ExcelJS
+      const workbook = new ExcelJS.Workbook();
 
-    // Per ora mostriamo i dati in console in formato CSV
-    const csvHeader =
-      "Valuta Acquisto,Prezzo Acquisto,Valuta Vendita,Prezzo Vendita,Margine (%)";
-    const csvRows = results.map(
-      (result) =>
-        `${result.purchaseCurrency},${result.purchasePrice.toFixed(2)},${
-          result.sellingCurrency
-        },${result.sellingPrice.toFixed(2)},${result.margin.toFixed(2)}%`
-    );
-    const csvContent = [csvHeader, ...csvRows].join("\n");
+      // Crea il primo foglio "Risultati Calcolo"
+      const resultsSheet = workbook.addWorksheet("Risultati Calcolo");
 
-    console.log("CSV Content:");
-    console.log(csvContent);
-  }, [results]);
+      // Imposta le intestazioni
+      resultsSheet.columns = [
+        { header: "DAZIO", key: "duty", width: 12 },
+        { header: "PREZZO ACQUISTO", key: "purchasePrice", width: 18 },
+        { header: "PREZZO VENDITA", key: "sellingPrice", width: 18 },
+        { header: "MARGINE", key: "margin", width: 12 },
+      ];
+
+      // Determina quale colonna evidenziare (il dato CALCOLATO, non quello di input)
+      let highlightColumn = -1;
+      if (calculationMode === "purchase") {
+        // Input: prezzo vendita → Calcolo: prezzo acquisto → Evidenzia colonna 2 (Prezzo Acquisto)
+        highlightColumn = 2; // Prezzo Acquisto (calcolato)
+      } else if (calculationMode === "selling") {
+        // Input: prezzo acquisto → Calcolo: prezzo vendita → Evidenzia colonna 3 (Prezzo Vendita)
+        highlightColumn = 3; // Prezzo Vendita (calcolato)
+      } else if (calculationMode === "margin") {
+        // Input: entrambi → Calcolo: margine → Evidenzia colonna 4 (Margine)
+        highlightColumn = 4; // Margine (calcolato)
+      }
+
+      // Formatta prima le intestazioni (riga 1)
+      const headerRow = resultsSheet.getRow(1);
+      headerRow.eachCell((cell, colNumber) => {
+        cell.font = { bold: true };
+        cell.alignment = { horizontal: "center" };
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFD3D3D3" },
+        };
+      });
+
+      // Aggiungi i dati
+      results.forEach((result) => {
+        const row = resultsSheet.addRow({
+          duty: (params.duty || 0) / 100,
+          purchasePrice: result.purchasePrice,
+          sellingPrice: result.sellingPrice,
+          margin: result.margin / 100,
+        });
+
+        // Formatta le celle dati
+        row.eachCell((cell, colNumber) => {
+          // Formattazione dati
+          if (colNumber === 1) {
+            // Dazio - percentuale
+            cell.numFmt = "0.00%";
+          } else if (colNumber === 2) {
+            // Prezzo Acquisto - valuta
+            cell.numFmt = `"${params.purchaseCurrency}" #,##0.00`;
+          } else if (colNumber === 3) {
+            // Prezzo Vendita - valuta
+            cell.numFmt = `"${params.sellingCurrency}" #,##0.00`;
+          } else if (colNumber === 4) {
+            // Margine - percentuale
+            cell.numFmt = "0.00%";
+          }
+
+          // Evidenziazione rimossa per richiesta utente
+        });
+      });
+
+      // Crea il secondo foglio "Parametri"
+      const parametersSheet = workbook.addWorksheet("Parametri");
+
+      // Aggiungi le informazioni di testa
+      parametersSheet.addRow([
+        "Data e ora elaborazione:",
+        new Date().toLocaleString("it-IT"),
+      ]);
+      parametersSheet.addRow([
+        "Parametri utilizzati:",
+        params.description || "Parametri predefiniti",
+      ]);
+
+      // Aggiungi il tipo di calcolo eseguito
+      let calculationType = "";
+      if (calculationMode === "purchase") {
+        calculationType = "Da prezzo vendita a prezzo acquisto";
+      } else if (calculationMode === "selling") {
+        calculationType = "Da prezzo acquisto a prezzo vendita";
+      } else if (calculationMode === "margin") {
+        calculationType = "Calcolo margine da prezzo acquisto e vendita";
+      }
+
+      parametersSheet.addRow(["Tipo di calcolo:", calculationType]);
+      parametersSheet.addRow([]); // Riga vuota
+      parametersSheet.addRow(["PARAMETRO", "VALORE"]); // Intestazioni tabella
+
+      // Aggiungi i parametri
+      const parametersData = [
+        ["Valuta Acquisto", params.purchaseCurrency],
+        ["Valuta Vendita", params.sellingCurrency],
+        ["Controllo Qualità (%)", params.qualityControlPercent / 100],
+        ["Costo Trasporto e Assicurazione", params.transportInsuranceCost],
+        ["Dazio (%)", params.duty / 100],
+        ["Tasso di Cambio", params.exchangeRate],
+        ["Costi Accessori Italia", params.italyAccessoryCosts],
+        ["Tools", params.tools],
+        ["Moltiplicatore Azienda", params.companyMultiplier],
+        ["Moltiplicatore Retail", params.retailMultiplier],
+        ["Margine Ottimale (%)", params.optimalMargin / 100],
+      ];
+
+      parametersData.forEach(([paramName, value]) => {
+        parametersSheet.addRow([paramName, value]);
+      });
+
+      // Formatta il foglio parametri
+      parametersSheet.columns = [{ width: 25 }, { width: 20 }];
+
+      // Formatta le prime tre righe (data, nome parametri e tipo calcolo)
+      for (let row = 1; row <= 3; row++) {
+        const excelRow = parametersSheet.getRow(row);
+        excelRow.eachCell((cell) => {
+          cell.font = { bold: true };
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFE6E6FA" },
+          };
+        });
+      }
+
+      // Formatta le intestazioni della tabella (riga 5)
+      const parametersHeaderRow = parametersSheet.getRow(5);
+      parametersHeaderRow.eachCell((cell) => {
+        cell.font = { bold: true };
+        cell.alignment = { horizontal: "center" };
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFD3D3D3" },
+        };
+        cell.border = {
+          top: { style: "thin" },
+          bottom: { style: "thin" },
+          left: { style: "thin" },
+          right: { style: "thin" },
+        };
+      });
+
+      // Formatta le righe dei parametri (dalla riga 6 in poi)
+      for (let row = 6; row <= parametersSheet.rowCount; row++) {
+        const excelRow = parametersSheet.getRow(row);
+        const paramName = excelRow.getCell(1).value as string;
+        const valueCell = excelRow.getCell(2);
+
+        // Formatta la cella chiave (nome parametro)
+        excelRow.getCell(1).font = { bold: true };
+        excelRow.getCell(1).border = {
+          top: { style: "thin" },
+          bottom: { style: "thin" },
+          left: { style: "thin" },
+          right: { style: "thin" },
+        };
+
+        // Formatta la cella valore
+        valueCell.alignment = { horizontal: "right" };
+        valueCell.border = {
+          top: { style: "thin" },
+          bottom: { style: "thin" },
+          left: { style: "thin" },
+          right: { style: "thin" },
+        };
+
+        // Formattazione specifica per tipo di parametro
+        if (paramName.includes("(%)") || paramName === "Margine Ottimale (%)") {
+          valueCell.numFmt = "0.00%";
+        } else if (paramName.includes("Costo") || paramName === "Tools") {
+          let currency = "";
+          if (paramName.includes("Costo Trasporto") || paramName === "Tools") {
+            currency = params.purchaseCurrency;
+          } else if (paramName.includes("Costi Accessori")) {
+            currency = params.sellingCurrency;
+          }
+          if (currency) {
+            valueCell.numFmt = `"${currency}" #,##0.00`;
+          }
+        } else if (
+          paramName === "Tasso di Cambio" ||
+          paramName.includes("Moltiplicatore")
+        ) {
+          valueCell.numFmt = "#,##0.00";
+        }
+      }
+
+      // Genera il nome del file con timestamp
+      const timestamp = new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace(/:/g, "-");
+      const fileName = `risultati_calcolo_${timestamp}.xlsx`;
+
+      // Scarica il file
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      link.click();
+      window.URL.revokeObjectURL(url);
+
+      console.log("File Excel esportato:", fileName);
+    } catch (error) {
+      console.error("Errore nell'export Excel:", error);
+      setError("Errore nell'export del file Excel");
+    }
+  }, [results, params, calculationMode]);
 
   // Reset
   const handleReset = useCallback(() => {
@@ -410,11 +739,11 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
 
         {inputMethod === "upload" && (
           <div className="upload-input">
-            <label>Carica file Excel (.xlsx):</label>
+            <label>Carica file Excel/CSV (.xlsx, .csv):</label>
             <input
               ref={fileInputRef}
               type="file"
-              accept=".xlsx,.xls"
+              accept=".xlsx,.xls,.csv"
               onChange={handleFileUpload}
               style={{ display: "none" }}
             />
