@@ -24,6 +24,7 @@ import {
   Email,
 } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
+import Logo from "../Logo";
 
 interface RegisterFormProps {
   onSwitchToLogin?: () => void;
@@ -139,11 +140,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
       >
         <CardContent sx={{ p: 4 }}>
           <Box sx={{ textAlign: "center", mb: 3 }}>
+            <Logo variant="black" size="large" />
             <Typography
               variant="h4"
               component="h1"
               gutterBottom
               color="primary"
+              sx={{ mt: 2 }}
             >
               Pricing Calculator
             </Typography>
