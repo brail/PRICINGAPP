@@ -96,7 +96,7 @@ const WizardStep3: React.FC<WizardStep3Props> = ({
       </p>
 
       <div className="wizard-form-section">
-        <h4>📊 Moltiplicatori di Vendita</h4>
+        <h4>Moltiplicatori di Vendita</h4>
 
         <div className="wizard-form-group">
           <label className="wizard-form-label">Moltiplicatore Retail *</label>
@@ -127,7 +127,7 @@ const WizardStep3: React.FC<WizardStep3Props> = ({
       </div>
 
       <div className="wizard-form-section">
-        <h4>🎯 Margine Ottimale</h4>
+        <h4>Margine Ottimale</h4>
 
         <div className="wizard-form-group">
           <label className="wizard-form-label">Margine Ottimale (%) *</label>
@@ -158,7 +158,7 @@ const WizardStep3: React.FC<WizardStep3Props> = ({
       {/* Anteprima del calcolo */}
       {exampleCalculation && (
         <div className="wizard-preview">
-          <h4>🧮 Anteprima Calcolo</h4>
+          <h4>Anteprima Calcolo</h4>
           <p
             style={{ fontSize: "14px", color: "#6c757d", marginBottom: "16px" }}
           >
@@ -220,9 +220,9 @@ const WizardStep3: React.FC<WizardStep3Props> = ({
       {/* Riepilogo finale */}
       <div
         className="wizard-preview"
-        style={{ marginTop: "24px", background: "#e8f5e8" }}
+        style={{ marginTop: "24px", background: "#f8f9fa" }}
       >
-        <h4>✅ Riepilogo Finale</h4>
+        <h4>Riepilogo Finale</h4>
         <div className="wizard-preview-item">
           <span className="wizard-preview-label">Nome Set:</span>
           <span className="wizard-preview-value">

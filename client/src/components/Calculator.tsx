@@ -86,6 +86,40 @@ const Calculator: React.FC = () => {
     }
   }, []);
 
+  // Funzione per caricare i parametri di default
+  const loadDefaultParameters = useCallback(async () => {
+    try {
+      // Carica il set di parametri di default
+      const sets = await pricingApi.getParameterSets();
+      const defaultSet = sets.find(
+        (set) => set.is_default === 1 || set.description === "Parametri Default"
+      );
+
+      if (defaultSet) {
+        const defaultParams: CalculationParams = {
+          purchaseCurrency: defaultSet.purchase_currency,
+          sellingCurrency: defaultSet.selling_currency,
+          qualityControlPercent: defaultSet.quality_control_percent,
+          transportInsuranceCost: defaultSet.transport_insurance_cost,
+          duty: defaultSet.duty,
+          exchangeRate: defaultSet.exchange_rate,
+          italyAccessoryCosts: defaultSet.italy_accessory_costs,
+          tools: defaultSet.tools,
+          companyMultiplier: defaultSet.company_multiplier,
+          retailMultiplier: defaultSet.retail_multiplier,
+          optimalMargin: defaultSet.optimal_margin,
+        };
+
+        setParams(defaultParams);
+        setSelectedParameterSetId(defaultSet.id);
+        setError("");
+      }
+    } catch (err) {
+      console.error("Errore nel caricamento dei parametri di default:", err);
+      setError("Errore nel caricamento dei parametri di default");
+    }
+  }, []);
+
   const loadParams = useCallback(async () => {
     try {
       // Prima prova a caricare i parametri salvati per questo utente
@@ -142,39 +176,6 @@ const Calculator: React.FC = () => {
     }
   }, [user]);
 
-  const loadDefaultParameters = useCallback(async () => {
-    try {
-      // Carica il set di parametri di default
-      const sets = await pricingApi.getParameterSets();
-      const defaultSet = sets.find(
-        (set) => set.is_default === 1 || set.description === "Parametri Default"
-      );
-
-      if (defaultSet) {
-        const defaultParams: CalculationParams = {
-          purchaseCurrency: defaultSet.purchase_currency,
-          sellingCurrency: defaultSet.selling_currency,
-          qualityControlPercent: defaultSet.quality_control_percent,
-          transportInsuranceCost: defaultSet.transport_insurance_cost,
-          duty: defaultSet.duty,
-          exchangeRate: defaultSet.exchange_rate,
-          italyAccessoryCosts: defaultSet.italy_accessory_costs,
-          tools: defaultSet.tools,
-          companyMultiplier: defaultSet.company_multiplier,
-          retailMultiplier: defaultSet.retail_multiplier,
-          optimalMargin: defaultSet.optimal_margin,
-        };
-
-        setParams(defaultParams);
-        setSelectedParameterSetId(defaultSet.id);
-        // Parametri caricati da set salvato
-        console.log("Parametri di default caricati:", defaultParams);
-      }
-    } catch (err) {
-      console.error("Errore nel caricamento dei parametri di default:", err);
-    }
-  }, []);
-
   // Carica parametri iniziali e set di parametri
   useEffect(() => {
     loadParameterSets();
@@ -188,7 +189,7 @@ const Calculator: React.FC = () => {
       // Se non c'è utente, carica i parametri di default
       loadDefaultParameters();
     }
-  }, [user, loadParams, loadDefaultParameters]);
+  }, [user, loadParams]);
 
   // Aggiorna la selezione del set quando i parametri cambiano
   useEffect(() => {
@@ -359,7 +360,6 @@ const Calculator: React.FC = () => {
     }
   };
 
-
   // Funzione per arrotondare il prezzo retail finale (stessa logica del server)
   const roundRetailPrice = (price: number): number => {
     if (isNaN(price) || !isFinite(price) || price <= 0) {
@@ -392,7 +392,6 @@ const Calculator: React.FC = () => {
       return tens + 4.9;
     }
   };
-
 
   // Gestore per le freccette del retail price (step di 5.00)
   const handleRetailPriceArrowKey = (direction: "up" | "down") => {
@@ -593,176 +592,178 @@ const Calculator: React.FC = () => {
       <div className="calculator-main-layout">
         {/* Sezione principale - Form prezzi */}
         <div className="price-inputs-section">
-        <div className="input-card-header">
-          <h3>Calcolo Prezzi</h3>
-          <button className="btn btn-secondary" onClick={clearAll}>
-            Pulisci
-          </button>
-        </div>
+          <div className="input-card-header">
+            <h3>Calcolo Prezzi</h3>
+            <button className="btn btn-secondary" onClick={clearAll}>
+              Pulisci
+            </button>
+          </div>
 
-        <div className="price-form-grid">
-          <div className="price-input-group">
-            <label className="form-label">
-              Prezzo di acquisto ({params.purchaseCurrency})
-            </label>
-            <div className="input-with-lock">
-              <input
-                type="number"
-                className={`form-input ${purchasePriceLocked ? "locked" : ""}`}
-                value={purchasePrice}
-                onChange={(e) => handlePurchasePriceChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleCalculate();
-                  }
-                }}
-                onWheel={(e) => e.preventDefault()}
-                onFocus={(e) => {
-                  e.target.addEventListener(
-                    "wheel",
-                    (event) => {
+          <div className="price-form-grid">
+            <div className="price-input-group">
+              <label className="form-label">
+                Prezzo di acquisto ({params.purchaseCurrency})
+              </label>
+              <div className="input-with-lock">
+                <input
+                  type="number"
+                  className={`form-input ${
+                    purchasePriceLocked ? "locked" : ""
+                  }`}
+                  value={purchasePrice}
+                  onChange={(e) => handlePurchasePriceChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleCalculate();
+                    }
+                  }}
+                  onWheel={(e) => e.preventDefault()}
+                  onFocus={(e) => {
+                    e.target.addEventListener(
+                      "wheel",
+                      (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      },
+                      { passive: false }
+                    );
+                  }}
+                  onBlur={(e) => {
+                    handlePurchasePriceBlur();
+                    e.target.removeEventListener("wheel", (event) => {
                       event.preventDefault();
                       event.stopPropagation();
-                    },
-                    { passive: false }
-                  );
-                }}
-                onBlur={(e) => {
-                  handlePurchasePriceBlur();
-                  e.target.removeEventListener("wheel", (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                  });
-                }}
-                placeholder="0.00"
-                step="0.10"
-                min="0"
-                disabled={purchasePriceLocked}
-              />
-              <label className="lock-checkbox">
-                <input
-                  type="checkbox"
-                  checked={purchasePriceLocked}
-                  onChange={handlePurchasePriceLockToggle}
-                  disabled={
-                    (!purchasePrice || isNaN(Number(purchasePrice))) &&
-                    !purchasePriceLocked
-                  }
-                />
-                <span className="lock-icon">🔒</span>
-              </label>
-            </div>
-          </div>
-          <div className="price-input-group">
-            <label className="form-label">
-              Prezzo retail ({params.sellingCurrency})
-            </label>
-            <div className="input-with-lock">
-              <input
-                type="number"
-                className={`form-input ${retailPriceLocked ? "locked" : ""}`}
-                value={retailPrice}
-                onChange={(e) => handleRetailPriceChange(e.target.value)}
-                onKeyDown={handleRetailPriceKeyDown}
-                onWheel={(e) => e.preventDefault()}
-                onFocus={(e) => {
-                  e.target.addEventListener(
-                    "wheel",
-                    (event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                    },
-                    { passive: false }
-                  );
-                }}
-                onBlur={(e) => {
-                  handleRetailPriceBlur();
-                  e.target.removeEventListener("wheel", (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                  });
-                }}
-                placeholder="0.00"
-                step="5.00"
-                min="0"
-                disabled={retailPriceLocked}
-              />
-              <label className="lock-checkbox">
-                <input
-                  type="checkbox"
-                  checked={retailPriceLocked}
-                  onChange={handleRetailPriceLockToggle}
-                  disabled={
-                    (!retailPrice || isNaN(Number(retailPrice))) &&
-                    !retailPriceLocked
-                  }
-                />
-                <span className="lock-icon">🔒</span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Margine Aziendale */}
-        {calculation && (
-          <div
-            className={`margin-display ${getMarginColor(
-              calculation.companyMargin,
-              params.optimalMargin
-            )}`}
-          >
-            <div className="margin-item">
-              <span className="margin-label">Margine Aziendale:</span>
-              <span className="margin-value">
-                {(calculation.companyMargin * 100).toFixed(2)}% (richiesto:{" "}
-                {params.optimalMargin}%)
-              </span>
-            </div>
-            <div className="margin-bar-container">
-              <div className="margin-bar">
-                <div
-                  className="margin-bar-fill"
-                  style={{
-                    width: `${Math.min(
-                      100,
-                      Math.max(0, calculation.companyMargin * 100)
-                    )}%`,
+                    });
                   }}
-                ></div>
-                <div
-                  className="margin-bar-target"
-                  style={{
-                    left: `${Math.min(
-                      100,
-                      Math.max(0, params.optimalMargin)
-                    )}%`,
-                  }}
-                ></div>
+                  placeholder="0.00"
+                  step="0.10"
+                  min="0"
+                  disabled={purchasePriceLocked}
+                />
+                <label className="lock-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={purchasePriceLocked}
+                    onChange={handlePurchasePriceLockToggle}
+                    disabled={
+                      (!purchasePrice || isNaN(Number(purchasePrice))) &&
+                      !purchasePriceLocked
+                    }
+                  />
+                  <span className="lock-icon">🔒</span>
+                </label>
               </div>
-              <div className="margin-bar-labels">
-                <span>0%</span>
-                <span className="target-label">
-                  Target: {params.optimalMargin}%
+            </div>
+            <div className="price-input-group">
+              <label className="form-label">
+                Prezzo retail ({params.sellingCurrency})
+              </label>
+              <div className="input-with-lock">
+                <input
+                  type="number"
+                  className={`form-input ${retailPriceLocked ? "locked" : ""}`}
+                  value={retailPrice}
+                  onChange={(e) => handleRetailPriceChange(e.target.value)}
+                  onKeyDown={handleRetailPriceKeyDown}
+                  onWheel={(e) => e.preventDefault()}
+                  onFocus={(e) => {
+                    e.target.addEventListener(
+                      "wheel",
+                      (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      },
+                      { passive: false }
+                    );
+                  }}
+                  onBlur={(e) => {
+                    handleRetailPriceBlur();
+                    e.target.removeEventListener("wheel", (event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                    });
+                  }}
+                  placeholder="0.00"
+                  step="5.00"
+                  min="0"
+                  disabled={retailPriceLocked}
+                />
+                <label className="lock-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={retailPriceLocked}
+                    onChange={handleRetailPriceLockToggle}
+                    disabled={
+                      (!retailPrice || isNaN(Number(retailPrice))) &&
+                      !retailPriceLocked
+                    }
+                  />
+                  <span className="lock-icon">🔒</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Margine Aziendale */}
+          {calculation && (
+            <div
+              className={`margin-display ${getMarginColor(
+                calculation.companyMargin,
+                params.optimalMargin
+              )}`}
+            >
+              <div className="margin-item">
+                <span className="margin-label">Margine Aziendale:</span>
+                <span className="margin-value">
+                  {(calculation.companyMargin * 100).toFixed(2)}% (richiesto:{" "}
+                  {params.optimalMargin}%)
                 </span>
-                <span>100%</span>
+              </div>
+              <div className="margin-bar-container">
+                <div className="margin-bar">
+                  <div
+                    className="margin-bar-fill"
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        Math.max(0, calculation.companyMargin * 100)
+                      )}%`,
+                    }}
+                  ></div>
+                  <div
+                    className="margin-bar-target"
+                    style={{
+                      left: `${Math.min(
+                        100,
+                        Math.max(0, params.optimalMargin)
+                      )}%`,
+                    }}
+                  ></div>
+                </div>
+                <div className="margin-bar-labels">
+                  <span>0%</span>
+                  <span className="target-label">
+                    Target: {params.optimalMargin}%
+                  </span>
+                  <span>100%</span>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-
-        <button
-          className="btn btn-primary"
-          onClick={handleCalculate}
-          disabled={loading || (!purchasePrice && !retailPrice)}
-        >
-          {loading ? (
-            <span className="loading"></span>
-          ) : purchasePriceLocked || retailPriceLocked ? (
-            "Calcola Margine"
-          ) : (
-            "Calcola"
           )}
-        </button>
+
+          <button
+            className="btn btn-primary"
+            onClick={handleCalculate}
+            disabled={loading || (!purchasePrice && !retailPrice)}
+          >
+            {loading ? (
+              <span className="loading"></span>
+            ) : purchasePriceLocked || retailPriceLocked ? (
+              "Calcola Margine"
+            ) : (
+              "Calcola"
+            )}
+          </button>
         </div>
 
         {/* Sidebar con parametri compatti */}
@@ -775,7 +776,9 @@ const Calculator: React.FC = () => {
               <select
                 className="form-select"
                 value={selectedParameterSetId || ""}
-                onChange={(e) => handleParameterSetChange(Number(e.target.value))}
+                onChange={(e) =>
+                  handleParameterSetChange(Number(e.target.value))
+                }
                 disabled={loadingParameterSets}
               >
                 {parameterSets.map((set) => (
@@ -802,16 +805,12 @@ const Calculator: React.FC = () => {
                   </span>
                 </div>
                 <div className="parameter-item">
-                  <span className="parameter-label">QC:</span>
-                  <span className="parameter-value">
-                    {params.qualityControlPercent}%
-                  </span>
+                  <span className="parameter-label">Cambio:</span>
+                  <span className="parameter-value">{params.exchangeRate}</span>
                 </div>
                 <div className="parameter-item">
                   <span className="parameter-label">Dazio:</span>
-                  <span className="parameter-value">
-                    {params.duty}%
-                  </span>
+                  <span className="parameter-value">{params.duty}%</span>
                 </div>
                 <div className="parameter-item">
                   <span className="parameter-label">Retail:</span>

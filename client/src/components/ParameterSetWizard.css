@@ -2,17 +2,19 @@
 .parameter-wizard {
   max-width: 800px;
   margin: 0 auto;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background: #fafbfc;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   overflow: hidden;
+  border: 1px solid #e8ecf0;
 }
 
 /* Wizard Header */
 .wizard-header {
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-  color: white;
-  padding: 24px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  color: #495057;
+  padding: 28px;
+  border-bottom: 1px solid #e8ecf0;
 }
 
 .wizard-progress {
@@ -30,7 +32,7 @@
   left: 40px;
   right: 40px;
   height: 2px;
-  background: rgba(255, 255, 255, 0.3);
+  background: #dee2e6;
   z-index: 1;
 }
 
@@ -49,24 +51,27 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
+  background: #e9ecef;
+  color: #6c757d;
   border-radius: 50%;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 16px;
   margin-bottom: 8px;
   transition: all 0.3s ease;
+  border: 2px solid #e9ecef;
 }
 
 .wizard-step.active .step-number {
-  background: white;
-  color: #007bff;
-  transform: scale(1.1);
+  background: #6c757d;
+  color: white;
+  border-color: #6c757d;
+  transform: scale(1.05);
 }
 
 .wizard-step.completed .step-number {
   background: #28a745;
   color: white;
+  border-color: #28a745;
 }
 
 .step-title {
@@ -93,6 +98,7 @@
 .wizard-content {
   padding: 32px;
   min-height: 400px;
+  background: white;
 }
 
 /* Wizard Footer */
@@ -102,7 +108,7 @@
   align-items: center;
   padding: 24px 32px;
   background: #f8f9fa;
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid #e8ecf0;
 }
 
 .wizard-footer-left,
@@ -119,19 +125,20 @@
 }
 
 .wizard-step-title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
+  font-size: 22px;
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 12px;
   text-align: center;
+  letter-spacing: -0.01em;
 }
 
 .wizard-step-description {
-  font-size: 16px;
+  font-size: 15px;
   color: #6c757d;
   margin-bottom: 32px;
   text-align: center;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .wizard-form-section {
@@ -139,12 +146,12 @@
 }
 
 .wizard-form-section h4 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
+  font-size: 16px;
+  font-weight: 500;
+  color: #495057;
   margin-bottom: 16px;
   padding-bottom: 8px;
-  border-bottom: 2px solid #e9ecef;
+  border-bottom: 1px solid #e8ecf0;
 }
 
 .wizard-form-row {

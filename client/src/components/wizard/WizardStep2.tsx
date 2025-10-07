@@ -58,7 +58,7 @@ const WizardStep2: React.FC<WizardStep2Props> = ({
       </p>
 
       <div className="wizard-form-section">
-        <h4>🔍 Quality Control e Controlli</h4>
+        <h4>Quality Control e Controlli</h4>
 
         <div className="wizard-form-group">
           <label className="wizard-form-label">Quality Control (%) *</label>
@@ -90,7 +90,7 @@ const WizardStep2: React.FC<WizardStep2Props> = ({
       </div>
 
       <div className="wizard-form-section">
-        <h4>🚚 Trasporto e Logistica</h4>
+        <h4>Trasporto e Logistica</h4>
 
         <div className="wizard-form-row">
           <div className="wizard-form-group">
@@ -148,7 +148,7 @@ const WizardStep2: React.FC<WizardStep2Props> = ({
       </div>
 
       <div className="wizard-form-section">
-        <h4>💱 Cambio e Accessori</h4>
+        <h4>Cambio e Accessori</h4>
 
         <div className="wizard-form-row">
           <div className="wizard-form-group">
@@ -239,7 +239,7 @@ const WizardStep2: React.FC<WizardStep2Props> = ({
         data.italyAccessoryCosts !== "" ||
         data.tools !== "") && (
         <div className="wizard-preview">
-          <h4>💰 Riepilogo Costi</h4>
+          <h4>Riepilogo Costi</h4>
           {data.qualityControlPercent !== "" && (
             <div className="wizard-preview-item">
               <span className="wizard-preview-label">Quality Control:</span>

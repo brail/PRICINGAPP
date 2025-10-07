@@ -32,7 +32,7 @@ const WizardStep1: React.FC<WizardStep1Props> = ({
       </p>
 
       <div className="wizard-form-section">
-        <h4>📋 Dettagli del Set</h4>
+        <h4>Dettagli del Set</h4>
 
         <div className="wizard-form-group">
           <label className="wizard-form-label">
@@ -57,7 +57,7 @@ const WizardStep1: React.FC<WizardStep1Props> = ({
       </div>
 
       <div className="wizard-form-section">
-        <h4>💱 Configurazione Valute</h4>
+        <h4>Configurazione Valute</h4>
 
         <div className="wizard-form-row">
           <div className="wizard-form-group">
@@ -117,7 +117,7 @@ const WizardStep1: React.FC<WizardStep1Props> = ({
       {/* Preview delle valute selezionate */}
       {data.purchaseCurrency && data.sellingCurrency && (
         <div className="wizard-preview">
-          <h4>📊 Anteprima Configurazione</h4>
+          <h4>Anteprima Configurazione</h4>
           <div className="wizard-preview-item">
             <span className="wizard-preview-label">Nome Set:</span>
             <span className="wizard-preview-value">
