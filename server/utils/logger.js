@@ -107,6 +107,14 @@ const loggers = {
         category: "calculation",
       });
     },
+    margin: (purchasePrice, retailPrice, companyMargin, params) => {
+      logger.info("Margin calculation", {
+        purchasePrice,
+        retailPrice,
+        margin: companyMargin,
+        category: "calculation",
+      });
+    },
   },
 
   // Logging errori

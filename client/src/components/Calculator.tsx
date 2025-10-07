@@ -7,6 +7,7 @@ import {
   PurchasePriceCalculation,
   CURRENCIES,
 } from "../types";
+import BatchCalculator from "./BatchCalculator";
 import "./Calculator.css";
 
 type CalculationMode = "purchase" | "selling" | "margin";
@@ -300,6 +301,65 @@ const Calculator: React.FC = () => {
     }
   };
 
+  // Funzione per calcoli batch
+  const handleBatchCalculate = useCallback(
+    async (
+      mode: CalculationMode,
+      input: number
+    ): Promise<{
+      purchasePrice: number;
+      sellingPrice: number;
+      margin: number;
+      purchaseCurrency: string;
+      sellingCurrency: string;
+    }> => {
+      try {
+        if (mode === "purchase") {
+          const result = await pricingApi.calculateSellingPrice(
+            input,
+            params.sellingCurrency
+          );
+          return {
+            purchasePrice: result.purchasePrice,
+            sellingPrice: result.retailPrice,
+            margin: result.companyMargin * 100, // Converti in percentuale
+            purchaseCurrency: result.purchaseCurrency,
+            sellingCurrency: result.sellingCurrency,
+          };
+        } else if (mode === "selling") {
+          const result = await pricingApi.calculatePurchasePrice(
+            input,
+            params.sellingCurrency
+          );
+          return {
+            purchasePrice: result.purchasePrice,
+            sellingPrice: result.retailPrice,
+            margin: result.companyMargin * 100, // Converti in percentuale
+            purchaseCurrency: result.purchaseCurrency,
+            sellingCurrency: result.sellingCurrency,
+          };
+        } else {
+          // Per il calcolo del margine, assumiamo che input sia il prezzo di vendita
+          const result = await pricingApi.calculatePurchasePrice(
+            input,
+            params.sellingCurrency
+          );
+          return {
+            purchasePrice: result.purchasePrice,
+            sellingPrice: result.retailPrice,
+            margin: result.companyMargin * 100, // Converti in percentuale
+            purchaseCurrency: result.purchaseCurrency,
+            sellingCurrency: result.sellingCurrency,
+          };
+        }
+      } catch (err) {
+        console.error("Batch calculation error:", err);
+        throw err;
+      }
+    },
+    [params.sellingCurrency]
+  );
+
   const handlePurchasePriceChange = (value: string) => {
     if (purchasePriceLocked) return; // Non modificare se bloccato
     setPurchasePrice(value);
@@ -483,31 +543,32 @@ const Calculator: React.FC = () => {
   const calculateMarginFromLockedPrice = async () => {
     if (purchasePriceLocked && retailPrice && !isNaN(Number(retailPrice))) {
       // Purchase price è bloccato
-      // landedCost = da calculateSellingPrice (con purchasePrice bloccato)
-      // wholesalePrice = da calculatePurchasePrice (con retailPrice inserito nel form)
       try {
-        // Calcola landedCost dal purchase price bloccato
-        const sellingResult = await pricingApi.calculateSellingPrice(
+        // Usa il nuovo endpoint per calcolare il margine
+        const marginResult = await pricingApi.calculateMargin(
           Number(purchasePrice),
-          params.sellingCurrency
+          Number(retailPrice)
         );
-
-        // Calcola wholesalePrice dal retail price inserito nel form
-        const purchaseResult = await pricingApi.calculatePurchasePrice(
-          Number(retailPrice),
-          params.sellingCurrency
-        );
-
-        const retailPriceValue = Number(retailPrice);
-        const landedCost = sellingResult.landedCost;
-        const wholesalePrice = purchaseResult.wholesalePrice;
-        const companyMargin = (wholesalePrice - landedCost) / wholesalePrice;
 
         // Crea un oggetto di calcolo personalizzato per il margine
         const marginCalculation = {
-          ...sellingResult, // Usa sellingResult come base per mantenere i dettagli del calcolo diretto
-          retailPrice: retailPriceValue,
-          companyMargin: companyMargin,
+          purchasePrice: marginResult.purchasePrice,
+          retailPrice: marginResult.retailPrice,
+          landedCost: marginResult.landedCost,
+          wholesalePrice: marginResult.wholesalePrice,
+          companyMargin: marginResult.companyMargin,
+          purchaseCurrency: marginResult.purchaseCurrency,
+          sellingCurrency: marginResult.sellingCurrency,
+          params: marginResult.params,
+          // Mantieni i dettagli del calcolo per compatibilità
+          qualityControlCost: 0,
+          priceWithQC: 0,
+          transportInsuranceCost: 0,
+          priceWithTransport: 0,
+          dutyCost: 0,
+          priceWithDuty: 0,
+          italyAccessoryCosts: 0,
+          retailPriceRaw: marginResult.retailPrice,
         };
 
         setCalculation(marginCalculation);
@@ -520,31 +581,32 @@ const Calculator: React.FC = () => {
       !isNaN(Number(purchasePrice))
     ) {
       // Retail price è bloccato
-      // wholesalePrice = da calculatePurchasePrice (con retailPrice bloccato)
-      // landedCost = da calculateSellingPrice (con purchasePrice inserito nel form)
       try {
-        // Calcola wholesalePrice dal retail price bloccato
-        const purchaseResult = await pricingApi.calculatePurchasePrice(
-          Number(retailPrice),
-          params.sellingCurrency
-        );
-
-        // Calcola landedCost dal purchase price inserito nel form
-        const sellingResult = await pricingApi.calculateSellingPrice(
+        // Usa il nuovo endpoint per calcolare il margine
+        const marginResult = await pricingApi.calculateMargin(
           Number(purchasePrice),
-          params.sellingCurrency
+          Number(retailPrice)
         );
-
-        const retailPriceValue = Number(retailPrice);
-        const landedCost = sellingResult.landedCost;
-        const wholesalePrice = purchaseResult.wholesalePrice;
-        const companyMargin = (wholesalePrice - landedCost) / wholesalePrice;
 
         // Crea un oggetto di calcolo personalizzato per il margine
         const marginCalculation = {
-          ...sellingResult, // Usa sellingResult come base per mantenere i dettagli del calcolo diretto
-          retailPrice: retailPriceValue,
-          companyMargin: companyMargin,
+          purchasePrice: marginResult.purchasePrice,
+          retailPrice: marginResult.retailPrice,
+          landedCost: marginResult.landedCost,
+          wholesalePrice: marginResult.wholesalePrice,
+          companyMargin: marginResult.companyMargin,
+          purchaseCurrency: marginResult.purchaseCurrency,
+          sellingCurrency: marginResult.sellingCurrency,
+          params: marginResult.params,
+          // Mantieni i dettagli del calcolo per compatibilità
+          qualityControlCost: 0,
+          priceWithQC: 0,
+          transportInsuranceCost: 0,
+          priceWithTransport: 0,
+          dutyCost: 0,
+          priceWithDuty: 0,
+          italyAccessoryCosts: 0,
+          retailPriceRaw: marginResult.retailPrice,
         };
 
         setCalculation(marginCalculation);
@@ -1152,6 +1214,12 @@ const Calculator: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* Sezione Calcolo Batch */}
+      <BatchCalculator
+        params={params}
+        onCalculate={handleBatchCalculate as any}
+      />
     </div>
   );
 };

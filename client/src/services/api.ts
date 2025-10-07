@@ -140,6 +140,27 @@ export const pricingApi = {
     return response.data;
   },
 
+  // Calcola margine da due prezzi (acquisto e vendita)
+  calculateMargin: async (
+    purchasePrice: number,
+    retailPrice: number
+  ): Promise<{
+    purchasePrice: number;
+    retailPrice: number;
+    landedCost: number;
+    wholesalePrice: number;
+    companyMargin: number;
+    purchaseCurrency: string;
+    sellingCurrency: string;
+    params: CalculationParams;
+  }> => {
+    const response = await api.post("/api/calculate-margin", {
+      purchasePrice,
+      retailPrice,
+    });
+    return response.data;
+  },
+
   // Ottieni tassi di cambio
   getExchangeRates: async (): Promise<ExchangeRates> => {
     const response = await api.get("/api/exchange-rates");
