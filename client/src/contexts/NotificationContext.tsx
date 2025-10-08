@@ -8,6 +8,7 @@ import { useToastNotification } from "../hooks/useToastNotification";
 import { ToastNotification } from "../components/ToastNotification";
 
 interface NotificationContextType {
+  notifications: ToastNotification[];
   showSuccess: (
     title: string,
     message: string,
@@ -45,13 +46,14 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   children,
 }) => {
   const toastNotification = useToastNotification();
-  
+
   console.log("🔔 NotificationProvider - Inizializzato:", {
     notifications: toastNotification.notifications.length,
-    showSuccess: typeof toastNotification.showSuccess
+    showSuccess: typeof toastNotification.showSuccess,
   });
 
   const contextValue: NotificationContextType = {
+    notifications: toastNotification.notifications,
     showSuccess: toastNotification.showSuccess,
     showError: toastNotification.showError,
     showWarning: toastNotification.showWarning,

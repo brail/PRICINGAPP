@@ -11,12 +11,12 @@ const ToastTestPanel: React.FC = () => {
   const { showSuccess, showError, showWarning, showInfo, clearAll } =
     useNotification();
 
-  console.log("🧪 ToastTestPanel - Hook caricato:", { 
-    showSuccess: typeof showSuccess, 
+  console.log("🧪 ToastTestPanel - Hook caricato:", {
+    showSuccess: typeof showSuccess,
     showError: typeof showError,
     showWarning: typeof showWarning,
     showInfo: typeof showInfo,
-    clearAll: typeof clearAll
+    clearAll: typeof clearAll,
   });
 
   const handleSuccess = () => {

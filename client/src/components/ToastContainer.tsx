@@ -5,11 +5,11 @@
 
 import React from "react";
 import { Box } from "@mui/material";
-import { useToastNotification } from "../hooks/useToastNotification";
+import { useNotification } from "../contexts/NotificationContext";
 import ToastNotificationComponent from "./ToastNotification";
 
 const ToastContainer: React.FC = () => {
-  const { notifications, removeToast } = useToastNotification();
+  const { notifications, removeToast } = useNotification();
 
   if (notifications.length === 0) {
     return null;
