@@ -4,20 +4,23 @@
  */
 
 import React from "react";
-import {
-  Box,
-  Button,
-  Typography,
-  Paper,
-  Stack,
-  Divider,
-} from "@mui/material";
+import { Box, Button, Typography, Paper, Stack, Divider } from "@mui/material";
 import { useNotification } from "../contexts/NotificationContext";
 
 const ToastTestPanel: React.FC = () => {
-  const { showSuccess, showError, showWarning, showInfo, clearAll } = useNotification();
+  const { showSuccess, showError, showWarning, showInfo, clearAll } =
+    useNotification();
+
+  console.log("🧪 ToastTestPanel - Hook caricato:", { 
+    showSuccess: typeof showSuccess, 
+    showError: typeof showError,
+    showWarning: typeof showWarning,
+    showInfo: typeof showInfo,
+    clearAll: typeof clearAll
+  });
 
   const handleSuccess = () => {
+    console.log("🔔 Test Success Toast - Inizio");
     showSuccess(
       "Operazione completata",
       "Il calcolo è stato eseguito con successo!",
@@ -29,6 +32,7 @@ const ToastTestPanel: React.FC = () => {
         },
       }
     );
+    console.log("🔔 Test Success Toast - Completato");
   };
 
   const handleError = () => {
@@ -47,32 +51,27 @@ const ToastTestPanel: React.FC = () => {
   };
 
   const handleWarning = () => {
-    showWarning(
-      "Attenzione",
-      "I parametri potrebbero non essere ottimali",
-      {
-        duration: 5000,
-      }
-    );
+    showWarning("Attenzione", "I parametri potrebbero non essere ottimali", {
+      duration: 5000,
+    });
   };
 
   const handleInfo = () => {
-    showInfo(
-      "Informazione",
-      "Nuova versione disponibile con miglioramenti",
-      {
-        duration: 4000,
-        action: {
-          label: "Aggiorna",
-          onClick: () => console.log("Avvia aggiornamento"),
-        },
-      }
-    );
+    showInfo("Informazione", "Nuova versione disponibile con miglioramenti", {
+      duration: 4000,
+      action: {
+        label: "Aggiorna",
+        onClick: () => console.log("Avvia aggiornamento"),
+      },
+    });
   };
 
   const handleMultiple = () => {
     showSuccess("Prima notifica", "Questa è la prima notifica");
-    setTimeout(() => showWarning("Seconda notifica", "Questa è la seconda"), 500);
+    setTimeout(
+      () => showWarning("Seconda notifica", "Questa è la seconda"),
+      500
+    );
     setTimeout(() => showInfo("Terza notifica", "Questa è la terza"), 1000);
   };
 
@@ -139,11 +138,7 @@ const ToastTestPanel: React.FC = () => {
             Test Multipli
           </Typography>
           <Stack direction="row" spacing={2}>
-            <Button
-              variant="outlined"
-              onClick={handleMultiple}
-              sx={{ mb: 1 }}
-            >
+            <Button variant="outlined" onClick={handleMultiple} sx={{ mb: 1 }}>
               🔄 Multiple Toasts
             </Button>
             <Button
@@ -167,13 +162,13 @@ const ToastTestPanel: React.FC = () => {
             <br />
             • Le notifiche appaiono in basso a destra
             <br />
-            • Success: 3 secondi, Error: 6 secondi, Warning: 5 secondi, Info: 4 secondi
+            • Success: 3 secondi, Error: 6 secondi, Warning: 5 secondi, Info: 4
+            secondi
             <br />
             • Alcune notifiche hanno azioni cliccabili
             <br />
             • "Multiple Toasts" mostra 3 notifiche in sequenza
-            <br />
-            • "Clear All" rimuove tutte le notifiche attive
+            <br />• "Clear All" rimuove tutte le notifiche attive
           </Typography>
         </Box>
       </Stack>

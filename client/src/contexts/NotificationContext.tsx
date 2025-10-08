@@ -45,6 +45,11 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   children,
 }) => {
   const toastNotification = useToastNotification();
+  
+  console.log("🔔 NotificationProvider - Inizializzato:", {
+    notifications: toastNotification.notifications.length,
+    showSuccess: typeof toastNotification.showSuccess
+  });
 
   const contextValue: NotificationContextType = {
     showSuccess: toastNotification.showSuccess,
