@@ -109,6 +109,59 @@ const loadParametersFromDatabase = async () => {
   }
 };
 
+// ===== FUNZIONI HELPER PER GESTIONE CENTRALIZZATA PARAMETRI =====
+
+// Converte un ParameterSet in CalculationParams
+const convertParameterSetToParams = (parameterSet) => {
+  return {
+    purchaseCurrency: parameterSet.purchase_currency,
+    sellingCurrency: parameterSet.selling_currency,
+    qualityControlPercent: parameterSet.quality_control_percent,
+    transportInsuranceCost: parameterSet.transport_insurance_cost,
+    duty: parameterSet.duty,
+    exchangeRate: parameterSet.exchange_rate,
+    italyAccessoryCosts: parameterSet.italy_accessory_costs,
+    tools: parameterSet.tools,
+    companyMultiplier: parameterSet.company_multiplier,
+    retailMultiplier: parameterSet.retail_multiplier,
+    optimalMargin: parameterSet.optimal_margin,
+  };
+};
+
+// Ottiene il set di parametri attivo per un utente
+const getUserActiveParameterSet = async (userId) => {
+  return new Promise((resolve, reject) => {
+    db.get(
+      "SELECT active_parameter_set_id FROM users WHERE id = ?",
+      [userId],
+      (err, row) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(row?.active_parameter_set_id || null);
+        }
+      }
+    );
+  });
+};
+
+// Imposta il set di parametri attivo per un utente
+const setUserActiveParameterSet = async (userId, setId) => {
+  return new Promise((resolve, reject) => {
+    db.run(
+      "UPDATE users SET active_parameter_set_id = ? WHERE id = ?",
+      [setId, userId],
+      function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(this.changes);
+        }
+      }
+    );
+  });
+};
+
 // Funzione per ottenere i tassi di cambio
 async function getExchangeRates() {
   const now = Date.now();
@@ -369,6 +422,99 @@ app.use("/api/auth", authRoutes);
 // Ottieni parametri attuali
 app.get("/api/params", (req, res) => {
   res.json(currentParams);
+});
+
+// ===== NUOVI ENDPOINT PER GESTIONE CENTRALIZZATA PARAMETRI =====
+
+// Ottieni parametri attivi per l'utente corrente
+app.get("/api/active-parameters", async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: "Utente non autenticato" });
+    }
+
+    // 1. Prova a caricare il set salvato per l'utente
+    const savedSetId = await getUserActiveParameterSet(userId);
+    if (savedSetId) {
+      const parameterSet = await getParameterSetById(savedSetId);
+      if (parameterSet) {
+        const activeParams = convertParameterSetToParams(parameterSet);
+        return res.json({
+          params: activeParams,
+          setId: parameterSet.id,
+          description: parameterSet.description,
+          source: "saved",
+        });
+      }
+    }
+
+    // 2. Fallback: usa il set di default
+    const defaultSet = await getDefaultParameterSet();
+    if (defaultSet) {
+      const activeParams = convertParameterSetToParams(defaultSet);
+      return res.json({
+        params: activeParams,
+        setId: defaultSet.id,
+        description: defaultSet.description,
+        source: "default",
+      });
+    }
+
+    // 3. Fallback: usa il primo set disponibile
+    const allSets = await getAllParameterSets();
+    if (allSets.length > 0) {
+      const firstSet = allSets[0];
+      const activeParams = convertParameterSetToParams(firstSet);
+      return res.json({
+        params: activeParams,
+        setId: firstSet.id,
+        description: firstSet.description,
+        source: "first_available",
+      });
+    }
+
+    res.status(404).json({ error: "Nessun set di parametri disponibile" });
+  } catch (error) {
+    loggers.error(error, { context: "getActiveParameters" });
+    res.status(500).json({ error: "Errore nel recupero dei parametri attivi" });
+  }
+});
+
+// Carica un set di parametri come attivo per l'utente
+app.post("/api/active-parameters/load/:setId", async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const { setId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Utente non autenticato" });
+    }
+
+    const parameterSet = await getParameterSetById(setId);
+    if (!parameterSet) {
+      return res.status(404).json({ error: "Set di parametri non trovato" });
+    }
+
+    // Salva il set come attivo per l'utente
+    await setUserActiveParameterSet(userId, setId);
+
+    // Aggiorna i parametri globali (per compatibilità)
+    const activeParams = convertParameterSetToParams(parameterSet);
+    currentParams = activeParams;
+
+    res.json({
+      message: "Set di parametri caricato con successo",
+      params: activeParams,
+      setId: parameterSet.id,
+      description: parameterSet.description,
+    });
+  } catch (error) {
+    loggers.error(error, { context: "loadActiveParameterSet" });
+    res
+      .status(500)
+      .json({ error: "Errore nel caricamento del set di parametri" });
+  }
 });
 
 // Aggiorna parametri attuali

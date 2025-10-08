@@ -85,7 +85,28 @@ const initDatabase = () => {
                         "Colonna order_index aggiunta alla tabella parameter_sets."
                       );
                     }
-                    resolve();
+
+                    // Aggiungi colonna active_parameter_set_id alla tabella users se non esiste
+                    db.run(
+                      `ALTER TABLE users ADD COLUMN active_parameter_set_id INTEGER`,
+                      (userErr) => {
+                        if (
+                          userErr &&
+                          !userErr.message.includes("duplicate column name")
+                        ) {
+                          console.error(
+                            "Errore nell'aggiunta della colonna active_parameter_set_id:",
+                            userErr
+                          );
+                        } else if (!userErr) {
+                          console.log(
+                            "Colonna active_parameter_set_id aggiunta alla tabella users."
+                          );
+                        }
+
+                        resolve();
+                      }
+                    );
                   }
                 );
               }

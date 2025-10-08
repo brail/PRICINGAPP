@@ -161,6 +161,32 @@ export const pricingApi = {
     return response.data;
   },
 
+  // ===== NUOVE API PER GESTIONE CENTRALIZZATA PARAMETRI =====
+
+  // Ottieni parametri attivi per l'utente corrente
+  getActiveParameters: async (): Promise<{
+    params: CalculationParams;
+    setId: number;
+    description: string;
+    source: "saved" | "default" | "first_available";
+  }> => {
+    const response = await api.get("/api/active-parameters");
+    return response.data;
+  },
+
+  // Carica un set di parametri come attivo per l'utente
+  loadActiveParameterSet: async (
+    setId: number
+  ): Promise<{
+    message: string;
+    params: CalculationParams;
+    setId: number;
+    description: string;
+  }> => {
+    const response = await api.post(`/api/active-parameters/load/${setId}`);
+    return response.data;
+  },
+
   // Ottieni tassi di cambio
   getExchangeRates: async (): Promise<ExchangeRates> => {
     const response = await api.get("/api/exchange-rates");
