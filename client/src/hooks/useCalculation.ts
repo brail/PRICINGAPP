@@ -228,9 +228,13 @@ export const useCalculation = () => {
   const getFinalPrice = useCallback(() => {
     const result = getCalculationResult();
     if (result) {
-      if (result && typeof result === 'object' && "retailPrice" in result) {
+      if (result && typeof result === "object" && "retailPrice" in result) {
         return (result as any).retailPrice;
-      } else if (result && typeof result === 'object' && "purchasePrice" in result) {
+      } else if (
+        result &&
+        typeof result === "object" &&
+        "purchasePrice" in result
+      ) {
         return (result as any).purchasePrice;
       }
     }

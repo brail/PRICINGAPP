@@ -23,7 +23,10 @@ export class CalculationService {
         throw new Error("Il prezzo di acquisto deve essere positivo");
       }
 
-      const response = await pricingApi.calculateSellingPrice(purchasePrice, params.sellingCurrency);
+      const response = await pricingApi.calculateSellingPrice(
+        purchasePrice,
+        params.sellingCurrency
+      );
       return response;
     } catch (error) {
       console.error("Errore nel calcolo prezzo di vendita:", error);
@@ -43,7 +46,10 @@ export class CalculationService {
         throw new Error("Il prezzo di vendita deve essere positivo");
       }
 
-      const response = await pricingApi.calculatePurchasePrice(retailPrice, params.sellingCurrency);
+      const response = await pricingApi.calculatePurchasePrice(
+        retailPrice,
+        params.sellingCurrency
+      );
       return response;
     } catch (error) {
       console.error("Errore nel calcolo prezzo di acquisto:", error);

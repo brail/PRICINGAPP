@@ -65,9 +65,7 @@ export class ParameterService {
   /**
    * Carica un set di parametri come attivo
    */
-  async loadParameterSet(
-    setId: number
-  ): Promise<{
+  async loadParameterSet(setId: number): Promise<{
     params: CalculationParams;
     setId: number;
     description: string;

@@ -104,7 +104,9 @@ const ParametersRefactored: React.FC = () => {
 
   // Gestione eliminazione set
   const handleDeleteSet = async (setId: number) => {
-    if (window.confirm("Sei sicuro di voler eliminare questo set di parametri?")) {
+    if (
+      window.confirm("Sei sicuro di voler eliminare questo set di parametri?")
+    ) {
       try {
         await deleteParameterSet(setId);
       } catch (error) {
@@ -151,14 +153,25 @@ const ParametersRefactored: React.FC = () => {
         <Typography variant="h6" gutterBottom>
           Parametri Attuali
         </Typography>
-        
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 2 }}>
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+            gap: 2,
+          }}
+        >
           {/* Quality Control */}
           <TextField
             label="Quality Control (%)"
             type="number"
             value={currentParams.qualityControlPercent}
-            onChange={(e) => handleParameterChange("qualityControlPercent", parseFloat(e.target.value) || 0)}
+            onChange={(e) =>
+              handleParameterChange(
+                "qualityControlPercent",
+                parseFloat(e.target.value) || 0
+              )
+            }
             fullWidth
             inputProps={{ min: 0, max: 100, step: 0.1 }}
           />
@@ -168,7 +181,9 @@ const ParametersRefactored: React.FC = () => {
             label="Dazio (%)"
             type="number"
             value={currentParams.duty}
-            onChange={(e) => handleParameterChange("duty", parseFloat(e.target.value) || 0)}
+            onChange={(e) =>
+              handleParameterChange("duty", parseFloat(e.target.value) || 0)
+            }
             fullWidth
             inputProps={{ min: 0, max: 100, step: 0.1 }}
           />
@@ -178,7 +193,12 @@ const ParametersRefactored: React.FC = () => {
             label="Margine Ottimale (%)"
             type="number"
             value={currentParams.optimalMargin}
-            onChange={(e) => handleParameterChange("optimalMargin", parseFloat(e.target.value) || 0)}
+            onChange={(e) =>
+              handleParameterChange(
+                "optimalMargin",
+                parseFloat(e.target.value) || 0
+              )
+            }
             fullWidth
             inputProps={{ min: 0, max: 100, step: 0.1 }}
           />
@@ -188,7 +208,12 @@ const ParametersRefactored: React.FC = () => {
             label="Tasso di Cambio"
             type="number"
             value={currentParams.exchangeRate}
-            onChange={(e) => handleParameterChange("exchangeRate", parseFloat(e.target.value) || 1)}
+            onChange={(e) =>
+              handleParameterChange(
+                "exchangeRate",
+                parseFloat(e.target.value) || 1
+              )
+            }
             fullWidth
             inputProps={{ min: 0.01, step: 0.01 }}
           />
@@ -198,7 +223,12 @@ const ParametersRefactored: React.FC = () => {
             label="Costo Trasporto e Assicurazione"
             type="number"
             value={currentParams.transportInsuranceCost}
-            onChange={(e) => handleParameterChange("transportInsuranceCost", parseFloat(e.target.value) || 0)}
+            onChange={(e) =>
+              handleParameterChange(
+                "transportInsuranceCost",
+                parseFloat(e.target.value) || 0
+              )
+            }
             fullWidth
             inputProps={{ min: 0, step: 0.1 }}
           />
@@ -208,7 +238,12 @@ const ParametersRefactored: React.FC = () => {
             label="Costi Accessori Italia"
             type="number"
             value={currentParams.italyAccessoryCosts}
-            onChange={(e) => handleParameterChange("italyAccessoryCosts", parseFloat(e.target.value) || 0)}
+            onChange={(e) =>
+              handleParameterChange(
+                "italyAccessoryCosts",
+                parseFloat(e.target.value) || 0
+              )
+            }
             fullWidth
             inputProps={{ min: 0, step: 0.1 }}
           />
@@ -218,7 +253,9 @@ const ParametersRefactored: React.FC = () => {
             label="Strumenti"
             type="number"
             value={currentParams.tools}
-            onChange={(e) => handleParameterChange("tools", parseFloat(e.target.value) || 0)}
+            onChange={(e) =>
+              handleParameterChange("tools", parseFloat(e.target.value) || 0)
+            }
             fullWidth
             inputProps={{ min: 0, step: 0.1 }}
           />
@@ -228,7 +265,12 @@ const ParametersRefactored: React.FC = () => {
             label="Moltiplicatore Retail"
             type="number"
             value={currentParams.retailMultiplier}
-            onChange={(e) => handleParameterChange("retailMultiplier", parseFloat(e.target.value) || 1)}
+            onChange={(e) =>
+              handleParameterChange(
+                "retailMultiplier",
+                parseFloat(e.target.value) || 1
+              )
+            }
             fullWidth
             inputProps={{ min: 1, step: 0.01 }}
           />
@@ -238,7 +280,9 @@ const ParametersRefactored: React.FC = () => {
             <InputLabel>Valuta Acquisto</InputLabel>
             <Select
               value={currentParams.purchaseCurrency}
-              onChange={(e) => handleParameterChange("purchaseCurrency", e.target.value)}
+              onChange={(e) =>
+                handleParameterChange("purchaseCurrency", e.target.value)
+              }
             >
               {CURRENCIES.map((currency) => (
                 <MenuItem key={currency.code} value={currency.code}>
@@ -253,7 +297,9 @@ const ParametersRefactored: React.FC = () => {
             <InputLabel>Valuta Vendita</InputLabel>
             <Select
               value={currentParams.sellingCurrency}
-              onChange={(e) => handleParameterChange("sellingCurrency", e.target.value)}
+              onChange={(e) =>
+                handleParameterChange("sellingCurrency", e.target.value)
+              }
             >
               {CURRENCIES.map((currency) => (
                 <MenuItem key={currency.code} value={currency.code}>
@@ -304,10 +350,9 @@ const ParametersRefactored: React.FC = () => {
                   secondary={
                     <Box>
                       <Typography variant="body2" color="text.secondary">
-                        Quality Control: {set.quality_control_percent}% | 
-                        Dazio: {set.duty}% | 
-                        Margine: {set.optimal_margin}% | 
-                        Tasso: {set.exchange_rate}
+                        Quality Control: {set.quality_control_percent}% | Dazio:{" "}
+                        {set.duty}% | Margine: {set.optimal_margin}% | Tasso:{" "}
+                        {set.exchange_rate}
                       </Typography>
                       {set.is_default && (
                         <Chip
@@ -344,7 +389,11 @@ const ParametersRefactored: React.FC = () => {
                       onClick={() => handleSetDefault(set.id)}
                       disabled={loading || set.is_default}
                     >
-                      {set.is_default ? <StarIcon color="primary" /> : <StarBorderIcon />}
+                      {set.is_default ? (
+                        <StarIcon color="primary" />
+                      ) : (
+                        <StarBorderIcon />
+                      )}
                     </IconButton>
                     <IconButton
                       size="small"
@@ -363,7 +412,10 @@ const ParametersRefactored: React.FC = () => {
       </Paper>
 
       {/* Dialog per creazione nuovo set */}
-      <Dialog open={showCreateDialog} onClose={() => setShowCreateDialog(false)}>
+      <Dialog
+        open={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
+      >
         <DialogTitle>Salva Nuovo Set di Parametri</DialogTitle>
         <DialogContent>
           <TextField
@@ -389,7 +441,10 @@ const ParametersRefactored: React.FC = () => {
       </Dialog>
 
       {/* Dialog per duplicazione set */}
-      <Dialog open={showDuplicateDialog} onClose={() => setShowDuplicateDialog(false)}>
+      <Dialog
+        open={showDuplicateDialog}
+        onClose={() => setShowDuplicateDialog(false)}
+      >
         <DialogTitle>Duplica Set di Parametri</DialogTitle>
         <DialogContent>
           <TextField
