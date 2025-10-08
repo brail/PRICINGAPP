@@ -20,10 +20,7 @@ require("dotenv").config({ path: path.join(__dirname, ".env") });
 const { logger, loggers } = require("./utils/logger");
 
 // Importa il modulo database
-const {
-  initDatabase,
-  seedDatabase,
-} = require("./database");
+const { initDatabase, seedDatabase } = require("./database");
 
 // Importa le route
 const { router: authRoutes, initUserModel } = require("./routes/auth");
@@ -31,11 +28,11 @@ const createCalculationRoutes = require("./src/routes/calculations");
 const createParameterRoutes = require("./src/routes/parameters");
 
 // Importa middleware
-const { 
-  errorHandler, 
-  notFoundHandler, 
-  jsonErrorHandler, 
-  requestLogger 
+const {
+  errorHandler,
+  notFoundHandler,
+  jsonErrorHandler,
+  requestLogger,
 } = require("./src/middleware/errorHandler");
 
 // Importa servizi
@@ -96,7 +93,10 @@ const calculationService = new CalculationService(parameterService);
 app.use("/api/auth", authRoutes);
 
 // Route per calcoli
-const calculationRoutes = createCalculationRoutes(parameterService, calculationService);
+const calculationRoutes = createCalculationRoutes(
+  parameterService,
+  calculationService
+);
 app.use("/api", calculationRoutes);
 
 // Route per parametri
