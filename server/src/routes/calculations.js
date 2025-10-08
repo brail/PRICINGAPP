@@ -1,0 +1,44 @@
+/**
+ * Calculation Routes per Pricing Calculator v0.2
+ * Routes per i calcoli di prezzi e margini
+ */
+
+const express = require("express");
+const router = express.Router();
+const CalculationController = require("../controllers/calculationController");
+const CalculationService = require("../services/calculationService");
+const { validateCalculationParams } = require("../middleware/validation");
+
+// Inizializza servizi e controller
+const ParameterService = require("../services/parameterService");
+const parameterService = new ParameterService();
+const calculationService = new CalculationService(parameterService);
+const calculationController = new CalculationController(calculationService);
+
+// Middleware per validazione
+router.use(validateCalculationParams);
+
+// Route per calcoli
+router.post("/calculate-selling", (req, res) => {
+  // Aggiungi i parametri attuali alla richiesta
+  req.params = calculationService.currentParams || {};
+  calculationController.calculateSellingPrice(req, res);
+});
+
+router.post("/calculate-purchase", (req, res) => {
+  // Aggiungi i parametri attuali alla richiesta
+  req.params = calculationService.currentParams || {};
+  calculationController.calculatePurchasePrice(req, res);
+});
+
+router.post("/calculate-margin", (req, res) => {
+  // Aggiungi i parametri attuali alla richiesta
+  req.params = calculationService.currentParams || {};
+  calculationController.calculateMargin(req, res);
+});
+
+router.get("/exchange-rates", (req, res) => {
+  calculationController.getExchangeRates(req, res);
+});
+
+module.exports = router;
