@@ -1,0 +1,49 @@
+# Multi-stage build per ottimizzazione
+FROM node:18-alpine AS builder
+
+# Installa dipendenze per build
+RUN apk add --no-cache python3 make g++
+
+WORKDIR /app
+
+# Copia package files
+COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
+# Copia codice sorgente
+COPY . .
+
+# Build dell'applicazione
+RUN npm run build || echo "No build script, using source"
+
+# Production stage
+FROM node:18-alpine AS production
+
+# Installa dumb-init per gestione segnali
+RUN apk add --no-cache dumb-init
+
+# Crea utente non-root
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodejs -u 1001
+
+WORKDIR /app
+
+# Copia dipendenze e codice
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nodejs:nodejs /app/package*.json ./
+COPY --chown=nodejs:nodejs . .
+
+# Crea directory per logs e data
+RUN mkdir -p /app/logs /app/data && chown -R nodejs:nodejs /app/logs /app/data
+
+# Esponi porta
+EXPOSE 5001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:5001/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+
+# Avvia con dumb-init
+USER nodejs
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "index.js"]
