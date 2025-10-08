@@ -13,6 +13,9 @@ import {
 } from "@mui/material";
 import { Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import { pricingApi } from "../../services/api";
+import { useBusinessErrorHandler, createBusinessError } from "../../hooks/useBusinessErrorHandler";
+import { CompactErrorHandler } from "../CompactErrorHandler";
+import { useNotification } from "../../contexts/NotificationContext";
 
 interface ChangePasswordDialogProps {
   open: boolean;
@@ -29,6 +32,8 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
   username,
   onSuccess,
 }) => {
+  const { addError, clearErrors, errors } = useBusinessErrorHandler();
+  const { showSuccess, showError } = useNotification();
   const [formData, setFormData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -40,14 +45,13 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
     confirm: false,
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const isAdminChangingOtherUser = userId !== undefined;
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    setError(null);
+    clearErrors();
     setSuccess(null);
   };
 
@@ -57,19 +61,31 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
 
   const validateForm = () => {
     if (!isAdminChangingOtherUser && !formData.currentPassword) {
-      setError("La password corrente è obbligatoria");
+      addError(createBusinessError.validationError(
+        "Password corrente obbligatoria",
+        "La password corrente è obbligatoria per motivi di sicurezza."
+      ));
       return false;
     }
     if (!formData.newPassword) {
-      setError("La nuova password è obbligatoria");
+      addError(createBusinessError.validationError(
+        "Nuova password obbligatoria",
+        "La nuova password è obbligatoria per completare l'operazione."
+      ));
       return false;
     }
     if (formData.newPassword.length < 6) {
-      setError("La nuova password deve essere di almeno 6 caratteri");
+      addError(createBusinessError.validationError(
+        "Password troppo corta",
+        "La nuova password deve essere di almeno 6 caratteri per motivi di sicurezza."
+      ));
       return false;
     }
     if (formData.newPassword !== formData.confirmPassword) {
-      setError("Le password non coincidono");
+      addError(createBusinessError.validationError(
+        "Password non coincidenti",
+        "Le password inserite non coincidono. Verifica e riprova."
+      ));
       return false;
     }
     return true;
@@ -80,7 +96,7 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
 
     try {
       setLoading(true);
-      setError(null);
+      clearErrors();
       setSuccess(null);
 
       if (isAdminChangingOtherUser) {
@@ -91,6 +107,7 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
           formData.confirmPassword
         );
         setSuccess("Password aggiornata con successo");
+        showSuccess("Password aggiornata", `La password per ${username} è stata aggiornata con successo.`);
       } else {
         // Utente che cambia la propria password
         await pricingApi.changePassword(
@@ -99,6 +116,7 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
           formData.confirmPassword
         );
         setSuccess("Password aggiornata con successo");
+        showSuccess("Password aggiornata", "La tua password è stata aggiornata con successo.");
       }
 
       // Reset form
@@ -119,7 +137,11 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
         setSuccess(null);
       }, 2000);
     } catch (err: any) {
-      setError(err.response?.data?.error || "Errore nel cambio password");
+      addError(createBusinessError.apiError(
+        "Errore nel cambio password",
+        "Impossibile aggiornare la password. Verifica i dati inseriti e riprova.",
+        err
+      ));
     } finally {
       setLoading(false);
     }
@@ -132,7 +154,7 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
         newPassword: "",
         confirmPassword: "",
       });
-      setError(null);
+      clearErrors();
       setSuccess(null);
       onClose();
     }
@@ -153,11 +175,7 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
 
       <DialogContent>
         <Box sx={{ pt: 2 }}>
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
+          <CompactErrorHandler />
 
           {success && (
             <Alert severity="success" sx={{ mb: 2 }}>
