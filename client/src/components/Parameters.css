@@ -196,13 +196,38 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1024px) {
+  .parameters {
+    max-width: 100%;
+    padding: 0 16px;
+  }
+
+  .parameters-grid {
+    gap: 20px;
+  }
+
+  .parameters-card {
+    padding: 20px;
+  }
+}
+
 @media (max-width: 768px) {
+  .parameters {
+    padding: 0 12px;
+  }
+
   .parameters-grid {
     gap: 16px;
   }
 
   .parameters-card {
-    padding: 20px;
+    padding: 16px;
+    border-radius: 8px;
+  }
+
+  .parameters-card h3 {
+    font-size: 18px;
+    margin-bottom: 16px;
   }
 
   .parameters-actions {
@@ -227,6 +252,55 @@
 
   .step.final .step-number {
     font-size: 16px;
+  }
+
+  /* Miglioramenti per i form */
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-input,
+  .form-select {
+    font-size: 16px; /* Previene zoom su iOS */
+    padding: 12px;
+    min-height: 44px; /* Touch-friendly */
+  }
+
+  .form-label {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  /* Bottoni touch-friendly */
+  .btn {
+    min-height: 44px;
+    padding: 12px 16px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+
+  .btn-sm {
+    min-height: 40px;
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  /* Header responsive */
+  .parameters-header {
+    margin-bottom: 24px;
+  }
+
+  .parameters-header h2 {
+    font-size: 24px;
+  }
+
+  .parameters-header p {
+    font-size: 14px;
   }
 }
 
@@ -572,6 +646,11 @@
   opacity: 0.6;
 }
 
+/* Wizard Styles */
+.parameter-wizard {
+  margin-top: 20px;
+}
+
 /* Responsive per la gestione dei set di parametri */
 @media (max-width: 768px) {
   .parameters-card-header {
@@ -588,6 +667,14 @@
 
   .parameter-set-actions {
     justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .parameter-set-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    text-align: center;
   }
 
   .form-row {
@@ -596,6 +683,107 @@
 
   .form-actions {
     flex-direction: column;
+    gap: 12px;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+  }
+
+  /* Miglioramenti per le card dei parametri */
+  .parameter-set-card {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .parameter-set-header h5 {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .parameter-set-details {
+    font-size: 13px;
+    margin-top: 12px;
+  }
+
+  .parameter-set-details p {
+    margin: 6px 0;
+  }
+
+  /* Form di creazione/modifica più compatti */
+  .new-parameter-set-form,
+  .edit-parameter-set-form,
+  .duplicate-parameter-set-form {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .new-parameter-set-form h4,
+  .edit-parameter-set-form h4,
+  .duplicate-parameter-set-form h4 {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  /* Drag handle più grande per touch */
+  .drag-handle {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .drag-handle span {
+    font-size: 14px;
+  }
+}
+
+/* Stili specifici per iPhone e schermi molto piccoli */
+@media (max-width: 414px) {
+  .parameters {
+    padding: 0 8px;
+  }
+
+  .parameters-card {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .parameters-header h2 {
+    font-size: 22px;
+  }
+
+  .parameter-set-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .parameter-set-actions .btn {
+    width: 100%;
+    margin-bottom: 4px;
+  }
+
+  .form-input,
+  .form-select {
+    padding: 14px;
+    min-height: 48px;
+  }
+
+  .btn {
+    min-height: 48px;
+    padding: 14px 16px;
+  }
+
+  /* Modal più compatto */
+  .modal-dialog {
+    margin: 10px;
+    max-height: calc(100vh - 20px);
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 }
 

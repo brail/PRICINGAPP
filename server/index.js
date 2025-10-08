@@ -459,6 +459,45 @@ app.post("/api/calculate-purchase", async (req, res) => {
   }
 });
 
+// Calcola margine da due prezzi (acquisto e vendita)
+app.post("/api/calculate-margin", async (req, res) => {
+  try {
+    const { purchasePrice, retailPrice } = req.body;
+    const params = { ...currentParams };
+
+    // Calcola landedCost dal prezzo di acquisto
+    const sellingResult = await calculateSellingPrice(purchasePrice, params);
+
+    // Calcola wholesalePrice dal prezzo di vendita
+    const purchaseResult = await calculatePurchasePrice(retailPrice, params);
+
+    const landedCost = sellingResult.landedCost;
+    const wholesalePrice = purchaseResult.wholesalePrice;
+    const companyMargin = (wholesalePrice - landedCost) / wholesalePrice;
+
+    // Log del calcolo
+    loggers.calculation.margin(
+      purchasePrice,
+      retailPrice,
+      companyMargin,
+      params
+    );
+
+    res.json({
+      purchasePrice,
+      retailPrice,
+      landedCost,
+      wholesalePrice,
+      companyMargin,
+      purchaseCurrency: params.purchaseCurrency,
+      sellingCurrency: params.sellingCurrency,
+      params,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Errore nel calcolo del margine" });
+  }
+});
+
 // Ottieni tassi di cambio
 app.get("/api/exchange-rates", async (req, res) => {
   try {

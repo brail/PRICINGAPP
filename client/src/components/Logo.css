@@ -1,0 +1,46 @@
+.logo {
+  display: inline-block;
+  vertical-align: middle;
+  transition: opacity 0.2s ease;
+}
+
+.logo:hover {
+  opacity: 0.8;
+}
+
+/* Dimensioni */
+.logo-small {
+  height: 24px;
+  width: auto;
+}
+
+.logo-medium {
+  height: 40px;
+  width: auto;
+}
+
+.logo-large {
+  height: 80px;
+  width: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .logo-medium {
+    height: 32px;
+  }
+
+  .logo-large {
+    height: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-medium {
+    height: 28px;
+  }
+
+  .logo-large {
+    height: 50px;
+  }
+}

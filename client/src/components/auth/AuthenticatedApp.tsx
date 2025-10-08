@@ -38,6 +38,7 @@ import Calculator from "../Calculator";
 import Parameters from "../Parameters";
 import UserDashboard from "./UserDashboard";
 import UserManagement from "./UserManagement";
+import Logo from "../Logo";
 
 const AuthenticatedApp: React.FC = () => {
   const { user, logout } = useAuth();
@@ -94,13 +95,20 @@ const AuthenticatedApp: React.FC = () => {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{ flexGrow: 1, fontSize: { xs: "1rem", sm: "1.25rem" } }}
-          >
-            Pricing Calculator v0.2
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1 }}>
+            <Logo variant="white" size="medium" />
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{
+                ml: 2,
+                fontSize: { xs: "1rem", sm: "1.25rem" },
+                fontWeight: 500,
+              }}
+            >
+              Pricing Calculator v0.2
+            </Typography>
+          </Box>
 
           {isMobile ? (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>

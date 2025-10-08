@@ -18,6 +18,9 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { pricingApi } from "../services/api";
 import { CURRENCIES } from "../types";
+import ParameterSetWizard from "./ParameterSetWizard";
+import EditParameterSetForm from "./EditParameterSetForm";
+import DuplicateParameterSetForm from "./DuplicateParameterSetForm";
 import "./Parameters.css";
 
 // Componente per gli elementi sortabili
@@ -38,6 +41,10 @@ interface SortableItemProps {
   handleWheelPrevent: (e: React.WheelEvent<HTMLInputElement>) => void;
   handleFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
   handleBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
+  handleEditSave: (data: any) => Promise<void>;
+  duplicatingParameterSet: any | null;
+  handleDuplicateSave: (data: any) => Promise<void>;
+  cancelDuplicatingParameterSet: () => void;
 }
 
 const SortableItem: React.FC<SortableItemProps> = ({
@@ -57,6 +64,10 @@ const SortableItem: React.FC<SortableItemProps> = ({
   handleWheelPrevent,
   handleFocus,
   handleBlur,
+  handleEditSave,
+  duplicatingParameterSet,
+  handleDuplicateSave,
+  cancelDuplicatingParameterSet,
 }) => {
   const {
     attributes,
@@ -184,269 +195,22 @@ const SortableItem: React.FC<SortableItemProps> = ({
 
       {/* Form di modifica posizionato sotto la card specifica */}
       {editingParameterSet && editingParameterSet.id === set.id && (
-        <div className="edit-parameter-set-form">
-          <h4>Modifica Set di Parametri: {editingParameterSet.description}</h4>
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">Descrizione *</label>
-              <input
-                type="text"
-                className="form-input"
-                value={editingParameterSet.description}
-                onChange={(e) =>
-                  setEditingParameterSet({
-                    ...editingParameterSet,
-                    description: e.target.value,
-                  })
-                }
-                placeholder="Nome del set di parametri"
-              />
-            </div>
-          </div>
+        <EditParameterSetForm
+          parameterSet={editingParameterSet}
+          onSave={handleEditSave}
+          onCancel={cancelEditingParameterSet}
+          saving={saving}
+        />
+      )}
 
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">Valuta acquisto *</label>
-              <select
-                className="form-select"
-                value={editingParameterSet.purchase_currency}
-                onChange={(e) =>
-                  setEditingParameterSet({
-                    ...editingParameterSet,
-                    purchase_currency: e.target.value,
-                  })
-                }
-              >
-                <option value="">Seleziona valuta</option>
-                {CURRENCIES.map((currency) => (
-                  <option key={currency.code} value={currency.code}>
-                    {currency.code} - {currency.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Valuta vendita *</label>
-              <select
-                className="form-select"
-                value={editingParameterSet.selling_currency}
-                onChange={(e) =>
-                  setEditingParameterSet({
-                    ...editingParameterSet,
-                    selling_currency: e.target.value,
-                  })
-                }
-              >
-                <option value="">Seleziona valuta</option>
-                {CURRENCIES.map((currency) => (
-                  <option key={currency.code} value={currency.code}>
-                    {currency.code} - {currency.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">Quality Control (%) *</label>
-              <input
-                type="number"
-                className="form-input"
-                value={editingParameterSet.quality_control_percent}
-                onChange={(e) =>
-                  setEditingParameterSet({
-                    ...editingParameterSet,
-                    quality_control_percent:
-                      e.target.value === "" ? "" : Number(e.target.value),
-                  })
-                }
-                onWheel={handleWheelPrevent}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
-                min="0"
-                step="0.1"
-                placeholder="Es. 5"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Trasporto + Assicurazione *</label>
-              <input
-                type="number"
-                className="form-input"
-                value={editingParameterSet.transport_insurance_cost}
-                onChange={(e) =>
-                  setEditingParameterSet({
-                    ...editingParameterSet,
-                    transport_insurance_cost:
-                      e.target.value === "" ? "" : Number(e.target.value),
-                  })
-                }
-                onWheel={handleWheelPrevent}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
-                min="0"
-                step="0.01"
-                placeholder="Es. 2.3"
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">Dazio (%) *</label>
-              <input
-                type="number"
-                className="form-input"
-                value={editingParameterSet.duty}
-                onChange={(e) =>
-                  setEditingParameterSet({
-                    ...editingParameterSet,
-                    duty: e.target.value === "" ? "" : Number(e.target.value),
-                  })
-                }
-                onWheel={handleWheelPrevent}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
-                min="0"
-                step="0.1"
-                placeholder="Es. 8"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Cambio *</label>
-              <input
-                type="number"
-                className="form-input"
-                value={editingParameterSet.exchange_rate}
-                onChange={(e) =>
-                  setEditingParameterSet({
-                    ...editingParameterSet,
-                    exchange_rate:
-                      e.target.value === "" ? "" : Number(e.target.value),
-                  })
-                }
-                onWheel={handleWheelPrevent}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
-                min="0"
-                step="0.0001"
-                placeholder="Es. 1.07"
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">Costi accessori Italia *</label>
-              <input
-                type="number"
-                className="form-input"
-                value={editingParameterSet.italy_accessory_costs}
-                onChange={(e) =>
-                  setEditingParameterSet({
-                    ...editingParameterSet,
-                    italy_accessory_costs:
-                      e.target.value === "" ? "" : Number(e.target.value),
-                  })
-                }
-                onWheel={handleWheelPrevent}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
-                min="0"
-                step="0.01"
-                placeholder="Es. 1"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Tools *</label>
-              <input
-                type="number"
-                className="form-input"
-                value={editingParameterSet.tools}
-                onChange={(e) =>
-                  setEditingParameterSet({
-                    ...editingParameterSet,
-                    tools: e.target.value === "" ? "" : Number(e.target.value),
-                  })
-                }
-                onWheel={handleWheelPrevent}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
-                min="0"
-                step="0.01"
-                placeholder="Es. 1.0"
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">Moltiplicatore retail *</label>
-              <input
-                type="number"
-                className="form-input"
-                value={editingParameterSet.retail_multiplier}
-                onChange={(e) =>
-                  setEditingParameterSet({
-                    ...editingParameterSet,
-                    retail_multiplier:
-                      e.target.value === "" ? "" : Number(e.target.value),
-                  })
-                }
-                onWheel={handleWheelPrevent}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
-                min="0"
-                step="0.01"
-                placeholder="Es. 2.48"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Margine ottimale (%) *</label>
-              <input
-                type="number"
-                className="form-input"
-                value={editingParameterSet.optimal_margin}
-                onChange={(e) =>
-                  setEditingParameterSet({
-                    ...editingParameterSet,
-                    optimal_margin:
-                      e.target.value === "" ? "" : Number(e.target.value),
-                  })
-                }
-                onWheel={handleWheelPrevent}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
-                min="0"
-                step="0.1"
-                placeholder="Es. 25"
-              />
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <button
-              className="btn btn-secondary"
-              onClick={cancelEditingParameterSet}
-              disabled={saving}
-            >
-              Annulla
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={handleUpdateParameterSet}
-              disabled={saving}
-            >
-              {saving ? "Salvando..." : "Salva Modifiche"}
-            </button>
-          </div>
-        </div>
+      {/* Form di duplicazione posizionato sotto la card specifica */}
+      {duplicatingParameterSet && duplicatingParameterSet.id === set.id && (
+        <DuplicateParameterSetForm
+          parameterSet={duplicatingParameterSet}
+          onSave={handleDuplicateSave}
+          onCancel={cancelDuplicatingParameterSet}
+          saving={saving}
+        />
       )}
     </div>
   );
@@ -457,6 +221,23 @@ const Parameters: React.FC = () => {
   const handleWheelPrevent = (e: React.WheelEvent<HTMLInputElement>) => {
     e.preventDefault();
     e.stopPropagation();
+  };
+
+  const handleEditSave = async (data: any) => {
+    try {
+      setSaving(true);
+      setError("");
+
+      await pricingApi.updateParameterSet(editingParameterSet.id, data);
+      setSuccess("Set di parametri aggiornato con successo!");
+      setEditingParameterSet(null);
+      loadParameterSets();
+    } catch (err: any) {
+      setError(err.message || "Errore nell'aggiornamento del set di parametri");
+      throw err; // Rilancia l'errore per il form
+    } finally {
+      setSaving(false);
+    }
   };
 
   // Funzione per disabilitare lo scroll quando il campo è attivo
@@ -501,6 +282,7 @@ const Parameters: React.FC = () => {
   // Stati per la gestione dei set di parametri
   const [parameterSets, setParameterSets] = useState<any[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
   const [editingParameterSet, setEditingParameterSet] = useState<any | null>(
     null
   );
@@ -874,6 +656,41 @@ const Parameters: React.FC = () => {
         err.response?.data?.error ||
           "Errore nella creazione del set di parametri"
       );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleWizardSave = async (data: any) => {
+    try {
+      setSaving(true);
+      setError("");
+
+      await pricingApi.createParameterSet(data);
+      setSuccess("Set di parametri creato con successo!");
+      setShowWizard(false);
+      loadParameterSets();
+    } catch (err: any) {
+      setError(err.message || "Errore nella creazione del set di parametri");
+      throw err; // Rilancia l'errore per il wizard
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDuplicateSave = async (data: any) => {
+    try {
+      setSaving(true);
+      setError("");
+
+      await pricingApi.createParameterSet(data);
+      setSuccess("Set di parametri duplicato con successo!");
+      setDuplicatingParameterSet(null);
+      setDuplicateDescription("");
+      loadParameterSets();
+    } catch (err: any) {
+      setError(err.message || "Errore nella duplicazione del set di parametri");
+      throw err; // Rilancia l'errore per il form
     } finally {
       setSaving(false);
     }
@@ -1350,16 +1167,17 @@ const Parameters: React.FC = () => {
             <button
               className="btn btn-primary"
               onClick={() => {
-                if (!showCreateForm) {
-                  // Chiudi tutti gli altri form prima di aprire quello di creazione
+                if (!showWizard) {
+                  // Chiudi tutti gli altri form prima di aprire il wizard
                   setEditingParameterSet(null);
                   setDuplicatingParameterSet(null);
+                  setShowCreateForm(false);
                   resetCreateForm();
                 }
-                setShowCreateForm(!showCreateForm);
+                setShowWizard(!showWizard);
               }}
             >
-              {showCreateForm ? "Annulla" : "Crea Nuovo Set"}
+              {showWizard ? "Annulla" : "Crea Nuovo Set"}
             </button>
           </div>
 
@@ -1403,6 +1221,12 @@ const Parameters: React.FC = () => {
                           handleWheelPrevent={handleWheelPrevent}
                           handleFocus={handleFocus}
                           handleBlur={handleBlur}
+                          handleEditSave={handleEditSave}
+                          duplicatingParameterSet={duplicatingParameterSet}
+                          handleDuplicateSave={handleDuplicateSave}
+                          cancelDuplicatingParameterSet={
+                            cancelDuplicatingParameterSet
+                          }
                         />
                       ))}
                     </div>
@@ -1411,283 +1235,13 @@ const Parameters: React.FC = () => {
               )}
             </div>
 
-            {/* Form per Creare Nuovo Set */}
-            {showCreateForm && (
-              <div className="new-parameter-set-form">
-                <h4>Crea Nuovo Set di Parametri</h4>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Descrizione *</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={newParameterSet.description}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          description: e.target.value,
-                        })
-                      }
-                      placeholder="Nome del set di parametri"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Valuta acquisto *</label>
-                    <select
-                      className="form-select"
-                      value={newParameterSet.purchaseCurrency}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          purchaseCurrency: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="">Seleziona valuta</option>
-                      {CURRENCIES.map((currency) => (
-                        <option key={currency.code} value={currency.code}>
-                          {currency.code} - {currency.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Valuta vendita *</label>
-                    <select
-                      className="form-select"
-                      value={newParameterSet.sellingCurrency}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          sellingCurrency: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="">Seleziona valuta</option>
-                      {CURRENCIES.map((currency) => (
-                        <option key={currency.code} value={currency.code}>
-                          {currency.code} - {currency.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Quality Control (%) *</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={newParameterSet.qualityControlPercent}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          qualityControlPercent:
-                            e.target.value === "" ? "" : Number(e.target.value),
-                        })
-                      }
-                      min="0"
-                      step="0.1"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">
-                      Trasporto + Assicurazione *
-                    </label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={newParameterSet.transportInsuranceCost}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          transportInsuranceCost:
-                            e.target.value === "" ? "" : Number(e.target.value),
-                        })
-                      }
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Dazio (%) *</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={newParameterSet.duty}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          duty:
-                            e.target.value === "" ? "" : Number(e.target.value),
-                        })
-                      }
-                      min="0"
-                      step="0.1"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Cambio *</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={newParameterSet.exchangeRate}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          exchangeRate:
-                            e.target.value === "" ? "" : Number(e.target.value),
-                        })
-                      }
-                      min="0.001"
-                      step="0.001"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">
-                      Costi accessori Italia *
-                    </label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={newParameterSet.italyAccessoryCosts}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          italyAccessoryCosts:
-                            e.target.value === "" ? "" : Number(e.target.value),
-                        })
-                      }
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Tools *</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={newParameterSet.tools}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          tools:
-                            e.target.value === "" ? "" : Number(e.target.value),
-                        })
-                      }
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">
-                      Moltiplicatore retail *
-                    </label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={newParameterSet.retailMultiplier}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          retailMultiplier:
-                            e.target.value === "" ? "" : Number(e.target.value),
-                        })
-                      }
-                      min="0.1"
-                      step="0.01"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Margine ottimale (%) *</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={newParameterSet.optimalMargin}
-                      onChange={(e) =>
-                        setNewParameterSet({
-                          ...newParameterSet,
-                          optimalMargin:
-                            e.target.value === "" ? "" : Number(e.target.value),
-                        })
-                      }
-                      min="0"
-                      max="100"
-                      step="0.1"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  className="btn btn-primary"
-                  onClick={handleCreateParameterSet}
-                  disabled={saving || validateForm().length > 0}
-                >
-                  {saving ? "Creazione..." : "Crea Set di Parametri"}
-                </button>
-              </div>
-            )}
-
-            {/* Form per Duplicare Set Esistente */}
-            {duplicatingParameterSet && (
-              <div className="duplicate-parameter-set-form">
-                <h4>Duplica Set di Parametri</h4>
-                <p>
-                  Stai duplicando:{" "}
-                  <strong>{duplicatingParameterSet.description}</strong>
-                </p>
-                <div className="form-row">
-                  <label htmlFor="duplicate-description">
-                    Nuova Descrizione *
-                  </label>
-                  <input
-                    type="text"
-                    id="duplicate-description"
-                    value={duplicateDescription}
-                    onChange={(e) => setDuplicateDescription(e.target.value)}
-                    placeholder="Inserisci una descrizione univoca"
-                    className={validateDuplicateDescription() ? "error" : ""}
-                  />
-                  {validateDuplicateDescription() && (
-                    <span className="error-message">
-                      {validateDuplicateDescription()}
-                    </span>
-                  )}
-                </div>
-                <div className="form-actions">
-                  <button
-                    className="btn btn-secondary"
-                    onClick={cancelDuplicatingParameterSet}
-                    disabled={saving}
-                  >
-                    Annulla
-                  </button>
-                  <button
-                    className="btn btn-primary"
-                    onClick={handleDuplicateParameterSet}
-                    disabled={saving || !!validateDuplicateDescription()}
-                  >
-                    {saving ? "Duplicazione..." : "Duplica Set"}
-                  </button>
-                </div>
-              </div>
+            {/* Wizard per Creare Nuovo Set */}
+            {showWizard && (
+              <ParameterSetWizard
+                onSave={handleWizardSave}
+                onCancel={() => setShowWizard(false)}
+                saving={saving}
+              />
             )}
 
             {/* Form di modifica rimosso - ora è posizionato sotto ogni card */}
