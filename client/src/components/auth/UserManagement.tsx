@@ -30,8 +30,11 @@ import {
 } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
 import { pricingApi } from "../../services/api";
-import { useBusinessErrorHandler, createBusinessError } from "../../hooks/useBusinessErrorHandler";
-import { CompactErrorHandler } from "../CompactErrorHandler";
+import {
+  useBusinessErrorHandler,
+  createBusinessError,
+} from "../../hooks/useBusinessErrorHandler";
+import ErrorListHandler from "../ErrorListHandler";
 import { useNotification } from "../../contexts/NotificationContext";
 import ChangePasswordDialog from "./ChangePasswordDialog";
 import "./UserManagement.css";
@@ -48,7 +51,7 @@ interface User {
 
 const UserManagement: React.FC = () => {
   const { user: currentUser } = useAuth();
-  const { addError, clearErrors, errors } = useBusinessErrorHandler();
+  const { addError, clearErrors, errors, removeError } = useBusinessErrorHandler();
   const { showSuccess, showError } = useNotification();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
@@ -82,11 +85,11 @@ const UserManagement: React.FC = () => {
       const response = await pricingApi.get("/api/auth/users");
       setUsers(response.data.users);
     } catch (err: any) {
-      addError(createBusinessError.apiError(
-        "Errore nel caricamento utenti",
-        "Impossibile caricare la lista degli utenti. Verifica la connessione e riprova.",
-        err
-      ));
+      addError(
+        createBusinessError.network(
+          "Impossibile caricare la lista degli utenti. Verifica la connessione e riprova."
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -133,26 +136,29 @@ const UserManagement: React.FC = () => {
   const handleSaveNewUser = async () => {
     // Validazione
     if (!createForm.username || !createForm.email || !createForm.password) {
-      addError(createBusinessError.validationError(
-        "Campi obbligatori mancanti",
-        "Tutti i campi sono obbligatori per creare un nuovo utente."
-      ));
+      addError(
+        createBusinessError.validation(
+          "Tutti i campi sono obbligatori per creare un nuovo utente."
+        )
+      );
       return;
     }
 
     if (createForm.password !== createForm.confirmPassword) {
-      addError(createBusinessError.validationError(
-        "Password non coincidenti",
-        "Le password inserite non coincidono. Verifica e riprova."
-      ));
+      addError(
+        createBusinessError.validation(
+          "Le password inserite non coincidono. Verifica e riprova."
+        )
+      );
       return;
     }
 
     if (createForm.password.length < 6) {
-      addError(createBusinessError.validationError(
-        "Password troppo corta",
-        "La password deve essere di almeno 6 caratteri per motivi di sicurezza."
-      ));
+      addError(
+        createBusinessError.validation(
+          "La password deve essere di almeno 6 caratteri per motivi di sicurezza."
+        )
+      );
       return;
     }
 
@@ -167,13 +173,16 @@ const UserManagement: React.FC = () => {
       });
       await loadUsers();
       setCreateDialogOpen(false);
-      showSuccess("Utente creato", `L'utente ${createForm.username} è stato creato con successo.`);
+      showSuccess(
+        "Utente creato",
+        `L'utente ${createForm.username} è stato creato con successo.`
+      );
     } catch (err: any) {
-      addError(createBusinessError.apiError(
-        "Errore nella creazione utente",
-        "Impossibile creare il nuovo utente. Verifica i dati inseriti e riprova.",
-        err
-      ));
+      addError(
+        createBusinessError.network(
+          "Impossibile creare il nuovo utente. Verifica i dati inseriti e riprova."
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -189,13 +198,16 @@ const UserManagement: React.FC = () => {
       await loadUsers();
       setEditDialogOpen(false);
       setEditingUser(null);
-      showSuccess("Utente aggiornato", `Le informazioni dell'utente ${editForm.username} sono state aggiornate con successo.`);
+      showSuccess(
+        "Utente aggiornato",
+        `Le informazioni dell'utente ${editForm.username} sono state aggiornate con successo.`
+      );
     } catch (err: any) {
-      addError(createBusinessError.apiError(
-        "Errore nell'aggiornamento utente",
-        "Impossibile aggiornare le informazioni dell'utente. Verifica i dati e riprova.",
-        err
-      ));
+      addError(
+        createBusinessError.network(
+          "Impossibile aggiornare le informazioni dell'utente. Verifica i dati e riprova."
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -217,18 +229,20 @@ const UserManagement: React.FC = () => {
       await loadUsers();
       setDeleteConfirmDialogOpen(false);
       setUserToDelete(null);
-      showSuccess("Utente eliminato", `L'utente ${userToDelete.username} è stato eliminato con successo.`);
+      showSuccess(
+        "Utente eliminato",
+        `L'utente ${userToDelete.username} è stato eliminato con successo.`
+      );
     } catch (err: any) {
-      addError(createBusinessError.apiError(
-        "Errore nell'eliminazione utente",
-        "Impossibile eliminare l'utente. Verifica i permessi e riprova.",
-        err
-      ));
+      addError(
+        createBusinessError.network(
+          "Impossibile eliminare l'utente. Verifica i permessi e riprova."
+        )
+      );
     } finally {
       setLoading(false);
     }
   };
-
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Mai";
@@ -257,8 +271,8 @@ const UserManagement: React.FC = () => {
       </div>
 
       <div className="user-management-content">
-        <CompactErrorHandler />
-        
+        <ErrorListHandler errors={errors} onDismiss={removeError} />
+
         <div className="user-management-actions">
           <h3>Lista Utenti</h3>
           <div className="action-buttons">
@@ -451,7 +465,10 @@ const UserManagement: React.FC = () => {
         userId={editingUser?.id}
         username={editingUser?.username}
         onSuccess={() => {
-          showSuccess("Password aggiornata", `La password per ${editingUser?.username} è stata aggiornata con successo.`);
+          showSuccess(
+            "Password aggiornata",
+            `La password per ${editingUser?.username} è stata aggiornata con successo.`
+          );
         }}
       />
 

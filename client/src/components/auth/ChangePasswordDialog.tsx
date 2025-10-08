@@ -13,8 +13,11 @@ import {
 } from "@mui/material";
 import { Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import { pricingApi } from "../../services/api";
-import { useBusinessErrorHandler, createBusinessError } from "../../hooks/useBusinessErrorHandler";
-import { CompactErrorHandler } from "../CompactErrorHandler";
+import {
+  useBusinessErrorHandler,
+  createBusinessError,
+} from "../../hooks/useBusinessErrorHandler";
+import ErrorListHandler from "../ErrorListHandler";
 import { useNotification } from "../../contexts/NotificationContext";
 
 interface ChangePasswordDialogProps {
@@ -32,7 +35,7 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
   username,
   onSuccess,
 }) => {
-  const { addError, clearErrors, errors } = useBusinessErrorHandler();
+  const { addError, clearErrors, errors, removeError } = useBusinessErrorHandler();
   const { showSuccess, showError } = useNotification();
   const [formData, setFormData] = useState({
     currentPassword: "",
@@ -61,31 +64,35 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
 
   const validateForm = () => {
     if (!isAdminChangingOtherUser && !formData.currentPassword) {
-      addError(createBusinessError.validationError(
-        "Password corrente obbligatoria",
-        "La password corrente è obbligatoria per motivi di sicurezza."
-      ));
+      addError(
+        createBusinessError.validation(
+          "La password corrente è obbligatoria per motivi di sicurezza."
+        )
+      );
       return false;
     }
     if (!formData.newPassword) {
-      addError(createBusinessError.validationError(
-        "Nuova password obbligatoria",
-        "La nuova password è obbligatoria per completare l'operazione."
-      ));
+      addError(
+        createBusinessError.validation(
+          "La nuova password è obbligatoria per completare l'operazione."
+        )
+      );
       return false;
     }
     if (formData.newPassword.length < 6) {
-      addError(createBusinessError.validationError(
-        "Password troppo corta",
-        "La nuova password deve essere di almeno 6 caratteri per motivi di sicurezza."
-      ));
+      addError(
+        createBusinessError.validation(
+          "La nuova password deve essere di almeno 6 caratteri per motivi di sicurezza."
+        )
+      );
       return false;
     }
     if (formData.newPassword !== formData.confirmPassword) {
-      addError(createBusinessError.validationError(
-        "Password non coincidenti",
-        "Le password inserite non coincidono. Verifica e riprova."
-      ));
+      addError(
+        createBusinessError.validation(
+          "Le password inserite non coincidono. Verifica e riprova."
+        )
+      );
       return false;
     }
     return true;
@@ -107,7 +114,10 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
           formData.confirmPassword
         );
         setSuccess("Password aggiornata con successo");
-        showSuccess("Password aggiornata", `La password per ${username} è stata aggiornata con successo.`);
+        showSuccess(
+          "Password aggiornata",
+          `La password per ${username} è stata aggiornata con successo.`
+        );
       } else {
         // Utente che cambia la propria password
         await pricingApi.changePassword(
@@ -116,7 +126,10 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
           formData.confirmPassword
         );
         setSuccess("Password aggiornata con successo");
-        showSuccess("Password aggiornata", "La tua password è stata aggiornata con successo.");
+        showSuccess(
+          "Password aggiornata",
+          "La tua password è stata aggiornata con successo."
+        );
       }
 
       // Reset form
@@ -137,11 +150,11 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
         setSuccess(null);
       }, 2000);
     } catch (err: any) {
-      addError(createBusinessError.apiError(
-        "Errore nel cambio password",
-        "Impossibile aggiornare la password. Verifica i dati inseriti e riprova.",
-        err
-      ));
+      addError(
+        createBusinessError.network(
+          "Impossibile aggiornare la password. Verifica i dati inseriti e riprova."
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -175,7 +188,7 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
 
       <DialogContent>
         <Box sx={{ pt: 2 }}>
-          <CompactErrorHandler />
+          <ErrorListHandler errors={errors} onDismiss={removeError} />
 
           {success && (
             <Alert severity="success" sx={{ mb: 2 }}>

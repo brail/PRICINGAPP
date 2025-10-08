@@ -5,7 +5,10 @@
 ### **✅ IMPORTS RICHIESTI**
 
 ```typescript
-import { useBusinessErrorHandler, createBusinessError } from "../../hooks/useBusinessErrorHandler";
+import {
+  useBusinessErrorHandler,
+  createBusinessError,
+} from "../../hooks/useBusinessErrorHandler";
 import { CompactErrorHandler } from "../CompactErrorHandler";
 import { useNotification } from "../../contexts/NotificationContext";
 ```
@@ -33,14 +36,19 @@ return (
 ```typescript
 try {
   // operazione API
-  const result = await pricingApi.get('/endpoint');
-  showSuccess("Operazione completata", "L'operazione è stata eseguita con successo.");
+  const result = await pricingApi.get("/endpoint");
+  showSuccess(
+    "Operazione completata",
+    "L'operazione è stata eseguita con successo."
+  );
 } catch (err: any) {
-  addError(createBusinessError.apiError(
-    "Titolo errore",
-    "Descrizione dettagliata dell'errore con suggerimenti.",
-    err
-  ));
+  addError(
+    createBusinessError.apiError(
+      "Titolo errore",
+      "Descrizione dettagliata dell'errore con suggerimenti.",
+      err
+    )
+  );
 }
 ```
 
@@ -48,10 +56,11 @@ try {
 
 ```typescript
 if (!formData.requiredField) {
-  addError(createBusinessError.validationError(
-    "Campo obbligatorio",
-    "Il campo è obbligatorio per completare l'operazione."
-  ));
+  addError(
+    createBusinessError.validation(
+      "Il campo è obbligatorio per completare l'operazione."
+    )
+  );
   return;
 }
 ```
@@ -60,10 +69,11 @@ if (!formData.requiredField) {
 
 ```typescript
 if (businessCondition) {
-  addError(createBusinessError.businessError(
-    "Condizione business",
-    "Descrizione del problema e suggerimenti per risolverlo."
-  ));
+  addError(
+    createBusinessError.business(
+      "Descrizione del problema e suggerimenti per risolverlo."
+    )
+  );
   return;
 }
 ```
@@ -71,42 +81,51 @@ if (businessCondition) {
 ## 🚫 **COSA NON FARE**
 
 ### **❌ NON usare:**
+
 - `useState<string>("")` per errori
 - `setError()` per gestire errori
 - `Alert` component per errori
 - Gestione errori locale non strutturata
 
 ### **❌ NON fare:**
+
 ```typescript
 // SBAGLIATO
 const [error, setError] = useState<string>("");
 setError("Errore generico");
-{error && <Alert severity="error">{error}</Alert>}
+{
+  error && <Alert severity="error">{error}</Alert>;
+}
 ```
 
 ## 📝 **TEMPLATE COMPONENTE NUOVO**
 
 ```typescript
 import React, { useState } from "react";
-import { useBusinessErrorHandler, createBusinessError } from "../../hooks/useBusinessErrorHandler";
+import {
+  useBusinessErrorHandler,
+  createBusinessError,
+} from "../../hooks/useBusinessErrorHandler";
 import { CompactErrorHandler } from "../CompactErrorHandler";
 import { useNotification } from "../../contexts/NotificationContext";
 
 const NewComponent: React.FC = () => {
   const { addError, clearErrors, errors } = useBusinessErrorHandler();
   const { showSuccess, showError } = useNotification();
-  
+
   const handleOperation = async () => {
     try {
       clearErrors();
       // operazione
       showSuccess("Successo", "Operazione completata con successo.");
     } catch (err: any) {
-      addError(createBusinessError.apiError(
-        "Errore operazione",
-        "Descrizione dettagliata dell'errore.",
-        err
-      ));
+      addError(
+        createBusinessError.apiError(
+          "Errore operazione",
+          "Descrizione dettagliata dell'errore.",
+          err
+        )
+      );
     }
   };
 
@@ -121,29 +140,40 @@ const NewComponent: React.FC = () => {
 
 ## 🎯 **TIPI DI ERRORI DISPONIBILI**
 
-### **1. API Errors**
+### **1. Validation Errors**
+
 ```typescript
-createBusinessError.apiError(title, message, axiosError)
+createBusinessError.validation(message, field?, suggestions?);
 ```
 
-### **2. Validation Errors**
+### **2. Network Errors**
+
 ```typescript
-createBusinessError.validationError(title, message)
+createBusinessError.network(message, retryAction?);
 ```
 
 ### **3. Business Errors**
+
 ```typescript
-createBusinessError.businessError(title, message)
+createBusinessError.business(message, businessRule?);
 ```
 
-### **4. Network Errors**
+### **4. System Errors**
+
 ```typescript
-createBusinessError.networkError(title, message)
+createBusinessError.system(message, technicalDetails?);
+```
+
+### **5. Calculation Errors**
+
+```typescript
+createBusinessError.calculation(message, context?);
 ```
 
 ## 🔧 **UTILITÀ DISPONIBILI**
 
 ### **Toast Notifications**
+
 ```typescript
 showSuccess("Titolo", "Messaggio");
 showError("Titolo", "Messaggio");
@@ -152,6 +182,7 @@ showInfo("Titolo", "Messaggio");
 ```
 
 ### **Error Management**
+
 ```typescript
 clearErrors(); // Pulisce tutti gli errori
 addError(businessError); // Aggiunge un errore
@@ -160,43 +191,54 @@ addError(businessError); // Aggiunge un errore
 ## 📚 **ESEMPI PRATICI**
 
 ### **Form Validation**
+
 ```typescript
 const handleSubmit = async () => {
   if (!formData.email) {
-    addError(createBusinessError.validationError(
-      "Email obbligatoria",
-      "L'email è obbligatoria per completare la registrazione."
-    ));
+    addError(
+      createBusinessError.validationError(
+        "Email obbligatoria",
+        "L'email è obbligatoria per completare la registrazione."
+      )
+    );
     return;
   }
-  
+
   try {
     await submitForm();
-    showSuccess("Registrazione completata", "Il tuo account è stato creato con successo.");
+    showSuccess(
+      "Registrazione completata",
+      "Il tuo account è stato creato con successo."
+    );
   } catch (err) {
-    addError(createBusinessError.apiError(
-      "Errore registrazione",
-      "Impossibile completare la registrazione. Verifica i dati e riprova.",
-      err
-    ));
+    addError(
+      createBusinessError.apiError(
+        "Errore registrazione",
+        "Impossibile completare la registrazione. Verifica i dati e riprova.",
+        err
+      )
+    );
   }
 };
 ```
 
 ### **API Call**
+
 ```typescript
 const loadData = async () => {
   try {
     clearErrors();
-    const response = await pricingApi.get('/data');
+    const response = await pricingApi.get("/data");
     setData(response.data);
     showSuccess("Dati caricati", "I dati sono stati caricati con successo.");
   } catch (err) {
-    addError(createBusinessError.apiError(
-      "Errore caricamento",
-      "Impossibile caricare i dati. Verifica la connessione e riprova.",
-      err
-    ));
+    addError(
+      createBusinessError.apiError(
+        "Errore caricamento",
+        "Impossibile caricare i dati. Verifica la connessione e riprova.",
+        err
+      )
+    );
   }
 };
 ```
