@@ -18,6 +18,8 @@ import {
   PurchasePriceCalculation,
   ExchangeRates,
 } from "../types";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { createBusinessError } from "../hooks/useBusinessErrorHandler";
 
 // ===========================================
 // CONFIGURAZIONE API
@@ -98,6 +100,55 @@ const handleApiError = (error: AxiosError): Error => {
   } else {
     // Altro errore
     return new Error(`Errore imprevisto: ${error.message}`);
+  }
+};
+
+// Funzione helper per convertire errori API in BusinessError
+export const createApiBusinessError = (error: AxiosError) => {
+  if (error.response) {
+    const status = error.response.status;
+    const message = (error.response.data as any)?.message || error.message;
+
+    switch (status) {
+      case 400:
+        return createBusinessError.validation(
+          `Richiesta non valida: ${message}`,
+          "api",
+          ["Verifica i dati inseriti", "Controlla i formati richiesti"]
+        );
+      case 401:
+        return createBusinessError.business(
+          "Non autorizzato. Effettua il login.",
+          "Sessione scaduta"
+        );
+      case 403:
+        return createBusinessError.business(
+          "Accesso negato.",
+          "Permessi insufficienti"
+        );
+      case 404:
+        return createBusinessError.system("Risorsa non trovata.", "Errore 404");
+      case 500:
+        return createBusinessError.system(
+          "Errore del server. Riprova più tardi.",
+          "Errore server interno"
+        );
+      default:
+        return createBusinessError.system(
+          `Errore del server (${status}): ${message}`,
+          "Errore server"
+        );
+    }
+  } else if (error.request) {
+    return createBusinessError.network(
+      "Errore di connessione. Verifica la tua connessione internet.",
+      () => window.location.reload()
+    );
+  } else {
+    return createBusinessError.system(
+      `Errore imprevisto: ${error.message}`,
+      "Errore imprevisto"
+    );
   }
 };
 

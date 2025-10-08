@@ -1,4 +1,9 @@
 import React, { useState, useCallback, useEffect } from "react";
+import {
+  useBusinessErrorHandler,
+  createBusinessError,
+} from "../hooks/useBusinessErrorHandler";
+import CompactErrorHandler from "./CompactErrorHandler";
 import "./DuplicateParameterSetForm.css";
 
 interface DuplicateParameterSetFormProps {
@@ -17,35 +22,54 @@ const DuplicateParameterSetForm: React.FC<DuplicateParameterSetFormProps> = ({
   const [description, setDescription] = useState(
     `${parameterSet.description} (Copia)`
   );
-  const [validationError, setValidationError] = useState("");
+
+  // Business error handler
+  const { errors, addError, removeError, clearErrors } =
+    useBusinessErrorHandler();
 
   useEffect(() => {
     setDescription(`${parameterSet.description} (Copia)`);
-    setValidationError("");
-  }, [parameterSet]);
+    clearErrors();
+  }, [parameterSet, clearErrors]);
 
   const handleDescriptionChange = useCallback(
     (value: string) => {
       setDescription(value);
-      if (validationError) {
-        setValidationError("");
-      }
+      clearErrors();
     },
-    [validationError]
+    [clearErrors]
   );
 
   const validateDescription = useCallback(() => {
     if (!description.trim()) {
-      setValidationError("La descrizione è obbligatoria");
+      addError(
+        createBusinessError.validation(
+          "La descrizione è obbligatoria",
+          "description",
+          [
+            "Inserisci una descrizione per il set di parametri",
+            "La descrizione aiuta a identificare il set",
+          ]
+        )
+      );
       return false;
     }
     if (description.trim().length < 3) {
-      setValidationError("La descrizione deve essere di almeno 3 caratteri");
+      addError(
+        createBusinessError.validation(
+          "La descrizione deve essere di almeno 3 caratteri",
+          "description",
+          [
+            "Aggiungi più caratteri alla descrizione",
+            "Minimo 3 caratteri richiesti",
+          ]
+        )
+      );
       return false;
     }
-    setValidationError("");
+    clearErrors();
     return true;
-  }, [description]);
+  }, [description, addError, clearErrors]);
 
   const handleSave = async () => {
     if (!validateDescription()) {
@@ -70,6 +94,12 @@ const DuplicateParameterSetForm: React.FC<DuplicateParameterSetFormProps> = ({
       await onSave(dataToSave);
     } catch (error) {
       console.error("Errore nella duplicazione:", error);
+      addError(
+        createBusinessError.system(
+          "Errore nella duplicazione del set di parametri",
+          "Errore di duplicazione"
+        )
+      );
     }
   };
 
@@ -90,16 +120,21 @@ const DuplicateParameterSetForm: React.FC<DuplicateParameterSetFormProps> = ({
             <input
               type="text"
               className={`duplicate-form-input ${
-                validationError ? "error" : ""
+                errors.length > 0 ? "error" : ""
               }`}
               value={description}
               onChange={(e) => handleDescriptionChange(e.target.value)}
               placeholder="Es. Set Standard EUR-USD (Copia)"
               autoFocus
             />
-            {validationError && (
-              <div className="duplicate-form-error">{validationError}</div>
-            )}
+            {/* Compact Error Handler */}
+            {errors.map((businessError) => (
+              <CompactErrorHandler
+                key={businessError.id}
+                error={businessError}
+                onDismiss={() => removeError(businessError.id)}
+              />
+            ))}
             <div className="duplicate-form-help">
               Scegli un nome univoco per il nuovo set di parametri
             </div>
@@ -224,7 +259,7 @@ const DuplicateParameterSetForm: React.FC<DuplicateParameterSetFormProps> = ({
         <button
           className="btn btn-primary"
           onClick={handleSave}
-          disabled={saving || !!validationError}
+          disabled={saving || errors.length > 0}
         >
           {saving ? "Duplicazione..." : "Duplica Set"}
         </button>

@@ -16,6 +16,11 @@ import {
   Button,
 } from "@mui/material";
 import {
+  useBusinessErrorHandler,
+  createBusinessError,
+} from "../../hooks/useBusinessErrorHandler";
+import CompactErrorHandler from "../CompactErrorHandler";
+import {
   Person,
   AdminPanelSettings,
   Edit,
@@ -39,7 +44,10 @@ const UserDashboard: React.FC = () => {
     email: user?.email || "",
   });
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
+  // Business error handler
+  const { errors, addError, removeError, clearErrors } =
+    useBusinessErrorHandler();
 
   const handleEditProfile = () => {
     setEditForm({
@@ -47,17 +55,22 @@ const UserDashboard: React.FC = () => {
       email: user?.email || "",
     });
     setEditDialogOpen(true);
-    setError(null);
+    clearErrors();
   };
 
   const handleSaveProfile = async () => {
     try {
       setSaving(true);
-      setError(null);
+      clearErrors();
       await updateUser(editForm);
       setEditDialogOpen(false);
     } catch (err: any) {
-      setError(err.message || "Errore nell'aggiornamento del profilo");
+      addError(
+        createBusinessError.system(
+          err.message || "Errore nell'aggiornamento del profilo",
+          "Errore di aggiornamento profilo"
+        )
+      );
     } finally {
       setSaving(false);
     }
@@ -208,11 +221,14 @@ const UserDashboard: React.FC = () => {
         <DialogTitle>Modifica Profilo</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2 }}>
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
-              </Alert>
-            )}
+            {/* Compact Error Handler */}
+            {errors.map((businessError) => (
+              <CompactErrorHandler
+                key={businessError.id}
+                error={businessError}
+                onDismiss={() => removeError(businessError.id)}
+              />
+            ))}
 
             <TextField
               fullWidth

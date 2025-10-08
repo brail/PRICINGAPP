@@ -86,8 +86,13 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
       </Typography>
 
       {error && (
-        <Alert severity={config.severity} sx={{ mb: 2, textAlign: "left" }}>
-          <Typography variant="caption">{error.message}</Typography>
+        <Alert
+          severity={config.severity}
+          sx={{ mb: 2, textAlign: "left", fontSize: "0.8rem" }}
+        >
+          <Typography variant="caption" sx={{ fontSize: "0.75rem" }}>
+            {error.message}
+          </Typography>
         </Alert>
       )}
 

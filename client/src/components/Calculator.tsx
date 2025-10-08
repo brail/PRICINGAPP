@@ -2,7 +2,12 @@ import React, { useState, useEffect, useCallback, memo } from "react";
 import { pricingApi } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 import { useParameterManager } from "../hooks/useParameterManager";
+import {
+  useBusinessErrorHandler,
+  createBusinessError,
+} from "../hooks/useBusinessErrorHandler";
 import { LoadingStates } from "./LoadingStates";
+import CompactErrorHandler from "./CompactErrorHandler";
 import {
   CalculationParams,
   SellingPriceCalculation,
@@ -33,7 +38,11 @@ const Calculator: React.FC = memo(() => {
   const [retailPriceLocked, setRetailPriceLocked] = useState<boolean>(false);
   const [mode, setMode] = useState<CalculationMode>("purchase");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>("");
+  // const [error, setError] = useState<string>(""); // Sostituito da BusinessErrorHandler
+
+  // Business error handler
+  const { errors, addError, removeError, clearErrors } =
+    useBusinessErrorHandler();
 
   const [calculation, setCalculation] = useState<
     SellingPriceCalculation | PurchasePriceCalculation | null
@@ -97,9 +106,11 @@ const Calculator: React.FC = memo(() => {
       }
     } catch (err) {
       console.error("Errore nel caricamento dei parametri:", err);
-      setError("Errore nel caricamento dei parametri");
+      addError(
+        createBusinessError.system("Errore nel caricamento dei parametri")
+      );
     }
-  }, [params, parameterSets, loadUserParameters]);
+  }, [params, parameterSets, loadUserParameters, addError]);
 
   // Carica parametri iniziali e set di parametri
   useEffect(() => {
@@ -154,9 +165,13 @@ const Calculator: React.FC = memo(() => {
       // Usa il ParameterContext per caricare il set
       await loadParameterSet(parameterSetId);
       setSelectedParameterSetId(parameterSetId);
-      setError("");
+      clearErrors();
     } catch (err) {
-      setError("Errore nel caricamento del set di parametri");
+      addError(
+        createBusinessError.system(
+          "Errore nel caricamento del set di parametri"
+        )
+      );
     }
   };
 
@@ -178,7 +193,7 @@ const Calculator: React.FC = memo(() => {
     if (!purchasePrice || isNaN(Number(purchasePrice))) return;
 
     setLoading(true);
-    setError("");
+    clearErrors();
 
     try {
       const result = await pricingApi.calculateSellingPrice(
@@ -191,7 +206,11 @@ const Calculator: React.FC = memo(() => {
         setRetailPrice(result.retailPrice.toFixed(2));
       }
     } catch (err) {
-      setError("Errore nel calcolo del prezzo di vendita");
+      addError(
+        createBusinessError.calculation(
+          "Errore nel calcolo del prezzo di vendita"
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -201,7 +220,7 @@ const Calculator: React.FC = memo(() => {
     if (!retailPrice || isNaN(Number(retailPrice))) return;
 
     setLoading(true);
-    setError("");
+    clearErrors();
 
     try {
       const result = await pricingApi.calculatePurchasePrice(
@@ -214,7 +233,11 @@ const Calculator: React.FC = memo(() => {
         setPurchasePrice(result.purchasePrice.toFixed(2));
       }
     } catch (err) {
-      setError("Errore nel calcolo del prezzo di acquisto");
+      addError(
+        createBusinessError.calculation(
+          "Errore nel calcolo del prezzo di acquisto"
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -399,6 +422,55 @@ const Calculator: React.FC = memo(() => {
 
   const handleCalculate = async () => {
     try {
+      // Pulisci errori precedenti
+      clearErrors();
+
+      // Validazione input
+      if (!purchasePrice && !retailPrice) {
+        addError(
+          createBusinessError.validation(
+            "Per procedere con il calcolo, inserisci almeno un prezzo (acquisto o vendita)",
+            "prezzo",
+            [
+              "💡 Inserisci il prezzo di acquisto per calcolare il prezzo di vendita",
+              "💡 Inserisci il prezzo di vendita per calcolare il prezzo di acquisto",
+              "💡 Oppure inserisci entrambi per calcolare il margine aziendale",
+            ]
+          )
+        );
+        return;
+      }
+
+      if (purchasePrice && isNaN(Number(purchasePrice))) {
+        addError(
+          createBusinessError.validation(
+            "Il prezzo di acquisto deve essere un valore numerico valido",
+            "purchasePrice",
+            [
+              "💡 Inserisci solo numeri (es: 25.50)",
+              "💡 Usa il punto come separatore decimale",
+              "💡 Evita caratteri speciali o lettere",
+            ]
+          )
+        );
+        return;
+      }
+
+      if (retailPrice && isNaN(Number(retailPrice))) {
+        addError(
+          createBusinessError.validation(
+            "Il prezzo di vendita deve essere un valore numerico valido",
+            "retailPrice",
+            [
+              "💡 Inserisci solo numeri (es: 45.99)",
+              "💡 Usa il punto come separatore decimale",
+              "💡 Evita caratteri speciali o lettere",
+            ]
+          )
+        );
+        return;
+      }
+
       // Se c'è un prezzo bloccato, calcola il margine
       if (purchasePriceLocked || retailPriceLocked) {
         await calculateMarginFromLockedPrice();
@@ -407,9 +479,23 @@ const Calculator: React.FC = memo(() => {
       } else if (retailPrice && !isNaN(Number(retailPrice))) {
         await calculateFromSelling();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Errore nel calcolo:", error);
-      setError("Errore durante il calcolo");
+
+      // Crea errore business-specific
+      addError(
+        createBusinessError.calculation(
+          error.message || "Errore durante il calcolo",
+          {
+            purchasePrice,
+            retailPrice,
+            mode,
+            timestamp: new Date().toISOString(),
+          }
+        )
+      );
+
+      // setError("Errore durante il calcolo"); // Sostituito da BusinessErrorHandler
     }
   };
 
@@ -443,7 +529,7 @@ const Calculator: React.FC = memo(() => {
     setPurchasePrice("");
     setRetailPrice("");
     setCalculation(null);
-    setError("");
+    clearErrors();
   };
 
   const handlePurchasePriceLockToggle = () => {
@@ -497,7 +583,9 @@ const Calculator: React.FC = memo(() => {
 
         setCalculation(marginCalculation);
       } catch (err) {
-        setError("Errore nel calcolo del margine");
+        addError(
+          createBusinessError.calculation("Errore nel calcolo del margine")
+        );
       }
     } else if (
       retailPriceLocked &&
@@ -535,7 +623,9 @@ const Calculator: React.FC = memo(() => {
 
         setCalculation(marginCalculation);
       } catch (err) {
-        setError("Errore nel calcolo del margine");
+        addError(
+          createBusinessError.calculation("Errore nel calcolo del margine")
+        );
       }
     }
   };
@@ -572,7 +662,18 @@ const Calculator: React.FC = memo(() => {
         </p>
       </div>
 
-      {error && <div className="error">{error}</div>}
+      {/* Sistema errori vecchio disabilitato - sostituito da BusinessErrorHandler */}
+      {/* {error && <div className="error">{error}</div>} */}
+
+      {/* Compact Error Handler */}
+      {errors.map((businessError) => (
+        <CompactErrorHandler
+          key={businessError.id}
+          error={businessError}
+          onDismiss={() => removeError(businessError.id)}
+          onRetry={handleCalculate}
+        />
+      ))}
 
       {/* Layout principale con focus sui prezzi */}
       <div className="calculator-main-layout">

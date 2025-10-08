@@ -2,6 +2,11 @@ import React, { useState, useCallback, useRef, useEffect } from "react";
 import { CalculationMode } from "../types";
 import { pricingApi } from "../services/api";
 import { LoadingStates, useLoadingState } from "./LoadingStates";
+import {
+  useBusinessErrorHandler,
+  createBusinessError,
+} from "../hooks/useBusinessErrorHandler";
+import CompactErrorHandler from "./CompactErrorHandler";
 import * as ExcelJS from "exceljs";
 import "./BatchCalculator.css";
 
@@ -39,9 +44,12 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
   const [inputData, setInputData] = useState<number[] | number[][]>([]);
   const [results, setResults] = useState<BatchResult[]>([]);
   const [isCalculating, setIsCalculating] = useState(false);
-  const [error, setError] = useState<string>("");
   const [pasteText, setPasteText] = useState("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+
+  // Business error handler
+  const { errors, addError, removeError, clearErrors } =
+    useBusinessErrorHandler();
 
   // Hook per gestire stati di loading professionali
   const { isLoading, loadingMessage, startLoading, stopLoading } =
@@ -153,7 +161,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
         return []; // Restituisce array vuoto per indicare errore
       }
     },
-    [calculationMode, cleanNumericValue]
+    [calculationMode, cleanNumericValue, addError, clearErrors]
   );
 
   // Gestione copia-incolla
@@ -167,19 +175,35 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       if (parsed.length === 0 && text.trim()) {
         // Determina il tipo di errore specifico
         if (calculationMode === "margin") {
-          setError(
-            "Per il calcolo margine sono necessarie due colonne (acquisto; vendita)"
+          addError(
+            createBusinessError.validation(
+              "Per il calcolo margine sono necessarie due colonne (acquisto; vendita)",
+              "inputData",
+              [
+                "Inserisci due colonne separate da punto e virgola",
+                "Formato: prezzo_acquisto; prezzo_vendita",
+                "Esempio: 25.50; 45.99",
+              ]
+            )
           );
         } else {
-          setError(
-            "Per il calcolo acquisto/vendita è necessaria una sola colonna"
+          addError(
+            createBusinessError.validation(
+              "Per il calcolo acquisto/vendita è necessaria una sola colonna",
+              "inputData",
+              [
+                "Inserisci una sola colonna di valori",
+                "Formato: prezzo_acquisto o prezzo_vendita",
+                "Esempio: 25.50",
+              ]
+            )
           );
         }
       } else {
-        setError("");
+        clearErrors();
       }
     },
-    [parsePasteData, calculationMode]
+    [parsePasteData, calculationMode, addError, clearErrors]
   );
 
   // Validazione automatica quando cambia la modalità di calcolo
@@ -192,19 +216,42 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       if (parsed.length === 0 && pasteText.trim()) {
         // Determina il tipo di errore specifico
         if (calculationMode === "margin") {
-          setError(
-            "Per il calcolo margine sono necessarie due colonne (acquisto; vendita)"
+          addError(
+            createBusinessError.validation(
+              "Per il calcolo margine sono necessarie due colonne (acquisto; vendita)",
+              "inputData",
+              [
+                "Inserisci due colonne separate da punto e virgola",
+                "Formato: prezzo_acquisto; prezzo_vendita",
+                "Esempio: 25.50; 45.99",
+              ]
+            )
           );
         } else {
-          setError(
-            "Per il calcolo acquisto/vendita è necessaria una sola colonna"
+          addError(
+            createBusinessError.validation(
+              "Per il calcolo acquisto/vendita è necessaria una sola colonna",
+              "inputData",
+              [
+                "Inserisci una sola colonna di valori",
+                "Formato: prezzo_acquisto o prezzo_vendita",
+                "Esempio: 25.50",
+              ]
+            )
           );
         }
       } else {
-        setError("");
+        clearErrors();
       }
     }
-  }, [calculationMode, pasteText, inputMethod, parsePasteData]);
+  }, [
+    calculationMode,
+    pasteText,
+    inputMethod,
+    parsePasteData,
+    addError,
+    clearErrors,
+  ]);
 
   // Gestione upload file
   const handleFileUpload = useCallback(
@@ -213,7 +260,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       if (!file) return;
 
       setUploadedFile(file);
-      setError("");
+      clearErrors();
 
       const reader = new FileReader();
       reader.onload = async (event) => {
@@ -307,7 +354,17 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
             .filter((item: any) => item !== null && item !== 0);
 
           if (numericData.length === 0) {
-            setError("Nessun dato numerico valido trovato nel file");
+            addError(
+              createBusinessError.validation(
+                "Nessun dato numerico valido trovato nel file",
+                "file",
+                [
+                  "Verifica che il file contenga valori numerici",
+                  "Assicurati che i dati siano nella prima colonna",
+                  "Formato supportato: .xlsx, .csv",
+                ]
+              )
+            );
             return;
           }
 
@@ -326,19 +383,38 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
             console.log("Dati Excel caricati:", numericData.length, "valori");
           } else if (hasTwoColumns && calculationMode !== "margin") {
             // ERRORE: Due colonne per calcolo acquisto/vendita
-            setError(
-              "Per il calcolo acquisto/vendita è necessaria una sola colonna nel file"
+            addError(
+              createBusinessError.validation(
+                "Per il calcolo acquisto/vendita è necessaria una sola colonna nel file",
+                "file",
+                [
+                  "Rimuovi la seconda colonna dal file",
+                  "Mantieni solo i valori di acquisto o vendita",
+                  "Oppure cambia modalità in 'Margine'",
+                ]
+              )
             );
           } else if (!hasTwoColumns && calculationMode === "margin") {
             // ERRORE: Una colonna per calcolo margine
-            setError(
-              "Per il calcolo margine sono necessarie due colonne nel file"
+            addError(
+              createBusinessError.validation(
+                "Per il calcolo margine sono necessarie due colonne nel file",
+                "file",
+                [
+                  "Aggiungi una seconda colonna con i prezzi di vendita",
+                  "Formato: prezzo_acquisto; prezzo_vendita",
+                  "Oppure cambia modalità in 'Acquisto' o 'Vendita'",
+                ]
+              )
             );
           }
         } catch (error) {
           console.error("Errore nel parsing del file Excel:", error);
-          setError(
-            "Errore nel leggere il file. Assicurati che sia un file .xlsx o .csv valido."
+          addError(
+            createBusinessError.system(
+              "Errore nel leggere il file. Assicurati che sia un file .xlsx o .csv valido.",
+              "Errore di parsing Excel"
+            )
           );
         }
       };
@@ -350,25 +426,45 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
         reader.readAsArrayBuffer(file);
       }
     },
-    [calculationMode, cleanNumericValue]
+    [calculationMode, cleanNumericValue, addError, clearErrors]
   );
 
   // Calcolo batch
   const handleBatchCalculate = useCallback(async () => {
     if (inputData.length === 0) {
-      setError("Inserisci almeno un valore");
+      addError(
+        createBusinessError.validation(
+          "Inserisci almeno un valore",
+          "inputData",
+          [
+            "Incolla i dati nell'area di testo",
+            "Oppure carica un file Excel/CSV",
+            "Formato: un valore per riga",
+          ]
+        )
+      );
       return;
     }
 
     if (inputData.length > 500) {
-      setError("Massimo 500 valori consentiti");
+      addError(
+        createBusinessError.validation(
+          "Massimo 500 valori consentiti",
+          "inputData",
+          [
+            "Riduci il numero di valori",
+            "Dividi i calcoli in batch più piccoli",
+            "Limite: 500 valori per batch",
+          ]
+        )
+      );
       return;
     }
 
     try {
       startLoading("Preparazione calcolo batch...", 0);
       setIsCalculating(true);
-      setError("");
+      clearErrors();
 
       const batchResults: BatchResult[] = [];
 
@@ -418,13 +514,27 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
 
       setResults(batchResults);
     } catch (err) {
-      setError("Errore durante il calcolo batch");
+      addError(
+        createBusinessError.calculation("Errore durante il calcolo batch", {
+          inputDataLength: inputData.length,
+          calculationMode,
+          timestamp: new Date().toISOString(),
+        })
+      );
       console.error("Batch calculation error:", err);
     } finally {
       stopLoading();
       setIsCalculating(false);
     }
-  }, [inputData, calculationMode, onCalculate, startLoading, stopLoading]);
+  }, [
+    inputData,
+    calculationMode,
+    onCalculate,
+    startLoading,
+    stopLoading,
+    addError,
+    clearErrors,
+  ]);
 
   // Export Excel
   const handleExportExcel = useCallback(async () => {
@@ -634,9 +744,14 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       console.log("File Excel esportato:", fileName);
     } catch (error) {
       console.error("Errore nell'export Excel:", error);
-      setError("Errore nell'export del file Excel");
+      addError(
+        createBusinessError.system(
+          "Errore nell'export del file Excel",
+          "Errore di esportazione Excel"
+        )
+      );
     }
-  }, [results, params, calculationMode]);
+  }, [results, params, calculationMode, addError]);
 
   // Reset
   const handleReset = useCallback(() => {
@@ -644,8 +759,8 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
     setResults([]);
     setPasteText("");
     setUploadedFile(null);
-    setError("");
-  }, []);
+    clearErrors();
+  }, [clearErrors]);
 
   return (
     <div className="batch-calculator">
@@ -799,7 +914,15 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       </div>
 
       {/* Errori */}
-      {error && <div className="batch-error">{error}</div>}
+      {/* Compact Error Handler */}
+      {errors.map((businessError) => (
+        <CompactErrorHandler
+          key={businessError.id}
+          error={businessError}
+          onDismiss={() => removeError(businessError.id)}
+          onRetry={handleBatchCalculate}
+        />
+      ))}
 
       {/* Azioni */}
       <div className="batch-actions">

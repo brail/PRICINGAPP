@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { LoadingStates, useLoadingState } from "./LoadingStates";
 import {
+  useBusinessErrorHandler,
+  createBusinessError,
+} from "../hooks/useBusinessErrorHandler";
+import CompactErrorHandler from "./CompactErrorHandler";
+import {
   DndContext,
   closestCenter,
   KeyboardSensor,
@@ -228,14 +233,19 @@ const Parameters: React.FC = () => {
   const handleEditSave = async (data: any) => {
     try {
       setSaving(true);
-      setError("");
+      clearErrors();
 
       // Usa il ParameterContext per aggiornare il set
       await updateParameterSet(editingParameterSet.id, data);
       setSuccess("Set di parametri aggiornato con successo!");
       setEditingParameterSet(null);
     } catch (err: any) {
-      setError(err.message || "Errore nell'aggiornamento del set di parametri");
+      addError(
+        createBusinessError.system(
+          err.message || "Errore nell'aggiornamento del set di parametri",
+          "Errore di aggiornamento parametri"
+        )
+      );
       throw err; // Rilancia l'errore per il form
     } finally {
       setSaving(false);
@@ -278,8 +288,11 @@ const Parameters: React.FC = () => {
   // const [exchangeRates, setExchangeRates] = useState<ExchangeRates>({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+
+  // Business error handler
+  const { errors, addError, removeError, clearErrors } =
+    useBusinessErrorHandler();
 
   // Hook per gestire stati di loading professionali
   const { isLoading, loadingMessage, startLoading, stopLoading } =
@@ -311,6 +324,7 @@ const Parameters: React.FC = () => {
     loadSettings();
     // loadExchangeRates();
     // loadParameterSets(); // Ora gestito da ParameterContext
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadSettings = async () => {
@@ -318,7 +332,12 @@ const Parameters: React.FC = () => {
       setLoading(true);
       // const currentParams = await pricingApi.getParams(); // Commentato per v0.2 - gestito dal Calculator
     } catch (err) {
-      setError("Errore nel caricamento delle impostazioni");
+      addError(
+        createBusinessError.system(
+          "Errore nel caricamento delle impostazioni",
+          "Errore di caricamento parametri"
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -497,14 +516,19 @@ const Parameters: React.FC = () => {
   const handleWizardSave = async (data: any) => {
     try {
       setSaving(true);
-      setError("");
+      clearErrors();
 
       await pricingApi.createParameterSet(data);
       setSuccess("Set di parametri creato con successo!");
       setShowWizard(false);
       loadParameterSets();
     } catch (err: any) {
-      setError(err.message || "Errore nella creazione del set di parametri");
+      addError(
+        createBusinessError.system(
+          err.message || "Errore nella creazione del set di parametri",
+          "Errore di creazione parametri"
+        )
+      );
       throw err; // Rilancia l'errore per il wizard
     } finally {
       setSaving(false);
@@ -514,14 +538,19 @@ const Parameters: React.FC = () => {
   const handleDuplicateSave = async (data: any) => {
     try {
       setSaving(true);
-      setError("");
+      clearErrors();
 
       await pricingApi.createParameterSet(data);
       setSuccess("Set di parametri duplicato con successo!");
       setDuplicatingParameterSet(null);
       loadParameterSets();
     } catch (err: any) {
-      setError(err.message || "Errore nella duplicazione del set di parametri");
+      addError(
+        createBusinessError.system(
+          err.message || "Errore nella duplicazione del set di parametri",
+          "Errore di duplicazione parametri"
+        )
+      );
       throw err; // Rilancia l'errore per il form
     } finally {
       setSaving(false);
@@ -534,7 +563,17 @@ const Parameters: React.FC = () => {
     // Validazione del form
     const validationErrors = validateEditForm();
     if (validationErrors.length > 0) {
-      setError("Errore di validazione: " + validationErrors.join(", "));
+      addError(
+        createBusinessError.validation(
+          "Errore di validazione: " + validationErrors.join(", "),
+          "form",
+          [
+            "Compila tutti i campi obbligatori",
+            "Verifica che i valori siano numerici",
+            "Controlla i formati delle valute",
+          ]
+        )
+      );
       return;
     }
 
@@ -568,9 +607,12 @@ const Parameters: React.FC = () => {
       setEditingParameterSet(null);
       await loadParameterSets();
     } catch (err: any) {
-      setError(
-        err.response?.data?.error ||
-          "Errore nell'aggiornamento del set di parametri"
+      addError(
+        createBusinessError.system(
+          err.response?.data?.error ||
+            "Errore nell'aggiornamento del set di parametri",
+          "Errore di aggiornamento parametri"
+        )
       );
     } finally {
       setSaving(false);
@@ -598,9 +640,12 @@ const Parameters: React.FC = () => {
       setShowDeleteConfirm(false);
       setParameterSetToDelete(null);
     } catch (err: any) {
-      setError(
-        err.response?.data?.error ||
-          "Errore nell'eliminazione del set di parametri"
+      addError(
+        createBusinessError.system(
+          err.response?.data?.error ||
+            "Errore nell'eliminazione del set di parametri",
+          "Errore di eliminazione parametri"
+        )
       );
     } finally {
       setSaving(false);
@@ -622,9 +667,12 @@ const Parameters: React.FC = () => {
 
       setSuccess("Set di parametri caricato con successo");
     } catch (err: any) {
-      setError(
-        err.response?.data?.error ||
-          "Errore nel caricamento del set di parametri"
+      addError(
+        createBusinessError.system(
+          err.response?.data?.error ||
+            "Errore nel caricamento del set di parametri",
+          "Errore di caricamento parametri"
+        )
       );
     } finally {
       stopLoading();
@@ -639,9 +687,12 @@ const Parameters: React.FC = () => {
       setSuccess("Set di parametri impostato come default");
       await loadParameterSets();
     } catch (err: any) {
-      setError(
-        err.response?.data?.error ||
-          "Errore nell'impostazione del set di parametri come default"
+      addError(
+        createBusinessError.system(
+          err.response?.data?.error ||
+            "Errore nell'impostazione del set di parametri come default",
+          "Errore di impostazione default"
+        )
       );
     } finally {
       setSaving(false);
@@ -723,7 +774,14 @@ const Parameters: React.FC = () => {
         </p>
       </div>
 
-      {error && <div className="error">{error}</div>}
+      {/* Compact Error Handler */}
+      {errors.map((businessError) => (
+        <CompactErrorHandler
+          key={businessError.id}
+          error={businessError}
+          onDismiss={() => removeError(businessError.id)}
+        />
+      ))}
       {success && <div className="success">{success}</div>}
 
       <div className="parameters-grid">
