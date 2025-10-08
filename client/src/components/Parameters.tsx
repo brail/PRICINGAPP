@@ -113,7 +113,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
                 startDuplicatingParameterSet(set);
               }}
               disabled={saving}
-              title="Duplica questo set di parametri"
+              title="Duplica questo template prezzi"
             >
               Duplica
             </button>
@@ -156,7 +156,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
               disabled={saving}
               title={
                 set.is_default
-                  ? "Set di parametri predefinito"
+                  ? "Template prezzi predefinito"
                   : "Imposta come predefinito"
               }
               data-is-default={set.is_default ? "true" : "false"}
@@ -172,7 +172,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
               {set.selling_currency}
             </p>
             <p>
-              <strong>Quality Control:</strong> {set.quality_control_percent}%
+              <strong>Controllo Qualità:</strong> {set.quality_control_percent}%
             </p>
             <p>
               <strong>Trasporto + Assicurazione:</strong>{" "}
@@ -189,10 +189,10 @@ const SortableItem: React.FC<SortableItemProps> = ({
               {set.italy_accessory_costs}
             </p>
             <p>
-              <strong>Tools:</strong> {set.tools}
+              <strong>Stampi:</strong> {set.tools}
             </p>
             <p>
-              <strong>Moltiplicatore Retail:</strong> {set.retail_multiplier}
+              <strong>Moltiplicatore Vendita al Dettaglio:</strong> {set.retail_multiplier}
             </p>
             <p>
               <strong>Margine ottimale:</strong> {set.optimal_margin}%
@@ -239,15 +239,15 @@ const Parameters: React.FC = () => {
       // Usa il ParameterContext per aggiornare il set
       await updateParameterSet(editingParameterSet.id, data);
       showSuccess(
-        "Parametri aggiornati",
-        "Set di parametri aggiornato con successo!"
+        "Template aggiornato",
+        "Template prezzi aggiornato con successo!"
       );
       setEditingParameterSet(null);
     } catch (err: any) {
       addError(
         createBusinessError.system(
-          err.message || "Errore nell'aggiornamento del set di parametri",
-          "Errore di aggiornamento parametri"
+          err.message || "Errore nell'aggiornamento del template prezzi",
+          "Errore di aggiornamento template"
         )
       );
       throw err; // Rilancia l'errore per il form
@@ -292,7 +292,6 @@ const Parameters: React.FC = () => {
   // const [exchangeRates, setExchangeRates] = useState<ExchangeRates>({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState<string>("");
 
   // Business error handler
   const { errors, addError, removeError, clearErrors } =
@@ -434,7 +433,7 @@ const Parameters: React.FC = () => {
     const errors: string[] = [];
 
     if (!editingParameterSet?.description?.trim()) {
-      errors.push("Descrizione è obbligatoria");
+      errors.push("Nome template è obbligatorio");
     }
 
     if (!editingParameterSet?.purchase_currency) {
@@ -451,7 +450,7 @@ const Parameters: React.FC = () => {
       editingParameterSet?.quality_control_percent === undefined ||
       isNaN(Number(editingParameterSet?.quality_control_percent))
     ) {
-      errors.push("Quality Control (%) è obbligatorio");
+      errors.push("Controllo Qualità (%) è obbligatorio");
     }
 
     if (
@@ -496,7 +495,7 @@ const Parameters: React.FC = () => {
       editingParameterSet?.tools === undefined ||
       isNaN(Number(editingParameterSet?.tools))
     ) {
-      errors.push("Tools è obbligatorio");
+      errors.push("Stampi è obbligatorio");
     }
 
     if (
@@ -505,7 +504,7 @@ const Parameters: React.FC = () => {
       editingParameterSet?.retail_multiplier === undefined ||
       isNaN(Number(editingParameterSet?.retail_multiplier))
     ) {
-      errors.push("Moltiplicatore retail è obbligatorio");
+      errors.push("Moltiplicatore vendita al dettaglio è obbligatorio");
     }
 
     if (
@@ -526,14 +525,14 @@ const Parameters: React.FC = () => {
       clearErrors();
 
       await pricingApi.createParameterSet(data);
-      showSuccess("Parametri creati", "Set di parametri creato con successo!");
+      showSuccess("Template creato", "Template prezzi creato con successo!");
       setShowWizard(false);
       loadParameterSets();
     } catch (err: any) {
       addError(
         createBusinessError.system(
-          err.message || "Errore nella creazione del set di parametri",
-          "Errore di creazione parametri"
+          err.message || "Errore nella creazione del template prezzi",
+          "Errore di creazione template"
         )
       );
       throw err; // Rilancia l'errore per il wizard
@@ -547,18 +546,37 @@ const Parameters: React.FC = () => {
       setSaving(true);
       clearErrors();
 
+      // Salva l'ID del set originale per mantenere la selezione
+      const originalSetId = duplicatingParameterSet?.id;
+
       await pricingApi.createParameterSet(data);
       showSuccess(
-        "Parametri duplicati",
-        "Set di parametri duplicato con successo!"
+        "Template duplicato",
+        "Template prezzi duplicato con successo!"
       );
       setDuplicatingParameterSet(null);
-      loadParameterSets();
+
+      // Ricarica la lista dei set
+      await loadParameterSets();
+
+      // Mantieni la selezione del set originale se esiste ancora
+      if (originalSetId) {
+        // Trova il set originale nella lista aggiornata
+        const updatedSets = await pricingApi.getParameterSets();
+        const originalSet = updatedSets.find((set) => set.id === originalSetId);
+        if (originalSet) {
+          // Il set originale esiste ancora, mantieni la selezione
+          console.log(
+            "Mantenendo selezione del set originale:",
+            originalSet.description
+          );
+        }
+      }
     } catch (err: any) {
       addError(
         createBusinessError.system(
-          err.message || "Errore nella duplicazione del set di parametri",
-          "Errore di duplicazione parametri"
+          err.message || "Errore nella duplicazione del template prezzi",
+          "Errore di duplicazione template"
         )
       );
       throw err; // Rilancia l'errore per il form
@@ -614,8 +632,8 @@ const Parameters: React.FC = () => {
         parameterSetToUpdate
       );
       showSuccess(
-        "Parametri aggiornati",
-        "Set di parametri aggiornato con successo"
+        "Template aggiornato",
+        "Template prezzi aggiornato con successo"
       );
       setEditingParameterSet(null);
       await loadParameterSets();
@@ -623,8 +641,8 @@ const Parameters: React.FC = () => {
       addError(
         createBusinessError.system(
           err.response?.data?.error ||
-            "Errore nell'aggiornamento del set di parametri",
-          "Errore di aggiornamento parametri"
+            "Errore nell'aggiornamento del template prezzi",
+          "Errore di aggiornamento template"
         )
       );
     } finally {
@@ -650,8 +668,8 @@ const Parameters: React.FC = () => {
       // Usa il ParameterContext per eliminare il set
       await deleteParameterSet(parameterSetToDelete.id);
       showSuccess(
-        "Parametri eliminati",
-        "Set di parametri eliminato con successo"
+        "Template eliminato",
+        "Template prezzi eliminato con successo"
       );
       setShowDeleteConfirm(false);
       setParameterSetToDelete(null);
@@ -659,8 +677,8 @@ const Parameters: React.FC = () => {
       addError(
         createBusinessError.system(
           err.response?.data?.error ||
-            "Errore nell'eliminazione del set di parametri",
-          "Errore di eliminazione parametri"
+            "Errore nell'eliminazione del template prezzi",
+          "Errore di eliminazione template"
         )
       );
     } finally {
@@ -670,11 +688,11 @@ const Parameters: React.FC = () => {
 
   const handleLoadParameterSet = async (id: number) => {
     try {
-      startLoading("Caricamento parametri...", 0);
+      startLoading("Caricamento template...", 0);
       setSaving(true);
 
       // Simula progresso
-      setTimeout(() => startLoading("Applicazione parametri...", 50), 200);
+      setTimeout(() => startLoading("Applicazione template...", 50), 200);
 
       // Usa il ParameterContext per caricare il set
       await loadParameterSet(id);
@@ -682,15 +700,15 @@ const Parameters: React.FC = () => {
       setTimeout(() => startLoading("Completamento...", 100), 300);
 
       showSuccess(
-        "Parametri caricati",
-        "Set di parametri caricato con successo"
+        "Template caricato",
+        "Template prezzi caricato con successo"
       );
     } catch (err: any) {
       addError(
         createBusinessError.system(
           err.response?.data?.error ||
-            "Errore nel caricamento del set di parametri",
-          "Errore di caricamento parametri"
+            "Errore nel caricamento del template prezzi",
+          "Errore di caricamento template"
         )
       );
     } finally {
@@ -702,15 +720,19 @@ const Parameters: React.FC = () => {
   const handleSetDefaultParameterSet = async (id: number) => {
     try {
       setSaving(true);
+      clearErrors();
       await pricingApi.setDefaultParameterSet(id);
-      setSuccess("Set di parametri impostato come default");
+      showSuccess(
+        "Template predefinito",
+        "Template prezzi impostato come predefinito con successo"
+      );
       await loadParameterSets();
     } catch (err: any) {
       addError(
         createBusinessError.system(
           err.response?.data?.error ||
-            "Errore nell'impostazione del set di parametri come default",
-          "Errore di impostazione default"
+            "Errore nell'impostazione del template prezzi come predefinito",
+          "Errore di impostazione predefinito"
         )
       );
     } finally {
@@ -787,9 +809,9 @@ const Parameters: React.FC = () => {
       )}
 
       <div className="parameters-header">
-        <h2>Parametri</h2>
+        <h2>Configurazione Prezzi</h2>
         <p className="text-muted">
-          Configura i parametri di calcolo per la calcolatrice prezzi.
+          Configura i template di calcolo per la calcolatrice prezzi.
         </p>
       </div>
 
@@ -801,7 +823,6 @@ const Parameters: React.FC = () => {
           onDismiss={() => removeError(businessError.id)}
         />
       ))}
-      {success && <div className="success">{success}</div>}
 
       <div className="parameters-grid">
         {/* Parametri di Calcolo - Temporaneamente nascosto */}
@@ -1044,7 +1065,7 @@ const Parameters: React.FC = () => {
         {/* Gestione Set di Parametri */}
         <div className="parameters-card">
           <div className="parameters-card-header">
-            <h3>Gestione Set di Parametri</h3>
+            <h3>Gestione Template Prezzi</h3>
             <button
               className="btn btn-primary"
               onClick={() => {
@@ -1056,16 +1077,16 @@ const Parameters: React.FC = () => {
                 setShowWizard(!showWizard);
               }}
             >
-              {showWizard ? "Annulla" : "Crea Nuovo Set"}
+              {showWizard ? "Annulla" : "Crea Nuovo Template"}
             </button>
           </div>
 
           <div className="parameter-sets-management">
             {/* Lista Set di Parametri */}
             <div className="parameter-sets-list">
-              <h4>Set di Parametri Esistenti</h4>
+              <h4>Template Prezzi Esistenti</h4>
               {parameterSets.length === 0 ? (
-                <p className="text-muted">Nessun set di parametri trovato.</p>
+                <p className="text-muted">Nessun template prezzi trovato.</p>
               ) : (
                 <DndContext
                   sensors={sensors}

@@ -224,3 +224,4 @@ const CompactErrorHandler: React.FC<CompactErrorHandlerProps> = ({
 };
 
 export default CompactErrorHandler;
+

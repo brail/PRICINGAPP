@@ -84,37 +84,37 @@ const Calculator: React.FC = memo(() => {
       // Se non ci sono parametri salvati per l'utente, carica i parametri globali
       // I parametri sono già caricati dal ParameterContext
 
-      // Aggiorna la selezione del set se i parametri sono già stati caricati
-      if (parameterSets.length > 0) {
-        const matchingSet = parameterSets.find((set) => {
-          return (
-            set.purchase_currency === params.purchaseCurrency &&
-            set.selling_currency === params.sellingCurrency &&
-            set.quality_control_percent === params.qualityControlPercent &&
-            set.transport_insurance_cost === params.transportInsuranceCost &&
-            set.duty === params.duty &&
-            set.exchange_rate === params.exchangeRate &&
-            set.italy_accessory_costs === params.italyAccessoryCosts &&
-            set.company_multiplier === params.companyMultiplier &&
-            set.retail_multiplier === params.retailMultiplier &&
-            set.optimal_margin === params.optimalMargin
-          );
-        });
+      // DISABILITATO: Auto-selezione che interferiva con la selezione manuale
+      // if (parameterSets.length > 0) {
+      //   const matchingSet = parameterSets.find((set) => {
+      //     return (
+      //       set.purchase_currency === params.purchaseCurrency &&
+      //       set.selling_currency === params.sellingCurrency &&
+      //       set.quality_control_percent === params.qualityControlPercent &&
+      //       set.transport_insurance_cost === params.transportInsuranceCost &&
+      //       set.duty === params.duty &&
+      //       set.exchange_rate === params.exchangeRate &&
+      //       set.italy_accessory_costs === params.italyAccessoryCosts &&
+      //       set.company_multiplier === params.companyMultiplier &&
+      //       set.retail_multiplier === params.retailMultiplier &&
+      //       set.optimal_margin === params.optimalMargin
+      //     );
+      //   });
 
-        if (matchingSet) {
-          setSelectedParameterSetId(matchingSet.id);
-          // Parametri caricati da set salvato
-        } else {
-          // Parametri personalizzati
-        }
-      }
+      //   if (matchingSet) {
+      //     setSelectedParameterSetId(matchingSet.id);
+      //     // Parametri caricati da set salvato
+      //   } else {
+      //     // Parametri personalizzati
+      //   }
+      // }
     } catch (err) {
       console.error("Errore nel caricamento dei parametri:", err);
       addError(
         createBusinessError.system("Errore nel caricamento dei parametri")
       );
     }
-  }, [params, parameterSets, loadUserParameters, addError]);
+  }, [loadUserParameters, addError]);
 
   // Carica parametri iniziali e set di parametri
   useEffect(() => {
@@ -130,35 +130,37 @@ const Calculator: React.FC = memo(() => {
   }, [user, loadParams]);
 
   // Aggiorna la selezione del set quando i parametri cambiano
-  useEffect(() => {
-    if (parameterSets.length > 0 && params) {
-      const matchingSet = parameterSets.find((set) => {
-        return (
-          set.purchase_currency === params.purchaseCurrency &&
-          set.selling_currency === params.sellingCurrency &&
-          set.quality_control_percent === params.qualityControlPercent &&
-          set.transport_insurance_cost === params.transportInsuranceCost &&
-          set.duty === params.duty &&
-          set.exchange_rate === params.exchangeRate &&
-          set.italy_accessory_costs === params.italyAccessoryCosts &&
-          set.tools === params.tools &&
-          set.company_multiplier === params.companyMultiplier &&
-          set.retail_multiplier === params.retailMultiplier &&
-          set.optimal_margin === params.optimalMargin
-        );
-      });
+  // DISABILITATO: Questo useEffect causava problemi di auto-selezione
+  // che interferiva con la selezione manuale dell'utente
+  // useEffect(() => {
+  //   if (parameterSets.length > 0 && params) {
+  //     const matchingSet = parameterSets.find((set) => {
+  //       return (
+  //         set.purchase_currency === params.purchaseCurrency &&
+  //         set.selling_currency === params.sellingCurrency &&
+  //         set.quality_control_percent === params.qualityControlPercent &&
+  //         set.transport_insurance_cost === params.transportInsuranceCost &&
+  //         set.duty === params.duty &&
+  //         set.exchange_rate === params.exchangeRate &&
+  //         set.italy_accessory_costs === params.italyAccessoryCosts &&
+  //         set.tools === params.tools &&
+  //         set.company_multiplier === params.companyMultiplier &&
+  //         set.retail_multiplier === params.retailMultiplier &&
+  //         set.optimal_margin === params.optimalMargin
+  //       );
+  //     });
 
-      if (matchingSet) {
-        // Parametri caricati da set salvato
-        if (matchingSet.id !== selectedParameterSetId) {
-          setSelectedParameterSetId(matchingSet.id);
-        }
-      } else {
-        // Parametri personalizzati
-        setSelectedParameterSetId(null);
-      }
-    }
-  }, [params, parameterSets, selectedParameterSetId]);
+  //     if (matchingSet) {
+  //       // Parametri caricati da set salvato
+  //       if (matchingSet.id !== selectedParameterSetId) {
+  //         setSelectedParameterSetId(matchingSet.id);
+  //       }
+  //     } else {
+  //       // Parametri personalizzati
+  //       setSelectedParameterSetId(null);
+  //     }
+  //   }
+  // }, [params, parameterSets, selectedParameterSetId]);
 
   const handleParameterSetChange = async (parameterSetId: number) => {
     if (!parameterSetId) {
@@ -168,6 +170,7 @@ const Calculator: React.FC = memo(() => {
     try {
       // Usa il ParameterContext per caricare il set
       await loadParameterSet(parameterSetId);
+      // Mantieni la selezione manuale dell'utente
       setSelectedParameterSetId(parameterSetId);
       clearErrors();
     } catch (err) {
@@ -873,11 +876,11 @@ const Calculator: React.FC = memo(() => {
 
         {/* Sidebar con parametri compatti */}
         <div className="sidebar-section">
-          {/* Selezione Set di Parametri */}
+          {/* Selezione Template Prezzi */}
           <div className="sidebar-card">
             <h4>Parametri</h4>
             <div className="form-group">
-              <label className="form-label">Set di Parametri:</label>
+              <label className="form-label">Template Prezzi:</label>
               <select
                 className="form-select"
                 value={selectedParameterSetId || ""}
@@ -903,7 +906,7 @@ const Calculator: React.FC = memo(() => {
             </div>
           </div>
 
-          {/* Dettagli Set di Parametri Caricato - Compatti */}
+          {/* Dettagli Template Prezzi Caricato - Compatti */}
           {params && (
             <div className="sidebar-card">
               <h4>Parametri Attivi</h4>

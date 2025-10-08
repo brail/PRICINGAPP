@@ -58,10 +58,10 @@ const WizardStep2: React.FC<WizardStep2Props> = ({
       </p>
 
       <div className="wizard-form-section">
-        <h4>Quality Control e Controlli</h4>
+        <h4>Controllo Qualità e Controlli</h4>
 
         <div className="wizard-form-group">
-          <label className="wizard-form-label">Quality Control (%) *</label>
+          <label className="wizard-form-label">Controllo Qualità (%) *</label>
           <input
             type="number"
             className={`wizard-form-input ${
@@ -209,7 +209,7 @@ const WizardStep2: React.FC<WizardStep2Props> = ({
         </div>
 
         <div className="wizard-form-group">
-          <label className="wizard-form-label">Tools *</label>
+          <label className="wizard-form-label">Stampi *</label>
           <input
             type="number"
             className={`wizard-form-input ${errors.tools ? "error" : ""}`}
@@ -242,7 +242,7 @@ const WizardStep2: React.FC<WizardStep2Props> = ({
           <h4>Riepilogo Costi</h4>
           {data.qualityControlPercent !== "" && (
             <div className="wizard-preview-item">
-              <span className="wizard-preview-label">Quality Control:</span>
+              <span className="wizard-preview-label">Controllo Qualità:</span>
               <span className="wizard-preview-value">
                 {data.qualityControlPercent}%
               </span>
@@ -280,7 +280,7 @@ const WizardStep2: React.FC<WizardStep2Props> = ({
           )}
           {data.tools !== "" && (
             <div className="wizard-preview-item">
-              <span className="wizard-preview-label">Tools:</span>
+              <span className="wizard-preview-label">Stampi:</span>
               <span className="wizard-preview-value">{data.tools}</span>
             </div>
           )}

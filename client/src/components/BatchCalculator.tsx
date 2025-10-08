@@ -520,12 +520,12 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
 
       // Notifica di successo
       showSuccess(
-        "Calcolo batch completato",
+        "Calcolo multiplo completato",
         `${batchResults.length} calcoli eseguiti con successo`
       );
     } catch (err) {
       addError(
-        createBusinessError.calculation("Errore durante il calcolo batch", {
+        createBusinessError.calculation("Errore durante il calcolo multiplo", {
           inputDataLength: inputData.length,
           calculationMode,
           timestamp: new Date().toISOString(),
@@ -799,7 +799,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       )}
 
       <div className="batch-header">
-        <h3>Calcolo Batch</h3>
+        <h3>Calcolo Multiplo</h3>
         <p>Calcola più valori contemporaneamente</p>
       </div>
 

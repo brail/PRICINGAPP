@@ -51,7 +51,8 @@ interface User {
 
 const UserManagement: React.FC = () => {
   const { user: currentUser } = useAuth();
-  const { addError, clearErrors, errors, removeError } = useBusinessErrorHandler();
+  const { addError, clearErrors, errors, removeError } =
+    useBusinessErrorHandler();
   const { showSuccess, showError } = useNotification();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);

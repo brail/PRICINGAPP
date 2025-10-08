@@ -77,7 +77,7 @@ const EditParameterSetForm: React.FC<EditParameterSetFormProps> = ({
       Number(formData.qualityControlPercent) < 0
     ) {
       errors.qualityControlPercent =
-        "Quality Control deve essere un numero positivo";
+        "Controllo Qualità deve essere un numero positivo";
     }
 
     if (
@@ -105,7 +105,7 @@ const EditParameterSetForm: React.FC<EditParameterSetFormProps> = ({
     }
 
     if (formData.tools === "" || Number(formData.tools) < 0) {
-      errors.tools = "Tools deve essere un numero positivo";
+      errors.tools = "Stampi deve essere un numero positivo";
     }
 
     if (
@@ -113,7 +113,7 @@ const EditParameterSetForm: React.FC<EditParameterSetFormProps> = ({
       Number(formData.retailMultiplier) <= 0
     ) {
       errors.retailMultiplier =
-        "Moltiplicatore retail deve essere un numero positivo";
+        "Moltiplicatore vendita al dettaglio deve essere un numero positivo";
     }
 
     if (
@@ -263,7 +263,7 @@ const EditParameterSetForm: React.FC<EditParameterSetFormProps> = ({
 
       <div className="edit-form-row">
         <div className="edit-form-group">
-          <label className="edit-form-label">Quality Control (%) *</label>
+          <label className="edit-form-label">Controllo Qualità (%) *</label>
           <input
             type="number"
             className={`edit-form-input ${
@@ -386,7 +386,7 @@ const EditParameterSetForm: React.FC<EditParameterSetFormProps> = ({
         </div>
 
         <div className="edit-form-group">
-          <label className="edit-form-label">Tools *</label>
+          <label className="edit-form-label">Stampi *</label>
           <input
             type="number"
             className={`edit-form-input ${
@@ -415,7 +415,7 @@ const EditParameterSetForm: React.FC<EditParameterSetFormProps> = ({
 
       <div className="edit-form-row">
         <div className="edit-form-group">
-          <label className="edit-form-label">Moltiplicatore Retail *</label>
+          <label className="edit-form-label">Moltiplicatore Vendita al Dettaglio *</label>
           <input
             type="number"
             className={`edit-form-input ${

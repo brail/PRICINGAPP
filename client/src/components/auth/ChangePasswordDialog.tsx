@@ -35,7 +35,8 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
   username,
   onSuccess,
 }) => {
-  const { addError, clearErrors, errors, removeError } = useBusinessErrorHandler();
+  const { addError, clearErrors, errors, removeError } =
+    useBusinessErrorHandler();
   const { showSuccess, showError } = useNotification();
   const [formData, setFormData] = useState({
     currentPassword: "",

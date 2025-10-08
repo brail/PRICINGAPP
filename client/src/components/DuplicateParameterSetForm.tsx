@@ -155,7 +155,7 @@ const DuplicateParameterSetForm: React.FC<DuplicateParameterSetFormProps> = ({
 
               <div className="duplicate-preview-item">
                 <span className="duplicate-preview-label">
-                  Quality Control:
+                  Controllo Qualità:
                 </span>
                 <span className="duplicate-preview-value">
                   {parameterSet.quality_control_percent}%
@@ -195,7 +195,7 @@ const DuplicateParameterSetForm: React.FC<DuplicateParameterSetFormProps> = ({
               </div>
 
               <div className="duplicate-preview-item">
-                <span className="duplicate-preview-label">Tools:</span>
+                <span className="duplicate-preview-label">Stampi:</span>
                 <span className="duplicate-preview-value">
                   {parameterSet.tools}
                 </span>
