@@ -11,7 +11,7 @@
  * @since 2024
  */
 
-import axios from "axios";
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import {
   CalculationParams,
   SellingPriceCalculation,
@@ -25,6 +25,81 @@ import {
 
 // Configurazione dinamica dell'URL dell'API
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5001";
+
+// Configurazione retry
+const RETRY_CONFIG = {
+  maxRetries: 3,
+  retryDelay: 1000,
+  retryCondition: (error: AxiosError) => {
+    // Retry su errori di rete o 5xx
+    return (
+      !error.response ||
+      (error.response.status >= 500 && error.response.status < 600)
+    );
+  },
+};
+
+// ===========================================
+// UTILITY FUNCTIONS
+// ===========================================
+
+// Funzione per retry automatico
+const retryRequest = async <T>(
+  requestFn: () => Promise<T>,
+  retries = RETRY_CONFIG.maxRetries
+): Promise<T> => {
+  try {
+    return await requestFn();
+  } catch (error) {
+    const axiosError = error as AxiosError;
+
+    if (retries > 0 && RETRY_CONFIG.retryCondition(axiosError)) {
+      console.warn(
+        `Retry attempt ${RETRY_CONFIG.maxRetries - retries + 1}/${
+          RETRY_CONFIG.maxRetries
+        }`
+      );
+      await new Promise((resolve) =>
+        setTimeout(resolve, RETRY_CONFIG.retryDelay)
+      );
+      return retryRequest(requestFn, retries - 1);
+    }
+
+    throw error;
+  }
+};
+
+// Funzione per gestione errori API
+const handleApiError = (error: AxiosError): Error => {
+  if (error.response) {
+    // Errore del server
+    const status = error.response.status;
+    const message = (error.response.data as any)?.message || error.message;
+
+    switch (status) {
+      case 400:
+        return new Error(`Richiesta non valida: ${message}`);
+      case 401:
+        return new Error("Non autorizzato. Effettua il login.");
+      case 403:
+        return new Error("Accesso negato.");
+      case 404:
+        return new Error("Risorsa non trovata.");
+      case 500:
+        return new Error("Errore del server. Riprova più tardi.");
+      default:
+        return new Error(`Errore del server (${status}): ${message}`);
+    }
+  } else if (error.request) {
+    // Errore di rete
+    return new Error(
+      "Errore di connessione. Verifica la tua connessione internet."
+    );
+  } else {
+    // Altro errore
+    return new Error(`Errore imprevisto: ${error.message}`);
+  }
+};
 
 // Configurazione API caricata
 
@@ -80,7 +155,8 @@ api.interceptors.response.use(
     }
 
     console.error("API Error:", error);
-    return Promise.reject(error);
+    const handledError = handleApiError(error);
+    return Promise.reject(handledError);
   }
 );
 
@@ -121,11 +197,13 @@ export const pricingApi = {
     purchasePrice: number,
     currency: string
   ): Promise<SellingPriceCalculation> => {
-    const response = await api.post("/api/calculate-selling", {
-      purchasePrice,
-      currency,
+    return retryRequest(async () => {
+      const response = await api.post("/api/calculate-selling", {
+        purchasePrice,
+        currency,
+      });
+      return response.data;
     });
-    return response.data;
   },
 
   // Calcola prezzo di acquisto
@@ -133,11 +211,13 @@ export const pricingApi = {
     retailPrice: number,
     currency: string
   ): Promise<PurchasePriceCalculation> => {
-    const response = await api.post("/api/calculate-purchase", {
-      retailPrice,
-      currency,
+    return retryRequest(async () => {
+      const response = await api.post("/api/calculate-purchase", {
+        retailPrice,
+        currency,
+      });
+      return response.data;
     });
-    return response.data;
   },
 
   // Calcola margine da due prezzi (acquisto e vendita)

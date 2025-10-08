@@ -6,11 +6,16 @@ import { Box, Typography, CircularProgress } from "@mui/material";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ParameterProvider } from "./contexts/ParameterContext";
 import { CalculationProvider } from "./contexts/CalculationContext";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { LoadingFallback } from "./components/ErrorFallback";
+import OfflineIndicator from "./components/OfflineIndicator";
 import "./App.css";
 
 // Lazy loading dei componenti
 const LoginForm = lazy(() => import("./components/auth/LoginForm"));
-const AuthenticatedApp = lazy(() => import("./components/auth/AuthenticatedApp"));
+const AuthenticatedApp = lazy(
+  () => import("./components/auth/AuthenticatedApp")
+);
 
 // Tema Material-UI
 const theme = createTheme({
@@ -54,56 +59,46 @@ const AppContent: React.FC = () => {
   }, [isAuthenticated]);
 
   if (isLoading) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        }}
-      >
-        <Typography variant="h6" color="white">
-          Caricamento...
-        </Typography>
-      </Box>
-    );
+    return <LoadingFallback />;
   }
 
   if (!isAuthenticated) {
     return (
-      <Suspense fallback={
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "100vh",
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-          }}
-        >
-          <CircularProgress />
-        </Box>
-      }>
+      <Suspense
+        fallback={
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: "100vh",
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        }
+      >
         <LoginForm />
       </Suspense>
     );
   }
 
   return (
-    <Suspense fallback={
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    }>
+    <Suspense
+      fallback={
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "100vh",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      }
+    >
       <AuthenticatedApp />
     </Suspense>
   );
@@ -113,13 +108,16 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AuthProvider>
-        <ParameterProvider>
-          <CalculationProvider>
-            <AppContent />
-          </CalculationProvider>
-        </ParameterProvider>
-      </AuthProvider>
+      <OfflineIndicator />
+      <ErrorBoundary>
+        <AuthProvider>
+          <ParameterProvider>
+            <CalculationProvider>
+              <AppContent />
+            </CalculationProvider>
+          </ParameterProvider>
+        </AuthProvider>
+      </ErrorBoundary>
     </ThemeProvider>
   );
 }
