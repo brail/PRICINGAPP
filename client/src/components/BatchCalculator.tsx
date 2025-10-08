@@ -6,6 +6,7 @@ import {
   useBusinessErrorHandler,
   createBusinessError,
 } from "../hooks/useBusinessErrorHandler";
+import { useNotification } from "../contexts/NotificationContext";
 import CompactErrorHandler from "./CompactErrorHandler";
 import * as ExcelJS from "exceljs";
 import "./BatchCalculator.css";
@@ -50,6 +51,9 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
   // Business error handler
   const { errors, addError, removeError, clearErrors } =
     useBusinessErrorHandler();
+  
+  // Notification system
+  const { showSuccess, showError, showInfo } = useNotification();
 
   // Hook per gestire stati di loading professionali
   const { isLoading, loadingMessage, startLoading, stopLoading } =
@@ -513,6 +517,12 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       }
 
       setResults(batchResults);
+      
+      // Notifica di successo
+      showSuccess(
+        "Calcolo batch completato",
+        `${batchResults.length} calcoli eseguiti con successo`
+      );
     } catch (err) {
       addError(
         createBusinessError.calculation("Errore durante il calcolo batch", {

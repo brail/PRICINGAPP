@@ -6,9 +6,11 @@ import { Box, CircularProgress } from "@mui/material";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ParameterProvider } from "./contexts/ParameterContext";
 import { CalculationProvider } from "./contexts/CalculationContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { LoadingFallback } from "./components/ErrorFallback";
 import OfflineIndicator from "./components/OfflineIndicator";
+import ToastContainer from "./components/ToastContainer";
 import "./App.css";
 
 // Lazy loading dei componenti
@@ -113,7 +115,10 @@ function App() {
         <AuthProvider>
           <ParameterProvider>
             <CalculationProvider>
-              <AppContent />
+              <NotificationProvider>
+                <AppContent />
+                <ToastContainer />
+              </NotificationProvider>
             </CalculationProvider>
           </ParameterProvider>
         </AuthProvider>

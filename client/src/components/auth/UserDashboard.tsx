@@ -19,6 +19,7 @@ import {
   useBusinessErrorHandler,
   createBusinessError,
 } from "../../hooks/useBusinessErrorHandler";
+import { useNotification } from "../../contexts/NotificationContext";
 import CompactErrorHandler from "../CompactErrorHandler";
 import {
   Person,
@@ -48,6 +49,9 @@ const UserDashboard: React.FC = () => {
   // Business error handler
   const { errors, addError, removeError, clearErrors } =
     useBusinessErrorHandler();
+  
+  // Notification system
+  const { showSuccess, showError } = useNotification();
 
   const handleEditProfile = () => {
     setEditForm({

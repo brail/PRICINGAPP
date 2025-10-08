@@ -6,6 +6,7 @@ import {
   useBusinessErrorHandler,
   createBusinessError,
 } from "../hooks/useBusinessErrorHandler";
+import { useNotification } from "../contexts/NotificationContext";
 import { LoadingStates } from "./LoadingStates";
 import CompactErrorHandler from "./CompactErrorHandler";
 import {
@@ -43,6 +44,9 @@ const Calculator: React.FC = memo(() => {
   // Business error handler
   const { errors, addError, removeError, clearErrors } =
     useBusinessErrorHandler();
+  
+  // Notification system
+  const { showSuccess, showError } = useNotification();
 
   const [calculation, setCalculation] = useState<
     SellingPriceCalculation | PurchasePriceCalculation | null
@@ -205,6 +209,11 @@ const Calculator: React.FC = memo(() => {
       if (!retailPriceLocked) {
         setRetailPrice(result.retailPrice.toFixed(2));
       }
+      // Notifica di successo
+      showSuccess(
+        "Calcolo completato",
+        `Prezzo di vendita calcolato: ${result.retailPrice.toFixed(2)} ${result.sellingCurrency}`
+      );
     } catch (err) {
       addError(
         createBusinessError.calculation(
@@ -232,6 +241,11 @@ const Calculator: React.FC = memo(() => {
       if (!purchasePriceLocked) {
         setPurchasePrice(result.purchasePrice.toFixed(2));
       }
+      // Notifica di successo
+      showSuccess(
+        "Calcolo completato",
+        `Prezzo di acquisto calcolato: ${result.purchasePrice.toFixed(2)} ${result.purchaseCurrency}`
+      );
     } catch (err) {
       addError(
         createBusinessError.calculation(
