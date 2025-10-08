@@ -2,7 +2,7 @@ const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 
 // Percorso del database
-const dbPath = path.join(__dirname, "pricing.db");
+const dbPath = path.join(__dirname, "data", "pricing.db");
 
 // Crea connessione al database
 const db = new sqlite3.Database(dbPath, (err) => {

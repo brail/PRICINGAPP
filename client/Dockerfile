@@ -1,46 +1,51 @@
-# ===========================================
-# PRICING CALCULATOR v0.1 - Frontend Dockerfile
-# ===========================================
+# Multi-stage build per frontend React
+FROM node:18-alpine AS builder
 
-# Build stage
-FROM node:18-alpine as build
+# Installa dipendenze di build
+RUN apk add --no-cache python3 make g++
 
-# Imposta la directory di lavoro
+# Imposta directory di lavoro
 WORKDIR /app
 
-# Copia i file di dipendenze
+# Copia package files
 COPY package*.json ./
 
-# Installa le dipendenze
-RUN npm ci
+# Installa dipendenze
+RUN npm ci --silent
 
-# Copia il codice sorgente
+# Copia sorgenti
 COPY . .
-
-# Argomenti di build per le variabili d'ambiente
-ARG REACT_APP_API_URL=http://localhost:5001/api
-
-# Imposta le variabili d'ambiente per il build
-ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
 # Build dell'applicazione
 RUN npm run build
 
-# Production stage
+# Stage di produzione
 FROM nginx:alpine
 
-# Copia la build dallo stage precedente
-COPY --from=build /app/build /usr/share/nginx/html
+# Installa dumb-init per gestione segnali
+RUN apk add --no-cache dumb-init
 
-# Copia la configurazione nginx personalizzata
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copia build dell'applicazione
+COPY --from=builder /app/build /usr/share/nginx/html
 
-# Espone la porta
+# Copia configurazione Nginx ottimizzata per Docker
+COPY nginx-docker.conf /etc/nginx/nginx.conf
+
+# Crea directory necessarie con permessi corretti
+RUN mkdir -p /var/log/nginx /var/cache/nginx/client_temp /var/cache/nginx/proxy_temp /var/cache/nginx/fastcgi_temp /var/cache/nginx/uwsgi_temp /var/cache/nginx/scgi_temp /tmp && \
+    chmod 755 /tmp && \
+    chmod 755 /var/log/nginx && \
+    chmod 755 /var/cache/nginx
+
+# Esponi porta
 EXPOSE 80
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost/health || exit 1
 
-# Comando di avvio
+# Usa dumb-init per gestione segnali
+ENTRYPOINT ["dumb-init", "--"]
+
+# Avvia Nginx
 CMD ["nginx", "-g", "daemon off;"]

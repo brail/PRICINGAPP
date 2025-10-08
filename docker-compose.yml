@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: pricing-backend
+    environment:
+      - NODE_ENV=production
+      - PORT=5001
+      - HOST=0.0.0.0
+      - DATABASE_PATH=./pricing.db
+      - FRONTEND_URL=http://localhost:3000
+      - ALLOWED_ORIGINS=http://localhost:3000
+      - JWT_SECRET=pricing-calculator-jwt-secret-2025-fixed
+      - JWT_REFRESH_SECRET=pricing-calculator-refresh-secret-2025-fixed
+      - LOG_LEVEL=info
+    ports:
+      - "5001:5001"
+    volumes:
+      - pricing_data:/app/data
+      - pricing_logs:/app/logs
+    networks:
+      - pricing_network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5001/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: pricing-frontend
+    ports:
+      - "3000:80"
+    networks:
+      - pricing_network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+networks:
+  pricing_network:
+    driver: bridge
+
+volumes:
+  pricing_data:
+    driver: local
+  pricing_logs:
+    driver: local

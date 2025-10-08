@@ -14,7 +14,7 @@ const {
   generateRefreshToken,
   verifyRefreshToken,
 } = require("../middleware/auth");
-const { loggers } = require("../../utils/logger");
+const { logger } = require("../../utils/logger");
 
 // Inizializza il modello User
 let userModel;
@@ -46,7 +46,7 @@ router.post("/login", async (req, res) => {
     // Trova l'utente
     const user = await userModel.findByUsername(username);
     if (!user) {
-      loggers.auth.login(username, false, req.ip);
+      logger.info(username, false, req.ip);
       return res.status(401).json({ error: "Credenziali non valide" });
     }
 
@@ -56,7 +56,7 @@ router.post("/login", async (req, res) => {
       user.password
     );
     if (!isValidPassword) {
-      loggers.auth.login(username, false, req.ip);
+      logger.info(username, false, req.ip);
       return res.status(401).json({ error: "Credenziali non valide" });
     }
 
@@ -68,7 +68,7 @@ router.post("/login", async (req, res) => {
     const refreshToken = generateRefreshToken(user);
 
     // Log del login riuscito
-    loggers.auth.login(username, true, req.ip);
+    logger.info(username, true, req.ip);
 
     // Rimuovi password dalla risposta
     const { password: _, ...userWithoutPassword } = user;
@@ -80,7 +80,7 @@ router.post("/login", async (req, res) => {
       refreshToken,
     });
   } catch (error) {
-    loggers.error(error, { context: "login", username });
+    logger.error(error, { context: "login", username: req.body.username });
     res.status(500).json({ error: "Errore interno del server" });
   }
 });
@@ -118,7 +118,11 @@ router.post("/register", async (req, res) => {
     if (error.code === "SQLITE_CONSTRAINT_UNIQUE") {
       res.status(400).json({ error: "Username o email già esistenti" });
     } else {
-      loggers.error(error, { context: "register", username, email });
+      logger.error(error, {
+        context: "register",
+        username: req.body.username,
+        email: req.body.email,
+      });
       res.status(500).json({ error: "Errore interno del server" });
     }
   }
@@ -151,7 +155,7 @@ router.post("/refresh", async (req, res) => {
       refreshToken: newRefreshToken,
     });
   } catch (error) {
-    loggers.error(error, { context: "refreshToken" });
+    logger.error(error, { context: "refreshToken" });
     res.status(401).json({ error: "Refresh token non valido" });
   }
 });
@@ -171,7 +175,7 @@ router.get("/me", authenticateToken, async (req, res) => {
       user: userWithoutPassword,
     });
   } catch (error) {
-    loggers.error(error, { context: "getProfile", userId: req.user.id });
+    logger.error(error, { context: "getProfile", userId: req.user.id });
     res.status(500).json({ error: "Errore interno del server" });
   }
 });
@@ -203,7 +207,7 @@ router.put("/me", authenticateToken, async (req, res) => {
     if (error.code === "SQLITE_CONSTRAINT_UNIQUE") {
       res.status(400).json({ error: "Username o email già esistenti" });
     } else {
-      loggers.error(error, { context: "updateProfile", userId: req.user.id });
+      logger.error(error, { context: "updateProfile", userId: req.user.id });
       res.status(500).json({ error: "Errore interno del server" });
     }
   }
@@ -215,7 +219,7 @@ router.get("/users", authenticateToken, requireAdmin, async (req, res) => {
     const users = await userModel.getAll();
     res.json({ users });
   } catch (error) {
-    loggers.error(error, { context: "getUsers", adminId: req.user.id });
+    logger.error(error, { context: "getUsers", adminId: req.user.id });
     res.status(500).json({ error: "Errore interno del server" });
   }
 });
@@ -247,7 +251,7 @@ router.put("/users/:id", authenticateToken, requireAdmin, async (req, res) => {
     if (error.code === "SQLITE_CONSTRAINT_UNIQUE") {
       res.status(400).json({ error: "Username o email già esistenti" });
     } else {
-      loggers.error(error, {
+      logger.error(error, {
         context: "updateUser",
         adminId: req.user.id,
         targetUserId: userId,
@@ -281,7 +285,7 @@ router.delete(
 
       res.json({ message: "Utente eliminato con successo" });
     } catch (error) {
-      loggers.error(error, {
+      logger.error(error, {
         context: "deleteUser",
         adminId: req.user.id,
         targetUserId: userId,
@@ -334,7 +338,7 @@ router.put("/me/password", authenticateToken, async (req, res) => {
 
     res.json({ message: "Password aggiornata con successo" });
   } catch (error) {
-    loggers.error(error, { context: "changePassword", userId: req.user.id });
+    logger.error(error, { context: "changePassword", userId: req.user.id });
     res.status(500).json({ error: "Errore interno del server" });
   }
 });
@@ -380,7 +384,7 @@ router.put(
 
       res.json({ message: "Password aggiornata con successo" });
     } catch (error) {
-      loggers.error(error, {
+      logger.error(error, {
         context: "changeUserPassword",
         adminId: req.user.id,
         targetUserId: userId,
