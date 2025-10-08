@@ -1,3 +1,5 @@
+@import "./styles/design-system.css";
+
 * {
   margin: 0;
   padding: 0;
@@ -10,8 +12,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f5f5f5;
-  color: #333;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
   line-height: 1.6;
   margin: 0;
   padding: 0;
@@ -33,15 +35,15 @@ code {
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 24px;
+  padding: var(--padding-xl);
   margin-bottom: 24px;
 }
 
 .btn {
-  background: #007bff;
+  background: var(--color-primary);
   color: white;
   border: none;
-  padding: 12px 24px;
+  padding: var(--padding-sm) var(--padding-xl);
   border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
@@ -53,7 +55,7 @@ code {
 }
 
 .btn:hover {
-  background: #0056b3;
+  background: var(--color-primary-hover);
   transform: translateY(-1px);
 }
 
@@ -62,21 +64,21 @@ code {
 }
 
 .btn-secondary {
-  background: #6c757d;
+  background: var(--color-secondary);
 }
 
 .btn-secondary:hover {
-  background: #545b62;
+  background: var(--color-secondary-hover);
 }
 
 .btn-outline {
   background: transparent;
-  color: #007bff;
-  border: 2px solid #007bff;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
 }
 
 .btn-outline:hover {
-  background: #007bff;
+  background: var(--color-primary);
   color: white;
 }
 
@@ -93,7 +95,7 @@ code {
 
 .form-input {
   width: 100%;
-  padding: 12px 16px;
+  padding: var(--padding-sm) var(--padding-md);
   border: 2px solid #e1e5e9;
   border-radius: 8px;
   font-size: 16px;
@@ -107,7 +109,7 @@ code {
 
 .form-select {
   width: 100%;
-  padding: 12px 16px;
+  padding: var(--padding-sm) var(--padding-md);
   border: 2px solid #e1e5e9;
   border-radius: 8px;
   font-size: 16px;

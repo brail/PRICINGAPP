@@ -8,6 +8,10 @@ import {
 } from "../hooks/useBusinessErrorHandler";
 import { useNotification } from "../contexts/NotificationContext";
 import CompactErrorHandler from "./CompactErrorHandler";
+import Button from "./Button";
+import Card from "./Card";
+import Input from "./Input";
+import LoadingSpinner from "./LoadingSpinner";
 import * as ExcelJS from "exceljs";
 import "./BatchCalculator.css";
 
@@ -936,20 +940,20 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
 
       {/* Azioni */}
       <div className="multi-actions">
-        <button
-          className="btn btn-primary"
+        <Button
+          variant="primary"
           onClick={handleBatchCalculate}
           disabled={isCalculating || inputData.length === 0}
         >
           {isCalculating ? "Calcolando..." : "Calcola Batch"}
-        </button>
-        <button className="btn btn-secondary" onClick={handleReset}>
+        </Button>
+        <Button variant="secondary" onClick={handleReset}>
           Pulisci
-        </button>
+        </Button>
         {results.length > 0 && (
-          <button className="btn btn-success" onClick={handleExportExcel}>
+          <Button variant="success" onClick={handleExportExcel}>
             Esporta Excel
-          </button>
+          </Button>
         )}
       </div>
 

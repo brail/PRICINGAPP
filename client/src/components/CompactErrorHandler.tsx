@@ -43,15 +43,35 @@ const CompactErrorHandler: React.FC<CompactErrorHandlerProps> = ({
   const getSeverityColor = (severity: BusinessError["severity"]) => {
     switch (severity) {
       case "critical":
-        return { bg: "#ffebee", border: "#f44336", text: "#d32f2f" };
+        return {
+          bg: "var(--color-danger-light)",
+          border: "var(--color-danger)",
+          text: "var(--color-danger)",
+        };
       case "high":
-        return { bg: "#fff3e0", border: "#ff9800", text: "#f57c00" };
+        return {
+          bg: "var(--color-warning-light)",
+          border: "var(--color-warning)",
+          text: "var(--color-warning-hover)",
+        };
       case "medium":
-        return { bg: "#e3f2fd", border: "#2196f3", text: "#1976d2" };
+        return {
+          bg: "var(--color-info-light)",
+          border: "var(--color-info)",
+          text: "var(--color-info)",
+        };
       case "low":
-        return { bg: "#e8f5e8", border: "#4caf50", text: "#388e3c" };
+        return {
+          bg: "var(--color-success-light)",
+          border: "var(--color-success)",
+          text: "var(--color-success-hover)",
+        };
       default:
-        return { bg: "#f5f5f5", border: "#9e9e9e", text: "#616161" };
+        return {
+          bg: "var(--color-bg-tertiary)",
+          border: "var(--color-secondary)",
+          text: "var(--color-text-secondary)",
+        };
     }
   };
 
@@ -224,4 +244,3 @@ const CompactErrorHandler: React.FC<CompactErrorHandlerProps> = ({
 };
 
 export default CompactErrorHandler;
-

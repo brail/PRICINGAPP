@@ -6,6 +6,10 @@ import {
 } from "../hooks/useBusinessErrorHandler";
 import { useNotification } from "../contexts/NotificationContext";
 import CompactErrorHandler from "./CompactErrorHandler";
+import Button from "./Button";
+import Card from "./Card";
+import Input from "./Input";
+import LoadingSpinner from "./LoadingSpinner";
 import {
   DndContext,
   closestCenter,
@@ -106,8 +110,9 @@ const SortableItem: React.FC<SortableItemProps> = ({
           </div>
           <h5>{set.description}</h5>
           <div className="parameter-set-actions">
-            <button
-              className="btn btn-sm btn-info"
+            <Button
+              variant="info"
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation();
                 startDuplicatingParameterSet(set);
@@ -116,9 +121,10 @@ const SortableItem: React.FC<SortableItemProps> = ({
               title="Duplica questo template prezzi"
             >
               Duplica
-            </button>
-            <button
-              className="btn btn-sm btn-primary"
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation();
                 handleLoadParameterSet(set.id);
@@ -126,9 +132,10 @@ const SortableItem: React.FC<SortableItemProps> = ({
               disabled={saving}
             >
               Carica
-            </button>
-            <button
-              className="btn btn-sm btn-secondary"
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation();
                 startEditingParameterSet(set);
@@ -136,9 +143,10 @@ const SortableItem: React.FC<SortableItemProps> = ({
               disabled={saving}
             >
               Modifica
-            </button>
-            <button
-              className="btn btn-sm btn-danger"
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation();
                 startDeleteParameterSet(set);
@@ -146,9 +154,10 @@ const SortableItem: React.FC<SortableItemProps> = ({
               disabled={saving || set.is_default}
             >
               Elimina
-            </button>
-            <button
-              className="btn btn-sm btn-star"
+            </Button>
+            <Button
+              variant="warning"
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation();
                 handleSetDefaultParameterSet(set.id);
@@ -162,7 +171,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
               data-is-default={set.is_default ? "true" : "false"}
             >
               {set.is_default ? "⭐" : "☆"}
-            </button>
+            </Button>
           </div>
         </div>
         {expandedCards.has(set.id) && (
@@ -192,7 +201,8 @@ const SortableItem: React.FC<SortableItemProps> = ({
               <strong>Stampi:</strong> {set.tools}
             </p>
             <p>
-              <strong>Moltiplicatore Vendita al Dettaglio:</strong> {set.retail_multiplier}
+              <strong>Moltiplicatore Vendita al Dettaglio:</strong>{" "}
+              {set.retail_multiplier}
             </p>
             <p>
               <strong>Margine ottimale:</strong> {set.optimal_margin}%
@@ -699,10 +709,7 @@ const Parameters: React.FC = () => {
 
       setTimeout(() => startLoading("Completamento...", 100), 300);
 
-      showSuccess(
-        "Template caricato",
-        "Template prezzi caricato con successo"
-      );
+      showSuccess("Template caricato", "Template prezzi caricato con successo");
     } catch (err: any) {
       addError(
         createBusinessError.system(
@@ -1066,7 +1073,7 @@ const Parameters: React.FC = () => {
         <div className="parameters-card">
           <div className="parameters-card-header">
             <h3>Gestione Template Prezzi</h3>
-            <button
+            <Button
               className="btn btn-primary"
               onClick={() => {
                 if (!showWizard) {
@@ -1078,7 +1085,7 @@ const Parameters: React.FC = () => {
               }}
             >
               {showWizard ? "Annulla" : "Crea Nuovo Template"}
-            </button>
+            </Button>
           </div>
 
           <div className="parameter-sets-management">
@@ -1371,20 +1378,20 @@ const Parameters: React.FC = () => {
                 </div>
 
                 <div className="form-actions">
-                  <button
+                  <Button
                     className="btn btn-primary"
                     onClick={handleUpdateParameterSet}
                     disabled={saving || validateEditForm().length > 0}
                   >
                     {saving ? "Aggiornamento..." : "Aggiorna Set"}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     className="btn btn-secondary"
                     onClick={cancelEditingParameterSet}
                     disabled={saving}
                   >
                     Annulla
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -1412,27 +1419,27 @@ const Parameters: React.FC = () => {
               ))}
           </div>
 
-          <button
+          <Button
             className="btn btn-outline mt-4"
             // onClick={loadExchangeRates}
             disabled={loading}
           >
             {loading ? <span className="loading"></span> : "Aggiorna Tassi"}
-          </button>
+          </Button>
         </div> */}
       </div>
 
       {/* Azioni */}
       {/* Azioni di salvataggio - Temporaneamente nascoste */}
       {/* <div className="parameters-actions">
-        <button
+        <Button
           className="btn btn-secondary"
           onClick={handleReset}
           disabled={saving}
         >
           Ripristina Default
-        </button>
-        <button className="btn" onClick={handleSave} disabled={saving}>
+        </Button>
+        <Button className="btn" onClick={handleSave} disabled={saving}>
           {saving ? (
             <>
               <span className="loading"></span>
@@ -1441,7 +1448,7 @@ const Parameters: React.FC = () => {
           ) : (
             "Salva Impostazioni"
           )}
-        </button>
+        </Button>
       </div> */}
 
       {/* Informazioni - Temporaneamente nascosto */}
@@ -1517,20 +1524,20 @@ const Parameters: React.FC = () => {
               </p>
             </div>
             <div className="modal-footer">
-              <button
+              <Button
                 className="btn btn-secondary"
                 onClick={cancelDeleteParameterSet}
                 disabled={saving}
               >
                 Annulla
-              </button>
-              <button
+              </Button>
+              <Button
                 className="btn btn-danger"
                 onClick={confirmDeleteParameterSet}
                 disabled={saving}
               >
                 {saving ? "Eliminazione..." : "Elimina"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -6,7 +6,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Box,
-  Button,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -20,6 +19,10 @@ import {
   CircularProgress,
   Typography,
 } from "@mui/material";
+import Button from "../Button";
+import Card from "../Card";
+import Input from "../Input";
+import LoadingSpinner from "../LoadingSpinner";
 import {
   Edit,
   Delete,
@@ -446,11 +449,7 @@ const UserManagement: React.FC = () => {
           <Button onClick={() => setEditDialogOpen(false)} disabled={loading}>
             Annulla
           </Button>
-          <Button
-            onClick={handleSaveUser}
-            variant="contained"
-            disabled={loading}
-          >
+          <Button onClick={handleSaveUser} variant="primary" disabled={loading}>
             {loading ? <CircularProgress size={20} /> : "Salva"}
           </Button>
         </DialogActions>
@@ -551,7 +550,7 @@ const UserManagement: React.FC = () => {
           <Button onClick={() => setCreateDialogOpen(false)}>Annulla</Button>
           <Button
             onClick={handleSaveNewUser}
-            variant="contained"
+            variant="primary"
             disabled={loading}
           >
             {loading ? "Creazione..." : "Crea Utente"}
@@ -567,7 +566,7 @@ const UserManagement: React.FC = () => {
         fullWidth
       >
         <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Warning color="error" />
+          <Warning />
           Conferma Eliminazione
         </DialogTitle>
         <DialogContent>
@@ -589,10 +588,8 @@ const UserManagement: React.FC = () => {
           </Button>
           <Button
             onClick={confirmDeleteUser}
-            variant="contained"
-            color="error"
+            variant="primary"
             disabled={loading}
-            startIcon={loading ? <CircularProgress size={20} /> : <Delete />}
           >
             {loading ? "Eliminazione..." : "Elimina Utente"}
           </Button>

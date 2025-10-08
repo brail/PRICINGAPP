@@ -16,6 +16,10 @@ import {
   CURRENCIES,
 } from "../types";
 import BatchCalculator from "./BatchCalculator";
+import Button from "./Button";
+import Card from "./Card";
+import Input from "./Input";
+import LoadingSpinner from "./LoadingSpinner";
 import "./Calculator.css";
 
 type CalculationMode = "purchase" | "selling" | "margin";
@@ -699,12 +703,12 @@ const Calculator: React.FC = memo(() => {
       {/* Layout principale con focus sui prezzi */}
       <div className="calculator-main-layout">
         {/* Sezione principale - Form prezzi */}
-        <div className="price-inputs-section">
+        <Card variant="elevated" padding="lg">
           <div className="input-card-header">
             <h3>Calcolo Prezzi</h3>
-            <button className="btn btn-secondary" onClick={clearAll}>
+            <Button variant="secondary" onClick={clearAll}>
               Pulisci
-            </button>
+            </Button>
           </div>
 
           <div className="price-form-grid">
@@ -859,25 +863,25 @@ const Calculator: React.FC = memo(() => {
             </div>
           )}
 
-          <button
-            className="btn btn-primary"
+          <Button
+            variant="primary"
             onClick={handleCalculate}
             disabled={loading || (!purchasePrice && !retailPrice)}
           >
             {loading ? (
-              <span className="loading"></span>
+              <LoadingSpinner size="sm" color="white" />
             ) : purchasePriceLocked || retailPriceLocked ? (
               "Calcola Margine"
             ) : (
               "Calcola"
             )}
-          </button>
-        </div>
+          </Button>
+        </Card>
 
         {/* Sidebar con parametri compatti */}
         <div className="sidebar-section">
           {/* Selezione Template Prezzi */}
-          <div className="sidebar-card">
+          <Card variant="outlined" padding="md">
             <h4>Parametri</h4>
             <div className="form-group">
               <label className="form-label">Template Prezzi:</label>
@@ -904,11 +908,11 @@ const Calculator: React.FC = memo(() => {
                 />
               )}
             </div>
-          </div>
+          </Card>
 
           {/* Dettagli Template Prezzi Caricato - Compatti */}
           {params && (
-            <div className="sidebar-card">
+            <Card variant="outlined" padding="md">
               <h4>Parametri Attivi</h4>
               <div className="parameter-grid">
                 <div className="parameter-item">
@@ -938,23 +942,23 @@ const Calculator: React.FC = memo(() => {
                   </span>
                 </div>
               </div>
-            </div>
+            </Card>
           )}
         </div>
       </div>
 
       {/* Risultati Dettagliati */}
       {calculation && (
-        <div className="results-card">
+        <Card variant="elevated" padding="lg">
           <div className="results-header">
             <h3>Dettaglio Calcolo</h3>
             <div className="results-actions">
-              <button
-                className="btn btn-primary"
+              <Button
+                variant="primary"
                 onClick={() => setShowDetails(!showDetails)}
               >
                 {showDetails ? "Nascondi Dettagli" : "Mostra Dettagli"}
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -1263,7 +1267,7 @@ const Calculator: React.FC = memo(() => {
               )}
             </div>
           )}
-        </div>
+        </Card>
       )}
 
       {/* Sezione Calcolo Batch */}

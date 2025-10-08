@@ -5,12 +5,15 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Button,
   Box,
   Typography,
   CircularProgress,
   Alert,
 } from "@mui/material";
+import Button from "../Button";
+import Card from "../Card";
+import Input from "../Input";
+import LoadingSpinner from "../LoadingSpinner";
 import { Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import { pricingApi } from "../../services/api";
 import {
@@ -211,9 +214,8 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
               InputProps={{
                 endAdornment: (
                   <Button
-                    size="small"
+                    size="sm"
                     onClick={() => togglePasswordVisibility("current")}
-                    sx={{ minWidth: "auto", p: 0.5 }}
                   >
                     {showPasswords.current ? <VisibilityOff /> : <Visibility />}
                   </Button>
@@ -234,9 +236,8 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
             InputProps={{
               endAdornment: (
                 <Button
-                  size="small"
+                  size="sm"
                   onClick={() => togglePasswordVisibility("new")}
-                  sx={{ minWidth: "auto", p: 0.5 }}
                 >
                   {showPasswords.new ? <VisibilityOff /> : <Visibility />}
                 </Button>
@@ -256,9 +257,8 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
             InputProps={{
               endAdornment: (
                 <Button
-                  size="small"
+                  size="sm"
                   onClick={() => togglePasswordVisibility("confirm")}
-                  sx={{ minWidth: "auto", p: 0.5 }}
                 >
                   {showPasswords.confirm ? <VisibilityOff /> : <Visibility />}
                 </Button>
@@ -272,12 +272,7 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
         <Button onClick={handleClose} disabled={loading}>
           Annulla
         </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          disabled={loading}
-          startIcon={loading ? <CircularProgress size={20} /> : <Lock />}
-        >
+        <Button onClick={handleSubmit} variant="primary" disabled={loading}>
           {loading ? "Aggiornamento..." : "Aggiorna Password"}
         </Button>
       </DialogActions>
