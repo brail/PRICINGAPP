@@ -798,13 +798,13 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
         </div>
       )}
 
-      <div className="batch-header">
+      <div className="multi-header">
         <h3>Calcolo Multiplo</h3>
         <p>Calcola più valori contemporaneamente</p>
       </div>
 
       {/* Selezione modalità di calcolo */}
-      <div className="batch-mode-selection">
+      <div className="multi-mode-selection">
         <label>Modalità di calcolo:</label>
         <div className="mode-buttons">
           <button
@@ -835,7 +835,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       </div>
 
       {/* Selezione metodo di input */}
-      <div className="batch-input-method">
+      <div className="multi-input-method">
         <label>Metodo di input:</label>
         <div className="input-method-buttons">
           <button
@@ -854,7 +854,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       </div>
 
       {/* Area input dati */}
-      <div className="batch-input-area">
+      <div className="multi-input-area">
         {inputMethod === "paste" && (
           <div className="paste-input">
             <label>
@@ -935,7 +935,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       ))}
 
       {/* Azioni */}
-      <div className="batch-actions">
+      <div className="multi-actions">
         <button
           className="btn btn-primary"
           onClick={handleBatchCalculate}
@@ -955,7 +955,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
 
       {/* Risultati */}
       {results.length > 0 && (
-        <div className="batch-results">
+        <div className="multi-results">
           <h4>Risultati ({results.length} calcoli)</h4>
           <div className="results-table">
             <table>
