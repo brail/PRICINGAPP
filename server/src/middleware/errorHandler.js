@@ -143,11 +143,11 @@ const requestLogger = (req, res, next) => {
       userAgent: req.get("User-Agent"),
     };
 
-      if (res.statusCode >= 400) {
-        loggers.error(new Error(`HTTP ${res.statusCode}`), logData);
-      } else {
-        logger.info("HTTP Request", logData);
-      }
+    if (res.statusCode >= 400) {
+      loggers.error(new Error(`HTTP ${res.statusCode}`), logData);
+    } else {
+      logger.info("HTTP Request", logData);
+    }
   });
 
   next();

@@ -27,8 +27,8 @@ const {
 
 // Importa le route
 const { router: authRoutes, initUserModel } = require("./routes/auth");
-const calculationRoutes = require("./src/routes/calculations");
-const parameterRoutes = require("./src/routes/parameters");
+const createCalculationRoutes = require("./src/routes/calculations");
+const createParameterRoutes = require("./src/routes/parameters");
 
 // Importa middleware
 const { 
@@ -96,9 +96,11 @@ const calculationService = new CalculationService(parameterService);
 app.use("/api/auth", authRoutes);
 
 // Route per calcoli
+const calculationRoutes = createCalculationRoutes(parameterService, calculationService);
 app.use("/api", calculationRoutes);
 
 // Route per parametri
+const parameterRoutes = createParameterRoutes(parameterService);
 app.use("/api", parameterRoutes);
 
 // Health check

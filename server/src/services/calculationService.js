@@ -22,6 +22,16 @@ class CalculationService {
   }
 
   /**
+   * Ottieni parametri attuali (metodo async)
+   */
+  async getCurrentParams() {
+    if (this.parameterService) {
+      return await this.parameterService.getCurrentParams();
+    }
+    return null;
+  }
+
+  /**
    * Funzione per calcolare dinamicamente il companyMultiplier
    */
   calculateCompanyMultiplier(optimalMargin) {

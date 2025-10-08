@@ -14,9 +14,10 @@ const {
   validateParameterSetsOrder,
 } = require("../middleware/validation");
 
-// Inizializza servizi e controller
-const parameterService = new ParameterService();
-const parameterController = new ParameterController(parameterService);
+// Le istanze dei servizi vengono passate dal server principale
+// Questa funzione restituisce le routes con le istanze dei servizi
+const createParameterRoutes = (parameterService) => {
+  const parameterController = new ParameterController(parameterService);
 
 // Middleware di autenticazione per le route che lo richiedono
 // (non per tutte le route)
@@ -108,4 +109,7 @@ router.put(
   }
 );
 
-module.exports = router;
+  return router;
+};
+
+module.exports = createParameterRoutes;

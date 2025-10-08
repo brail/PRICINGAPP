@@ -9,36 +9,32 @@ const CalculationController = require("../controllers/calculationController");
 const CalculationService = require("../services/calculationService");
 const { validateCalculationParams } = require("../middleware/validation");
 
-// Inizializza servizi e controller
-const ParameterService = require("../services/parameterService");
-const parameterService = new ParameterService();
-const calculationService = new CalculationService(parameterService);
-const calculationController = new CalculationController(calculationService);
+// Le istanze dei servizi vengono passate dal server principale
+// Questa funzione restituisce le routes con le istanze dei servizi
+const createCalculationRoutes = (parameterService, calculationService) => {
+  const calculationController = new CalculationController(calculationService);
 
-// Middleware per validazione
-router.use(validateCalculationParams);
+  // Middleware per validazione
+  router.use(validateCalculationParams);
 
-// Route per calcoli
-router.post("/calculate-selling", (req, res) => {
-  // Aggiungi i parametri attuali alla richiesta
-  req.params = calculationService.currentParams || {};
-  calculationController.calculateSellingPrice(req, res);
-});
+  // Route per calcoli
+  router.post("/calculate-selling", (req, res) => {
+    calculationController.calculateSellingPrice(req, res);
+  });
 
-router.post("/calculate-purchase", (req, res) => {
-  // Aggiungi i parametri attuali alla richiesta
-  req.params = calculationService.currentParams || {};
-  calculationController.calculatePurchasePrice(req, res);
-});
+  router.post("/calculate-purchase", (req, res) => {
+    calculationController.calculatePurchasePrice(req, res);
+  });
 
-router.post("/calculate-margin", (req, res) => {
-  // Aggiungi i parametri attuali alla richiesta
-  req.params = calculationService.currentParams || {};
-  calculationController.calculateMargin(req, res);
-});
+  router.post("/calculate-margin", (req, res) => {
+    calculationController.calculateMargin(req, res);
+  });
 
-router.get("/exchange-rates", (req, res) => {
-  calculationController.getExchangeRates(req, res);
-});
+  router.get("/exchange-rates", (req, res) => {
+    calculationController.getExchangeRates(req, res);
+  });
 
-module.exports = router;
+  return router;
+};
+
+module.exports = createCalculationRoutes;

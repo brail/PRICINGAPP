@@ -16,7 +16,9 @@ class CalculationController {
   async calculateSellingPrice(req, res) {
     try {
       const { purchasePrice } = req.body;
-      const params = req.params || {};
+      
+      // Ottieni i parametri attuali dal service
+      const params = await this.calculationService.getCurrentParams();
 
       const result = await this.calculationService.calculateSellingPrice(
         purchasePrice,
@@ -46,7 +48,9 @@ class CalculationController {
   async calculatePurchasePrice(req, res) {
     try {
       const { retailPrice } = req.body;
-      const params = req.params || {};
+      
+      // Ottieni i parametri attuali dal service
+      const params = await this.calculationService.getCurrentParams();
 
       const result = await this.calculationService.calculatePurchasePrice(
         retailPrice,
@@ -76,7 +80,9 @@ class CalculationController {
   async calculateMargin(req, res) {
     try {
       const { purchasePrice, retailPrice } = req.body;
-      const params = req.params || {};
+      
+      // Ottieni i parametri attuali dal service
+      const params = await this.calculationService.getCurrentParams();
 
       const result = await this.calculationService.calculateMargin(
         purchasePrice,
