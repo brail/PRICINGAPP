@@ -22,11 +22,13 @@ interface TimeoutHandlerReturn {
   withTimeout: <T>(operation: Promise<T>) => Promise<T>;
 }
 
-export const useTimeoutHandler = (options: TimeoutHandlerOptions): TimeoutHandlerReturn => {
+export const useTimeoutHandler = (
+  options: TimeoutHandlerOptions
+): TimeoutHandlerReturn => {
   const [isTimedOut, setIsTimedOut] = useState(false);
   const [isWarning, setIsWarning] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
-  
+
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -37,7 +39,7 @@ export const useTimeoutHandler = (options: TimeoutHandlerOptions): TimeoutHandle
     setIsWarning(false);
     setTimeRemaining(options.timeout);
     startTimeRef.current = Date.now();
-    
+
     // Timeout principale
     timeoutRef.current = setTimeout(() => {
       setIsTimedOut(true);
@@ -45,7 +47,7 @@ export const useTimeoutHandler = (options: TimeoutHandlerOptions): TimeoutHandle
         options.onTimeout();
       }
     }, options.timeout);
-    
+
     // Warning timeout (se specificato)
     if (options.warningThreshold) {
       const warningTime = options.timeout * (options.warningThreshold / 100);
@@ -53,13 +55,13 @@ export const useTimeoutHandler = (options: TimeoutHandlerOptions): TimeoutHandle
         setIsWarning(true);
       }, warningTime);
     }
-    
+
     // Aggiorna tempo rimanente ogni secondo
     intervalRef.current = setInterval(() => {
       const elapsed = Date.now() - startTimeRef.current;
       const remaining = Math.max(0, options.timeout - elapsed);
       setTimeRemaining(remaining);
-      
+
       if (remaining === 0) {
         setIsTimedOut(true);
         if (options.onTimeout) {
@@ -82,7 +84,7 @@ export const useTimeoutHandler = (options: TimeoutHandlerOptions): TimeoutHandle
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-    
+
     setIsTimedOut(false);
     setIsWarning(false);
     setTimeRemaining(0);
@@ -95,21 +97,24 @@ export const useTimeoutHandler = (options: TimeoutHandlerOptions): TimeoutHandle
     setTimeRemaining(0);
   }, [clearTimeoutHandler]);
 
-  const withTimeout = useCallback(async <T>(operation: Promise<T>): Promise<T> => {
-    startTimeout();
-    
-    try {
-      const result = await operation;
-      clearTimeoutHandler();
-      if (options.onSuccess) {
-        options.onSuccess();
+  const withTimeout = useCallback(
+    async <T>(operation: Promise<T>): Promise<T> => {
+      startTimeout();
+
+      try {
+        const result = await operation;
+        clearTimeoutHandler();
+        if (options.onSuccess) {
+          options.onSuccess();
+        }
+        return result;
+      } catch (error) {
+        clearTimeoutHandler();
+        throw error;
       }
-      return result;
-    } catch (error) {
-      clearTimeoutHandler();
-      throw error;
-    }
-  }, [startTimeout, clearTimeoutHandler, options]);
+    },
+    [startTimeout, clearTimeoutHandler, options]
+  );
 
   return {
     isTimedOut,

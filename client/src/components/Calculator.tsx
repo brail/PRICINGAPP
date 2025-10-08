@@ -44,7 +44,7 @@ const Calculator: React.FC = memo(() => {
   // Business error handler
   const { errors, addError, removeError, clearErrors } =
     useBusinessErrorHandler();
-  
+
   // Notification system
   const { showSuccess, showError } = useNotification();
 
@@ -212,7 +212,9 @@ const Calculator: React.FC = memo(() => {
       // Notifica di successo
       showSuccess(
         "Calcolo completato",
-        `Prezzo di vendita calcolato: ${result.retailPrice.toFixed(2)} ${result.sellingCurrency}`
+        `Prezzo di vendita calcolato: ${result.retailPrice.toFixed(2)} ${
+          result.sellingCurrency
+        }`
       );
     } catch (err) {
       addError(
@@ -244,7 +246,9 @@ const Calculator: React.FC = memo(() => {
       // Notifica di successo
       showSuccess(
         "Calcolo completato",
-        `Prezzo di acquisto calcolato: ${result.purchasePrice.toFixed(2)} ${result.purchaseCurrency}`
+        `Prezzo di acquisto calcolato: ${result.purchasePrice.toFixed(2)} ${
+          result.purchaseCurrency
+        }`
       );
     } catch (err) {
       addError(

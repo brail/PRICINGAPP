@@ -49,7 +49,7 @@ const UserDashboard: React.FC = () => {
   // Business error handler
   const { errors, addError, removeError, clearErrors } =
     useBusinessErrorHandler();
-  
+
   // Notification system
   const { showSuccess, showError } = useNotification();
 

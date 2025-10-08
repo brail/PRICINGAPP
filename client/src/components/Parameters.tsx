@@ -238,7 +238,10 @@ const Parameters: React.FC = () => {
 
       // Usa il ParameterContext per aggiornare il set
       await updateParameterSet(editingParameterSet.id, data);
-      showSuccess("Parametri aggiornati", "Set di parametri aggiornato con successo!");
+      showSuccess(
+        "Parametri aggiornati",
+        "Set di parametri aggiornato con successo!"
+      );
       setEditingParameterSet(null);
     } catch (err: any) {
       addError(
@@ -294,7 +297,7 @@ const Parameters: React.FC = () => {
   // Business error handler
   const { errors, addError, removeError, clearErrors } =
     useBusinessErrorHandler();
-  
+
   // Notification system
   const { showSuccess, showError, showInfo } = useNotification();
 
@@ -545,7 +548,10 @@ const Parameters: React.FC = () => {
       clearErrors();
 
       await pricingApi.createParameterSet(data);
-      showSuccess("Parametri duplicati", "Set di parametri duplicato con successo!");
+      showSuccess(
+        "Parametri duplicati",
+        "Set di parametri duplicato con successo!"
+      );
       setDuplicatingParameterSet(null);
       loadParameterSets();
     } catch (err: any) {
@@ -607,7 +613,10 @@ const Parameters: React.FC = () => {
         editingParameterSet.id,
         parameterSetToUpdate
       );
-      showSuccess("Parametri aggiornati", "Set di parametri aggiornato con successo");
+      showSuccess(
+        "Parametri aggiornati",
+        "Set di parametri aggiornato con successo"
+      );
       setEditingParameterSet(null);
       await loadParameterSets();
     } catch (err: any) {
@@ -640,7 +649,10 @@ const Parameters: React.FC = () => {
       setSaving(true);
       // Usa il ParameterContext per eliminare il set
       await deleteParameterSet(parameterSetToDelete.id);
-      showSuccess("Parametri eliminati", "Set di parametri eliminato con successo");
+      showSuccess(
+        "Parametri eliminati",
+        "Set di parametri eliminato con successo"
+      );
       setShowDeleteConfirm(false);
       setParameterSetToDelete(null);
     } catch (err: any) {
@@ -669,7 +681,10 @@ const Parameters: React.FC = () => {
 
       setTimeout(() => startLoading("Completamento...", 100), 300);
 
-      showSuccess("Parametri caricati", "Set di parametri caricato con successo");
+      showSuccess(
+        "Parametri caricati",
+        "Set di parametri caricato con successo"
+      );
     } catch (err: any) {
       addError(
         createBusinessError.system(

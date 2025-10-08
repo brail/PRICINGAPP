@@ -39,6 +39,7 @@ import Parameters from "../Parameters";
 import UserDashboard from "./UserDashboard";
 import UserManagement from "./UserManagement";
 import Logo from "../Logo";
+import ToastTestPanel from "../ToastTestPanel";
 
 const AuthenticatedApp: React.FC = () => {
   const { user, logout } = useAuth();
@@ -261,6 +262,16 @@ const AuthenticatedApp: React.FC = () => {
           Parametri
         </MenuItem>
 
+        <MenuItem
+          component={Link}
+          to="/test-toast"
+          onClick={handleMobileMenuClose}
+          selected={location.pathname === "/test-toast"}
+        >
+          <Calculate sx={{ mr: 1 }} />
+          Test Toast
+        </MenuItem>
+
         {user?.role === "admin" && (
           <MenuItem
             component={Link}
@@ -285,6 +296,7 @@ const AuthenticatedApp: React.FC = () => {
           <Route path="/" element={<Calculator />} />
           <Route path="/parameters" element={<Parameters />} />
           <Route path="/dashboard" element={<UserDashboard />} />
+          <Route path="/test-toast" element={<ToastTestPanel />} />
           {user?.role === "admin" && (
             <Route path="/users" element={<UserManagement />} />
           )}

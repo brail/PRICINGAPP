@@ -51,7 +51,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
   // Business error handler
   const { errors, addError, removeError, clearErrors } =
     useBusinessErrorHandler();
-  
+
   // Notification system
   const { showSuccess, showError, showInfo } = useNotification();
 
@@ -517,7 +517,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       }
 
       setResults(batchResults);
-      
+
       // Notifica di successo
       showSuccess(
         "Calcolo batch completato",

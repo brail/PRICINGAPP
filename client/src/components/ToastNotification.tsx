@@ -14,13 +14,7 @@ import {
   Typography,
   IconButton,
 } from "@mui/material";
-import {
-  CheckCircle,
-  Error,
-  Warning,
-  Info,
-  Close,
-} from "@mui/icons-material";
+import { CheckCircle, Error, Warning, Info, Close } from "@mui/icons-material";
 
 export interface ToastNotification {
   id: string;
@@ -89,7 +83,9 @@ const ToastNotificationComponent: React.FC<ToastNotificationProps> = ({
   return (
     <Snackbar
       open={open}
-      autoHideDuration={notification.persistent ? null : notification.duration || 4000}
+      autoHideDuration={
+        notification.persistent ? null : notification.duration || 4000
+      }
       onClose={handleClose}
       TransitionComponent={SlideTransition}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
@@ -116,20 +112,12 @@ const ToastNotificationComponent: React.FC<ToastNotificationProps> = ({
               >
                 {notification.action.label}
               </Typography>
-              <IconButton
-                size="small"
-                onClick={handleClose}
-                sx={{ ml: 1 }}
-              >
+              <IconButton size="small" onClick={handleClose} sx={{ ml: 1 }}>
                 <Close fontSize="small" />
               </IconButton>
             </Box>
           ) : (
-            <IconButton
-              size="small"
-              onClick={handleClose}
-              sx={{ ml: 1 }}
-            >
+            <IconButton size="small" onClick={handleClose} sx={{ ml: 1 }}>
               <Close fontSize="small" />
             </IconButton>
           )
