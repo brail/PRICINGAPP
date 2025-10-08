@@ -643,9 +643,9 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
         ["Dazio (%)", params.duty / 100],
         ["Tasso di Cambio", params.exchangeRate],
         ["Costi Accessori Italia", params.italyAccessoryCosts],
-        ["Tools", params.tools],
+        ["Stampi", params.tools],
         ["Moltiplicatore Azienda", params.companyMultiplier],
-        ["Moltiplicatore Retail", params.retailMultiplier],
+        ["Moltiplicatore Vendita al Dettaglio", params.retailMultiplier],
         ["Margine Ottimale (%)", params.optimalMargin / 100],
       ];
 
@@ -714,9 +714,9 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
         // Formattazione specifica per tipo di parametro
         if (paramName.includes("(%)") || paramName === "Margine Ottimale (%)") {
           valueCell.numFmt = "0.00%";
-        } else if (paramName.includes("Costo") || paramName === "Tools") {
+        } else if (paramName.includes("Costo") || paramName === "Stampi") {
           let currency = "";
-          if (paramName.includes("Costo Trasporto") || paramName === "Tools") {
+          if (paramName.includes("Costo Trasporto") || paramName === "Stampi") {
             currency = params.purchaseCurrency;
           } else if (paramName.includes("Costi Accessori")) {
             currency = params.sellingCurrency;
@@ -773,7 +773,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
   }, [clearErrors]);
 
   return (
-    <div className="batch-calculator">
+    <div className="multi-calculator">
       {/* Loading Overlay per calcoli batch */}
       {isLoading && (
         <div

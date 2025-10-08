@@ -1,4 +1,4 @@
-.batch-calculator {
+.multi-calculator {
   background: white;
   border-radius: 12px;
   padding: 24px;
@@ -7,32 +7,32 @@
   border: 1px solid #e9ecef;
 }
 
-.batch-header {
+.multi-header {
   text-align: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
   border-bottom: 2px solid #f8f9fa;
 }
 
-.batch-header h3 {
+.multi-header h3 {
   color: #495057;
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0 0 8px 0;
 }
 
-.batch-header p {
+.multi-header p {
   color: #6c757d;
   margin: 0;
   font-size: 0.95rem;
 }
 
 /* Selezione modalità di calcolo */
-.batch-mode-selection {
+.multi-mode-selection {
   margin-bottom: 20px;
 }
 
-.batch-mode-selection label {
+.multi-mode-selection label {
   display: block;
   font-weight: 500;
   color: #495057;
@@ -69,11 +69,11 @@
 }
 
 /* Selezione metodo di input */
-.batch-input-method {
+.multi-input-method {
   margin-bottom: 20px;
 }
 
-.batch-input-method label {
+.multi-input-method label {
   display: block;
   font-weight: 500;
   color: #495057;
@@ -110,7 +110,7 @@
 }
 
 /* Area input dati */
-.batch-input-area {
+.multi-input-area {
   margin-bottom: 20px;
   padding: 20px;
   background: #f8f9fa;
@@ -118,7 +118,7 @@
   border: 1px solid #e9ecef;
 }
 
-.batch-input-area label {
+.multi-input-area label {
   display: block;
   font-weight: 500;
   color: #495057;
@@ -243,7 +243,7 @@
 }
 
 /* Errori */
-.batch-error {
+.multi-error {
   background: #f8d7da;
   color: #721c24;
   padding: 12px;
@@ -254,7 +254,7 @@
 }
 
 /* Azioni */
-.batch-actions {
+.multi-actions {
   display: flex;
   gap: 12px;
   justify-content: center;
@@ -262,7 +262,7 @@
   flex-wrap: wrap;
 }
 
-.batch-actions .btn {
+.multi-actions .btn {
   padding: 10px 20px;
   border: none;
   border-radius: 6px;
@@ -272,46 +272,46 @@
   transition: all 0.2s ease;
 }
 
-.batch-actions .btn:disabled {
+.multi-actions .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.batch-actions .btn-primary {
+.multi-actions .btn-primary {
   background: #6c757d;
   color: white;
 }
 
-.batch-actions .btn-primary:hover:not(:disabled) {
+.multi-actions .btn-primary:hover:not(:disabled) {
   background: #5a6268;
 }
 
-.batch-actions .btn-secondary {
+.multi-actions .btn-secondary {
   background: #e9ecef;
   color: #495057;
 }
 
-.batch-actions .btn-secondary:hover {
+.multi-actions .btn-secondary:hover {
   background: #dee2e6;
 }
 
-.batch-actions .btn-success {
+.multi-actions .btn-success {
   background: #28a745;
   color: white;
 }
 
-.batch-actions .btn-success:hover {
+.multi-actions .btn-success:hover {
   background: #218838;
 }
 
 /* Risultati */
-.batch-results {
+.multi-results {
   margin-top: 24px;
   padding-top: 20px;
   border-top: 2px solid #f8f9fa;
 }
 
-.batch-results h4 {
+.multi-results h4 {
   color: #495057;
   font-size: 1.2rem;
   font-weight: 600;
@@ -365,7 +365,7 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .batch-calculator {
+  .multi-calculator {
     padding: 16px;
     margin: 16px 0;
   }
@@ -380,11 +380,11 @@
     text-align: center;
   }
 
-  .batch-actions {
+  .multi-actions {
     flex-direction: column;
   }
 
-  .batch-actions .btn {
+  .multi-actions .btn {
     width: 100%;
   }
 
@@ -401,11 +401,11 @@
 }
 
 @media (max-width: 480px) {
-  .batch-header h3 {
+  .multi-header h3 {
     font-size: 1.3rem;
   }
 
-  .batch-input-area {
+  .multi-input-area {
     padding: 16px;
   }
 
