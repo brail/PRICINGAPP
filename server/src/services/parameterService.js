@@ -356,21 +356,23 @@ class ParameterService {
    * Aggiorna un set di parametri
    */
   async updateParameterSet(id, params) {
+    // Gestisce sia camelCase che snake_case
     const {
       description,
-      purchaseCurrency,
-      sellingCurrency,
-      qualityControlPercent,
-      transportInsuranceCost,
-      duty,
-      exchangeRate,
-      italyAccessoryCosts,
-      tools,
-      retailMultiplier,
-      optimalMargin,
+      purchaseCurrency = params.purchase_currency,
+      sellingCurrency = params.selling_currency,
+      qualityControlPercent = params.quality_control_percent,
+      transportInsuranceCost = params.transport_insurance_cost,
+      duty = params.duty,
+      exchangeRate = params.exchange_rate,
+      italyAccessoryCosts = params.italy_accessory_costs,
+      tools = params.tools,
+      retailMultiplier = params.retail_multiplier,
+      optimalMargin = params.optimal_margin,
     } = params;
 
-    const updatedParameterSet = await updateParameterSet(id, {
+    // Debug: log dei parametri mappati
+    const mappedParams = {
       description,
       purchase_currency: purchaseCurrency,
       selling_currency: sellingCurrency,
@@ -383,7 +385,9 @@ class ParameterService {
       company_multiplier: this.calculateCompanyMultiplier(optimalMargin),
       retail_multiplier: retailMultiplier,
       optimal_margin: optimalMargin,
-    });
+    };
+
+    const updatedParameterSet = await updateParameterSet(id, mappedParams);
 
     return updatedParameterSet;
   }

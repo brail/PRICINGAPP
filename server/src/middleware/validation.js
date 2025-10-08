@@ -50,18 +50,19 @@ const validateCalculationParams = (req, res, next) => {
  * Valida i parametri per la creazione/aggiornamento di un set di parametri
  */
 const validateParameterSet = (req, res, next) => {
+  // Gestisce sia camelCase che snake_case
   const {
     description,
-    purchaseCurrency,
-    sellingCurrency,
-    qualityControlPercent,
-    transportInsuranceCost,
-    duty,
-    exchangeRate,
-    italyAccessoryCosts,
-    tools,
-    retailMultiplier,
-    optimalMargin,
+    purchaseCurrency = req.body.purchase_currency,
+    sellingCurrency = req.body.selling_currency,
+    qualityControlPercent = req.body.quality_control_percent,
+    transportInsuranceCost = req.body.transport_insurance_cost,
+    duty = req.body.duty,
+    exchangeRate = req.body.exchange_rate,
+    italyAccessoryCosts = req.body.italy_accessory_costs,
+    tools = req.body.tools,
+    retailMultiplier = req.body.retail_multiplier,
+    optimalMargin = req.body.optimal_margin,
   } = req.body;
 
   const errors = [];

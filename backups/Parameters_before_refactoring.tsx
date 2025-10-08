@@ -17,7 +17,6 @@ import {
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { pricingApi } from "../services/api";
-import { useParameterManager } from "../hooks/useParameterManager";
 import { CURRENCIES } from "../types";
 import ParameterSetWizard from "./ParameterSetWizard";
 import EditParameterSetForm from "./EditParameterSetForm";
@@ -229,10 +228,10 @@ const Parameters: React.FC = () => {
       setSaving(true);
       setError("");
 
-      // Usa il ParameterContext per aggiornare il set
-      await updateParameterSet(editingParameterSet.id, data);
+      await pricingApi.updateParameterSet(editingParameterSet.id, data);
       setSuccess("Set di parametri aggiornato con successo!");
       setEditingParameterSet(null);
+      loadParameterSets();
     } catch (err: any) {
       setError(err.message || "Errore nell'aggiornamento del set di parametri");
       throw err; // Rilancia l'errore per il form
@@ -281,19 +280,8 @@ const Parameters: React.FC = () => {
   const [success, setSuccess] = useState<string>("");
 
   // Stati per la gestione dei set di parametri
+  const [parameterSets, setParameterSets] = useState<any[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
-
-  // Usa ParameterContext invece di stato locale
-  const {
-    parameterSets,
-    loading: paramsLoading,
-    loadParameterSets,
-    loadParameterSet,
-    createParameterSet,
-    updateParameterSet,
-    deleteParameterSet,
-    reorderParameterSets,
-  } = useParameterManager();
   const [showWizard, setShowWizard] = useState(false);
   const [editingParameterSet, setEditingParameterSet] = useState<any | null>(
     null
@@ -336,7 +324,7 @@ const Parameters: React.FC = () => {
   useEffect(() => {
     loadSettings();
     // loadExchangeRates();
-    // loadParameterSets(); // Ora gestito da ParameterContext
+    loadParameterSets();
   }, []);
 
   const loadSettings = async () => {
@@ -404,7 +392,15 @@ const Parameters: React.FC = () => {
   //   return currency ? currency.name : code;
   // };
 
-  // Funzioni per la gestione dei set di parametri (ora gestite da ParameterContext)
+  // Funzioni per la gestione dei set di parametri
+  const loadParameterSets = async () => {
+    try {
+      const sets = await pricingApi.getParameterSets();
+      setParameterSets(sets);
+    } catch (err) {
+      setError("Errore nel caricamento dei set di parametri");
+    }
+  };
 
   // Configura i sensori per il drag and drop
   const sensors = useSensors(
@@ -422,11 +418,17 @@ const Parameters: React.FC = () => {
       const oldIndex = parameterSets.findIndex((item) => item.id === active.id);
       const newIndex = parameterSets.findIndex((item) => item.id === over.id);
 
-      // Crea il nuovo array riordinato
       const newItems = arrayMove(parameterSets, oldIndex, newIndex);
+      setParameterSets(newItems);
 
-      // Usa il ParameterContext per riordinare
-      await reorderParameterSets(newItems);
+      try {
+        await pricingApi.updateParameterSetsOrder(newItems);
+        setSuccess("Ordine aggiornato con successo");
+      } catch (err) {
+        setError("Errore nell'aggiornamento dell'ordine");
+        // Ripristina l'ordine originale in caso di errore
+        await loadParameterSets();
+      }
     }
   };
 
@@ -632,28 +634,23 @@ const Parameters: React.FC = () => {
       // Converti valori in numeri (ora sappiamo che non sono vuoti)
       const parameterSetToCreate = {
         description: newParameterSet.description,
-        purchase_currency: newParameterSet.purchaseCurrency,
-        selling_currency: newParameterSet.sellingCurrency,
-        quality_control_percent: Number(newParameterSet.qualityControlPercent),
-        transport_insurance_cost: Number(
-          newParameterSet.transportInsuranceCost
-        ),
+        purchaseCurrency: newParameterSet.purchaseCurrency,
+        sellingCurrency: newParameterSet.sellingCurrency,
+        qualityControlPercent: Number(newParameterSet.qualityControlPercent),
+        transportInsuranceCost: Number(newParameterSet.transportInsuranceCost),
         duty: Number(newParameterSet.duty),
-        exchange_rate: Number(newParameterSet.exchangeRate),
-        italy_accessory_costs: Number(newParameterSet.italyAccessoryCosts),
+        exchangeRate: Number(newParameterSet.exchangeRate),
+        italyAccessoryCosts: Number(newParameterSet.italyAccessoryCosts),
         tools: Number(newParameterSet.tools),
-        retail_multiplier: Number(newParameterSet.retailMultiplier),
-        optimal_margin: Number(newParameterSet.optimalMargin),
-        company_multiplier: 1.5, // Valore di default
-        is_default: false,
-        order_index: parameterSets.length,
+        retailMultiplier: Number(newParameterSet.retailMultiplier),
+        optimalMargin: Number(newParameterSet.optimalMargin),
       };
 
-      // Usa il ParameterContext per creare il set
-      await createParameterSet(parameterSetToCreate);
+      await pricingApi.createParameterSet(parameterSetToCreate);
       setSuccess("Set di parametri creato con successo");
       resetCreateForm();
       setShowCreateForm(false);
+      await loadParameterSets();
     } catch (err: any) {
       setError(
         err.response?.data?.error ||
@@ -763,11 +760,11 @@ const Parameters: React.FC = () => {
 
     try {
       setSaving(true);
-      // Usa il ParameterContext per eliminare il set
-      await deleteParameterSet(parameterSetToDelete.id);
+      await pricingApi.deleteParameterSet(parameterSetToDelete.id);
       setSuccess("Set di parametri eliminato con successo");
       setShowDeleteConfirm(false);
       setParameterSetToDelete(null);
+      await loadParameterSets();
     } catch (err: any) {
       setError(
         err.response?.data?.error ||
@@ -781,8 +778,7 @@ const Parameters: React.FC = () => {
   const handleLoadParameterSet = async (id: number) => {
     try {
       setSaving(true);
-      // Usa il ParameterContext per caricare il set
-      await loadParameterSet(id);
+      // const result = await pricingApi.loadParameterSet(id); // Commentato per v0.2 - gestito dal Calculator
       setSuccess("Set di parametri caricato con successo");
     } catch (err: any) {
       setError(
