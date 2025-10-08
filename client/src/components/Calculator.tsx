@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, memo, useMemo } from "react";
 import { pricingApi } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 import { useParameterManager } from "../hooks/useParameterManager";
@@ -13,7 +13,7 @@ import "./Calculator.css";
 
 type CalculationMode = "purchase" | "selling" | "margin";
 
-const Calculator: React.FC = () => {
+const Calculator: React.FC = memo(() => {
   const { user } = useAuth();
 
   // Usa ParameterContext invece di stato locale
@@ -40,8 +40,8 @@ const Calculator: React.FC = () => {
   const [selectedParameterSetId, setSelectedParameterSetId] = useState<
     number | null
   >(null);
-  // Stato per mostrare i dettagli dei parametri
-  const [showParameterDetails, setShowParameterDetails] = useState(false);
+  // Stato per mostrare i dettagli dei parametri (rimosso - non utilizzato)
+  // const [showParameterDetails, setShowParameterDetails] = useState(false);
 
   // Funzioni per gestire i parametri per utente (ora gestite da ParameterContext)
   const loadUserParameters = (): CalculationParams | null => {
@@ -97,7 +97,7 @@ const Calculator: React.FC = () => {
       console.error("Errore nel caricamento dei parametri:", err);
       setError("Errore nel caricamento dei parametri");
     }
-  }, [user, params, parameterSets]);
+  }, [user, params, parameterSets, loadUserParameters]);
 
   // Carica parametri iniziali e set di parametri
   useEffect(() => {
@@ -1139,6 +1139,8 @@ const Calculator: React.FC = () => {
       />
     </div>
   );
-};
+});
+
+Calculator.displayName = 'Calculator';
 
 export default Calculator;

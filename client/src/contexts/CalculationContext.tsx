@@ -13,7 +13,6 @@ import React, {
 import { pricingApi } from "../services/api";
 import { useParameterContext } from "./ParameterContext";
 import {
-  CalculationParams,
   SellingPriceCalculation,
   PurchasePriceCalculation,
 } from "../types";

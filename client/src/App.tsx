@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, CircularProgress } from "@mui/material";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ParameterProvider } from "./contexts/ParameterContext";
 import { CalculationProvider } from "./contexts/CalculationContext";
-import LoginForm from "./components/auth/LoginForm";
-import AuthenticatedApp from "./components/auth/AuthenticatedApp";
 import "./App.css";
+
+// Lazy loading dei componenti
+const LoginForm = lazy(() => import("./components/auth/LoginForm"));
+const AuthenticatedApp = lazy(() => import("./components/auth/AuthenticatedApp"));
 
 // Tema Material-UI
 const theme = createTheme({
@@ -70,10 +72,41 @@ const AppContent: React.FC = () => {
   }
 
   if (!isAuthenticated) {
-    return <LoginForm />;
+    return (
+      <Suspense fallback={
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "100vh",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      }>
+        <LoginForm />
+      </Suspense>
+    );
   }
 
-  return <AuthenticatedApp />;
+  return (
+    <Suspense fallback={
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    }>
+      <AuthenticatedApp />
+    </Suspense>
+  );
 };
 
 function App() {
