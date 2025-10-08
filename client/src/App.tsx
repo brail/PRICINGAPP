@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import {
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { Box, Typography } from "@mui/material";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { ParameterProvider } from "./contexts/ParameterContext";
+import { CalculationProvider } from "./contexts/CalculationContext";
 import LoginForm from "./components/auth/LoginForm";
 import AuthenticatedApp from "./components/auth/AuthenticatedApp";
 import "./App.css";
@@ -82,7 +81,11 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
-        <AppContent />
+        <ParameterProvider>
+          <CalculationProvider>
+            <AppContent />
+          </CalculationProvider>
+        </ParameterProvider>
       </AuthProvider>
     </ThemeProvider>
   );
