@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { CalculationMode } from "../types";
 import { pricingApi } from "../services/api";
+import { LoadingStates, useLoadingState } from "./LoadingStates";
 import * as ExcelJS from "exceljs";
 import "./BatchCalculator.css";
 
@@ -41,6 +42,10 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
   const [error, setError] = useState<string>("");
   const [pasteText, setPasteText] = useState("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+
+  // Hook per gestire stati di loading professionali
+  const { isLoading, loadingMessage, startLoading, stopLoading } =
+    useLoadingState();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -360,10 +365,11 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       return;
     }
 
-    setIsCalculating(true);
-    setError("");
-
     try {
+      startLoading("Preparazione calcolo batch...", 0);
+      setIsCalculating(true);
+      setError("");
+
       const batchResults: BatchResult[] = [];
 
       if (calculationMode === "margin" && Array.isArray(inputData[0])) {
@@ -415,9 +421,10 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       setError("Errore durante il calcolo batch");
       console.error("Batch calculation error:", err);
     } finally {
+      stopLoading();
       setIsCalculating(false);
     }
-  }, [inputData, calculationMode, onCalculate]);
+  }, [inputData, calculationMode, onCalculate, startLoading, stopLoading]);
 
   // Export Excel
   const handleExportExcel = useCallback(async () => {
@@ -642,6 +649,30 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
 
   return (
     <div className="batch-calculator">
+      {/* Loading Overlay per calcoli batch */}
+      {isLoading && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <LoadingStates
+            type="progress"
+            message={loadingMessage}
+            fullScreen={true}
+          />
+        </div>
+      )}
+
       <div className="batch-header">
         <h3>Calcolo Batch</h3>
         <p>Calcola più valori contemporaneamente</p>

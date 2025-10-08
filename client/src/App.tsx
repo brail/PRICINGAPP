@@ -2,7 +2,7 @@ import React, { useState, useEffect, lazy, Suspense } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { Box, Typography, CircularProgress } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ParameterProvider } from "./contexts/ParameterContext";
 import { CalculationProvider } from "./contexts/CalculationContext";
@@ -72,7 +72,7 @@ const AppContent: React.FC = () => {
               justifyContent: "center",
               alignItems: "center",
               minHeight: "100vh",
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              background: "#F0F0F0",
             }}
           >
             <CircularProgress />

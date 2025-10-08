@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback, memo, useMemo } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import { pricingApi } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 import { useParameterManager } from "../hooks/useParameterManager";
+import { LoadingStates } from "./LoadingStates";
 import {
   CalculationParams,
   SellingPriceCalculation,
@@ -33,6 +34,7 @@ const Calculator: React.FC = memo(() => {
   const [mode, setMode] = useState<CalculationMode>("purchase");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
+
   const [calculation, setCalculation] = useState<
     SellingPriceCalculation | PurchasePriceCalculation | null
   >(null);
@@ -44,7 +46,7 @@ const Calculator: React.FC = memo(() => {
   // const [showParameterDetails, setShowParameterDetails] = useState(false);
 
   // Funzioni per gestire i parametri per utente (ora gestite da ParameterContext)
-  const loadUserParameters = (): CalculationParams | null => {
+  const loadUserParameters = useCallback((): CalculationParams | null => {
     if (user) {
       const userSavedParams = localStorage.getItem(`userParams_${user.id}`);
       if (userSavedParams) {
@@ -52,7 +54,7 @@ const Calculator: React.FC = memo(() => {
       }
     }
     return null;
-  };
+  }, [user]);
 
   // Funzione per caricare i parametri di default (ora gestita da ParameterContext)
 
@@ -97,7 +99,7 @@ const Calculator: React.FC = memo(() => {
       console.error("Errore nel caricamento dei parametri:", err);
       setError("Errore nel caricamento dei parametri");
     }
-  }, [user, params, parameterSets, loadUserParameters]);
+  }, [params, parameterSets, loadUserParameters]);
 
   // Carica parametri iniziali e set di parametri
   useEffect(() => {
@@ -396,13 +398,18 @@ const Calculator: React.FC = memo(() => {
   };
 
   const handleCalculate = async () => {
-    // Se c'è un prezzo bloccato, calcola il margine
-    if (purchasePriceLocked || retailPriceLocked) {
-      await calculateMarginFromLockedPrice();
-    } else if (purchasePrice && !isNaN(Number(purchasePrice))) {
-      await calculateFromPurchase();
-    } else if (retailPrice && !isNaN(Number(retailPrice))) {
-      await calculateFromSelling();
+    try {
+      // Se c'è un prezzo bloccato, calcola il margine
+      if (purchasePriceLocked || retailPriceLocked) {
+        await calculateMarginFromLockedPrice();
+      } else if (purchasePrice && !isNaN(Number(purchasePrice))) {
+        await calculateFromPurchase();
+      } else if (retailPrice && !isNaN(Number(retailPrice))) {
+        await calculateFromSelling();
+      }
+    } catch (error) {
+      console.error("Errore nel calcolo:", error);
+      setError("Errore durante il calcolo");
     }
   };
 
@@ -767,7 +774,12 @@ const Calculator: React.FC = memo(() => {
                 ))}
               </select>
               {paramsLoading && (
-                <span className="loading-text">Caricamento...</span>
+                <LoadingStates
+                  type="inline"
+                  message="Caricamento parametri..."
+                  size="small"
+                  color="primary"
+                />
               )}
             </div>
           </div>
@@ -1141,6 +1153,6 @@ const Calculator: React.FC = memo(() => {
   );
 });
 
-Calculator.displayName = 'Calculator';
+Calculator.displayName = "Calculator";
 
 export default Calculator;

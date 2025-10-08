@@ -17,7 +17,6 @@ import {
   WifiOff,
   CloudOff,
   Error as ErrorIcon,
-  Warning,
 } from "@mui/icons-material";
 
 interface ErrorFallbackProps {

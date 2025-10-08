@@ -11,7 +11,7 @@
  * @since 2024
  */
 
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosError } from "axios";
 import {
   CalculationParams,
   SellingPriceCalculation,

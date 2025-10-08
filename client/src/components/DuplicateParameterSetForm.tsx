@@ -1,5 +1,4 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { CURRENCIES } from "../types";
 import "./DuplicateParameterSetForm.css";
 
 interface DuplicateParameterSetFormProps {
@@ -72,11 +71,6 @@ const DuplicateParameterSetForm: React.FC<DuplicateParameterSetFormProps> = ({
     } catch (error) {
       console.error("Errore nella duplicazione:", error);
     }
-  };
-
-  const getCurrencyName = (code: string) => {
-    const currency = CURRENCIES.find((c) => c.code === code);
-    return currency ? currency.name : code;
   };
 
   return (

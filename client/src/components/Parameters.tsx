@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, memo, useMemo } from "react";
+import React, { useState, useEffect } from "react";
+import { LoadingStates, useLoadingState } from "./LoadingStates";
 import {
   DndContext,
   closestCenter,
@@ -280,16 +281,15 @@ const Parameters: React.FC = () => {
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
 
-  // Stati per la gestione dei set di parametri
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  // Hook per gestire stati di loading professionali
+  const { isLoading, loadingMessage, startLoading, stopLoading } =
+    useLoadingState();
 
   // Usa ParameterContext invece di stato locale
   const {
     parameterSets,
-    loading: paramsLoading,
     loadParameterSets,
     loadParameterSet,
-    createParameterSet,
     updateParameterSet,
     deleteParameterSet,
     reorderParameterSets,
@@ -302,36 +302,10 @@ const Parameters: React.FC = () => {
   const [duplicatingParameterSet, setDuplicatingParameterSet] = useState<
     any | null
   >(null);
-  const [duplicateDescription, setDuplicateDescription] = useState<string>("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
   const [parameterSetToDelete, setParameterSetToDelete] = useState<any | null>(
     null
   );
-  const [newParameterSet, setNewParameterSet] = useState<{
-    description: string;
-    purchaseCurrency: string;
-    sellingCurrency: string;
-    qualityControlPercent: string | number;
-    transportInsuranceCost: string | number;
-    duty: string | number;
-    exchangeRate: string | number;
-    italyAccessoryCosts: string | number;
-    tools: string | number;
-    retailMultiplier: string | number;
-    optimalMargin: string | number;
-  }>({
-    description: "",
-    purchaseCurrency: "",
-    sellingCurrency: "",
-    qualityControlPercent: "",
-    transportInsuranceCost: "",
-    duty: "",
-    exchangeRate: "",
-    italyAccessoryCosts: "",
-    tools: "",
-    retailMultiplier: "",
-    optimalMargin: "",
-  });
 
   useEffect(() => {
     loadSettings();
@@ -430,104 +404,6 @@ const Parameters: React.FC = () => {
     }
   };
 
-  const resetCreateForm = () => {
-    setNewParameterSet({
-      description: "",
-      purchaseCurrency: "",
-      sellingCurrency: "",
-      qualityControlPercent: "",
-      transportInsuranceCost: "",
-      duty: "",
-      exchangeRate: "",
-      italyAccessoryCosts: "",
-      tools: "",
-      retailMultiplier: "",
-      optimalMargin: "",
-    });
-  };
-
-  const validateForm = () => {
-    const errors: string[] = [];
-
-    if (!newParameterSet.description.trim()) {
-      errors.push("Descrizione è obbligatoria");
-    }
-
-    if (!newParameterSet.purchaseCurrency) {
-      errors.push("Valuta acquisto è obbligatoria");
-    }
-
-    if (!newParameterSet.sellingCurrency) {
-      errors.push("Valuta vendita è obbligatoria");
-    }
-
-    if (
-      newParameterSet.qualityControlPercent === "" ||
-      newParameterSet.qualityControlPercent === null ||
-      newParameterSet.qualityControlPercent === undefined
-    ) {
-      errors.push("Quality Control (%) è obbligatorio");
-    }
-
-    if (
-      newParameterSet.transportInsuranceCost === "" ||
-      newParameterSet.transportInsuranceCost === null ||
-      newParameterSet.transportInsuranceCost === undefined
-    ) {
-      errors.push("Trasporto + Assicurazione è obbligatorio");
-    }
-
-    if (
-      newParameterSet.duty === "" ||
-      newParameterSet.duty === null ||
-      newParameterSet.duty === undefined
-    ) {
-      errors.push("Dazio (%) è obbligatorio");
-    }
-
-    if (
-      newParameterSet.exchangeRate === "" ||
-      newParameterSet.exchangeRate === null ||
-      newParameterSet.exchangeRate === undefined
-    ) {
-      errors.push("Cambio è obbligatorio");
-    }
-
-    if (
-      newParameterSet.italyAccessoryCosts === "" ||
-      newParameterSet.italyAccessoryCosts === null ||
-      newParameterSet.italyAccessoryCosts === undefined
-    ) {
-      errors.push("Costi accessori Italia è obbligatorio");
-    }
-
-    if (
-      newParameterSet.tools === "" ||
-      newParameterSet.tools === null ||
-      newParameterSet.tools === undefined
-    ) {
-      errors.push("Tools è obbligatorio");
-    }
-
-    if (
-      newParameterSet.retailMultiplier === "" ||
-      newParameterSet.retailMultiplier === null ||
-      newParameterSet.retailMultiplier === undefined
-    ) {
-      errors.push("Moltiplicatore retail è obbligatorio");
-    }
-
-    if (
-      newParameterSet.optimalMargin === "" ||
-      newParameterSet.optimalMargin === null ||
-      newParameterSet.optimalMargin === undefined
-    ) {
-      errors.push("Margine ottimale (%) è obbligatorio");
-    }
-
-    return errors;
-  };
-
   const validateEditForm = () => {
     const errors: string[] = [];
 
@@ -618,52 +494,6 @@ const Parameters: React.FC = () => {
     return errors;
   };
 
-  const handleCreateParameterSet = async () => {
-    // Validazione del form
-    const validationErrors = validateForm();
-    if (validationErrors.length > 0) {
-      setError("Errore di validazione: " + validationErrors.join(", "));
-      return;
-    }
-
-    try {
-      setSaving(true);
-
-      // Converti valori in numeri (ora sappiamo che non sono vuoti)
-      const parameterSetToCreate = {
-        description: newParameterSet.description,
-        purchase_currency: newParameterSet.purchaseCurrency,
-        selling_currency: newParameterSet.sellingCurrency,
-        quality_control_percent: Number(newParameterSet.qualityControlPercent),
-        transport_insurance_cost: Number(
-          newParameterSet.transportInsuranceCost
-        ),
-        duty: Number(newParameterSet.duty),
-        exchange_rate: Number(newParameterSet.exchangeRate),
-        italy_accessory_costs: Number(newParameterSet.italyAccessoryCosts),
-        tools: Number(newParameterSet.tools),
-        retail_multiplier: Number(newParameterSet.retailMultiplier),
-        optimal_margin: Number(newParameterSet.optimalMargin),
-        company_multiplier: 1.5, // Valore di default
-        is_default: false,
-        order_index: parameterSets.length,
-      };
-
-      // Usa il ParameterContext per creare il set
-      await createParameterSet(parameterSetToCreate);
-      setSuccess("Set di parametri creato con successo");
-      resetCreateForm();
-      setShowCreateForm(false);
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error ||
-          "Errore nella creazione del set di parametri"
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const handleWizardSave = async (data: any) => {
     try {
       setSaving(true);
@@ -689,7 +519,6 @@ const Parameters: React.FC = () => {
       await pricingApi.createParameterSet(data);
       setSuccess("Set di parametri duplicato con successo!");
       setDuplicatingParameterSet(null);
-      setDuplicateDescription("");
       loadParameterSets();
     } catch (err: any) {
       setError(err.message || "Errore nella duplicazione del set di parametri");
@@ -780,9 +609,17 @@ const Parameters: React.FC = () => {
 
   const handleLoadParameterSet = async (id: number) => {
     try {
+      startLoading("Caricamento parametri...", 0);
       setSaving(true);
+
+      // Simula progresso
+      setTimeout(() => startLoading("Applicazione parametri...", 50), 200);
+
       // Usa il ParameterContext per caricare il set
       await loadParameterSet(id);
+
+      setTimeout(() => startLoading("Completamento...", 100), 300);
+
       setSuccess("Set di parametri caricato con successo");
     } catch (err: any) {
       setError(
@@ -790,6 +627,7 @@ const Parameters: React.FC = () => {
           "Errore nel caricamento del set di parametri"
       );
     } finally {
+      stopLoading();
       setSaving(false);
     }
   };
@@ -812,79 +650,16 @@ const Parameters: React.FC = () => {
 
   const startDuplicatingParameterSet = (set: any) => {
     // Chiudi tutti gli altri form prima di aprire quello di duplicazione
-    setShowCreateForm(false);
     setEditingParameterSet(null);
     setDuplicatingParameterSet(set);
-    setDuplicateDescription(`${set.description} (Copia)`);
   };
 
   const cancelDuplicatingParameterSet = () => {
     setDuplicatingParameterSet(null);
-    setDuplicateDescription("");
-  };
-
-  const validateDuplicateDescription = () => {
-    if (!duplicateDescription.trim()) {
-      return "Descrizione è obbligatoria";
-    }
-
-    const existingSet = parameterSets.find(
-      (set) =>
-        set.description.toLowerCase() === duplicateDescription.toLowerCase()
-    );
-
-    if (existingSet) {
-      return "Una descrizione con questo nome esiste già";
-    }
-
-    return null;
-  };
-
-  const handleDuplicateParameterSet = async () => {
-    const validationError = validateDuplicateDescription();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-
-    if (!duplicatingParameterSet) return;
-
-    try {
-      setSaving(true);
-
-      // Crea il nuovo set con tutti i parametri del set originale
-      const duplicatedSet = {
-        description: duplicateDescription,
-        purchaseCurrency: duplicatingParameterSet.purchase_currency,
-        sellingCurrency: duplicatingParameterSet.selling_currency,
-        qualityControlPercent: duplicatingParameterSet.quality_control_percent,
-        transportInsuranceCost:
-          duplicatingParameterSet.transport_insurance_cost,
-        duty: duplicatingParameterSet.duty,
-        exchangeRate: duplicatingParameterSet.exchange_rate,
-        italyAccessoryCosts: duplicatingParameterSet.italy_accessory_costs,
-        tools: duplicatingParameterSet.tools,
-        retailMultiplier: duplicatingParameterSet.retail_multiplier,
-        optimalMargin: duplicatingParameterSet.optimal_margin,
-      };
-
-      await pricingApi.createParameterSet(duplicatedSet);
-      setSuccess("Set di parametri duplicato con successo");
-      cancelDuplicatingParameterSet();
-      await loadParameterSets();
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error ||
-          "Errore nella duplicazione del set di parametri"
-      );
-    } finally {
-      setSaving(false);
-    }
   };
 
   const startEditingParameterSet = (parameterSet: any) => {
     // Chiudi tutti gli altri form prima di aprire quello di modifica
-    setShowCreateForm(false);
     setDuplicatingParameterSet(null);
     setEditingParameterSet({ ...parameterSet });
   };
@@ -906,16 +681,41 @@ const Parameters: React.FC = () => {
   if (loading) {
     return (
       <div className="settings">
-        <div className="loading-container">
-          <div className="loading"></div>
-          <p>Caricamento impostazioni...</p>
-        </div>
+        <LoadingStates
+          type="skeleton"
+          message="Caricamento parametri..."
+          fullScreen={false}
+        />
       </div>
     );
   }
 
   return (
     <div className="parameters">
+      {/* Loading Overlay per caricamento parametri */}
+      {isLoading && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <LoadingStates
+            type="progress"
+            message={loadingMessage}
+            fullScreen={true}
+          />
+        </div>
+      )}
+
       <div className="parameters-header">
         <h2>Parametri</h2>
         <p className="text-muted">
@@ -1175,8 +975,6 @@ const Parameters: React.FC = () => {
                   // Chiudi tutti gli altri form prima di aprire il wizard
                   setEditingParameterSet(null);
                   setDuplicatingParameterSet(null);
-                  setShowCreateForm(false);
-                  resetCreateForm();
                 }
                 setShowWizard(!showWizard);
               }}
