@@ -92,7 +92,7 @@ const LoginForm: React.FC<LoginFormProps> = () => {
         justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        background: "#F0F0F0",
         padding: 2,
       }}
     >
@@ -100,24 +100,31 @@ const LoginForm: React.FC<LoginFormProps> = () => {
         sx={{
           maxWidth: 400,
           width: "100%",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-          borderRadius: 2,
+          backgroundColor: "#FFFFFF",
+          border: "1px solid #E0E0E0",
+          borderRadius: "12px",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
         }}
       >
         <CardContent sx={{ p: 4 }}>
           <Box sx={{ textAlign: "center", mb: 3 }}>
             <Logo variant="black" size="large" />
             <Typography
-              variant="h4"
+              variant="h5"
               component="h1"
               gutterBottom
               color="primary"
-              sx={{ mt: 2 }}
+              sx={{
+                mt: 2,
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+                fontWeight: 500,
+              }}
             >
-              Pricing Calculator
+              PRICING CALCULATOR
             </Typography>
-            <Typography variant="h6" color="text.secondary">
-              v0.2 - Accedi al tuo account
+            <Typography variant="body1" color="text.secondary">
+              Accedi al tuo account
             </Typography>
           </Box>
 
@@ -190,6 +197,19 @@ const LoginForm: React.FC<LoginFormProps> = () => {
                 "Accedi"
               )}
             </Button>
+
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{
+                display: "block",
+                textAlign: "center",
+                fontSize: "0.75rem",
+                opacity: 0.7,
+              }}
+            >
+              v0.2.0
+            </Typography>
           </form>
         </CardContent>
       </Card>

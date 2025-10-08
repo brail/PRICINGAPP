@@ -24,11 +24,13 @@ import {
   Lock,
 } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
+import { useVersion } from "../../hooks/useVersion";
 import ChangePasswordDialog from "./ChangePasswordDialog";
 import "./UserDashboard.css";
 
 const UserDashboard: React.FC = () => {
   const { user, updateUser, isLoading } = useAuth();
+  const { version, buildDate, environment } = useVersion();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [changePasswordDialogOpen, setChangePasswordDialogOpen] =
     useState(false);
@@ -71,7 +73,6 @@ const UserDashboard: React.FC = () => {
         return <Person />;
     }
   };
-
 
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return "Mai";
@@ -185,7 +186,12 @@ const UserDashboard: React.FC = () => {
 
               <div className="stat-item">
                 <span className="stat-label">Versione App</span>
-                <span className="stat-value">v0.2.0-dev</span>
+                <span className="stat-value">
+                  v{version}
+                  {environment === "development" && "-dev"}
+                  {buildDate &&
+                    ` (${new Date(buildDate).toLocaleDateString()})`}
+                </span>
               </div>
             </div>
           </div>

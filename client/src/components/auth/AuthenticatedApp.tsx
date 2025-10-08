@@ -80,6 +80,10 @@ const AuthenticatedApp: React.FC = () => {
     handleMobileMenuClose();
   };
 
+  const handleLogoClick = () => {
+    navigate("/");
+  };
+
   const getRoleIcon = (role: string) => {
     switch (role) {
       case "admin":
@@ -95,7 +99,18 @@ const AuthenticatedApp: React.FC = () => {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              flexGrow: 1,
+              cursor: "pointer",
+              "&:hover": {
+                opacity: 0.8,
+              },
+            }}
+            onClick={handleLogoClick}
+          >
             <Logo variant="white" size="medium" />
             <Typography
               variant="h6"
@@ -104,9 +119,11 @@ const AuthenticatedApp: React.FC = () => {
                 ml: 2,
                 fontSize: { xs: "1rem", sm: "1.25rem" },
                 fontWeight: 500,
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
               }}
             >
-              Pricing Calculator v0.2
+              PRICING CALCULATOR
             </Typography>
           </Box>
 
