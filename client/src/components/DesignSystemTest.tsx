@@ -3,7 +3,7 @@ import Button from "./Button";
 import Card from "./Card";
 import { Form, FormGroup, FormLabel, FormInput, FormTextArea } from "./Form";
 import Input from "./Input";
-import { Modal, ModalHeader, ModalBody, ModalFooter } from "./Modal";
+import { Modal, ModalBody, ModalFooter } from "./Modal";
 import LoadingSpinner from "./LoadingSpinner";
 import Alert from "./Alert";
 

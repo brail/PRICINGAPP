@@ -9,9 +9,6 @@ import {
 import { useNotification } from "../contexts/NotificationContext";
 import CompactErrorHandler from "./CompactErrorHandler";
 import Button from "./Button";
-import Card from "./Card";
-import Input from "./Input";
-import LoadingSpinner from "./LoadingSpinner";
 import * as ExcelJS from "exceljs";
 import "./BatchCalculator.css";
 
@@ -57,7 +54,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
     useBusinessErrorHandler();
 
   // Notification system
-  const { showSuccess, showError, showInfo } = useNotification();
+  const { showSuccess } = useNotification();
 
   // Hook per gestire stati di loading professionali
   const { isLoading, loadingMessage, startLoading, stopLoading } =
@@ -804,12 +801,11 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
 
       <div className="multi-header">
         <h3>Calcolo Multiplo</h3>
-        <p>Calcola più valori contemporaneamente</p>
       </div>
 
       {/* Selezione modalità di calcolo */}
       <div className="multi-mode-selection">
-        <label>Modalità di calcolo:</label>
+        <label>Modalità:</label>
         <div className="mode-buttons">
           <button
             className={`mode-btn ${
@@ -840,7 +836,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
 
       {/* Selezione metodo di input */}
       <div className="multi-input-method">
-        <label>Metodo di input:</label>
+        <label>Input:</label>
         <div className="input-method-buttons">
           <button
             className={`method-btn ${inputMethod === "paste" ? "active" : ""}`}
@@ -883,19 +879,10 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
             {inputData.length > 0 && (
               <div className="data-preview">
                 <strong>
-                  Dati riconosciuti ({inputData.length}{" "}
-                  {calculationMode === "margin" ? "coppie" : "valori"}):
+                  {inputData.length}{" "}
+                  {calculationMode === "margin" ? "coppie" : "valori"}{" "}
+                  riconosciuti
                 </strong>
-                <div className="preview-values">
-                  {inputData.slice(0, 10).map((value, index) => (
-                    <span key={index} className="preview-value">
-                      {Array.isArray(value)
-                        ? `${value[0]} ; ${value[1]}`
-                        : value}
-                    </span>
-                  ))}
-                  {inputData.length > 10 && <span>...</span>}
-                </div>
               </div>
             )}
           </div>
@@ -903,7 +890,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
 
         {inputMethod === "upload" && (
           <div className="upload-input">
-            <label>Carica file Excel/CSV (.xlsx, .csv):</label>
+            <label>Carica file Excel/CSV:</label>
             <input
               ref={fileInputRef}
               type="file"
@@ -919,8 +906,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
             </button>
             {uploadedFile && (
               <div className="file-info">
-                <p>File selezionato: {uploadedFile.name}</p>
-                <p>Dimensione: {(uploadedFile.size / 1024).toFixed(1)} KB</p>
+                <p>File: {uploadedFile.name}</p>
               </div>
             )}
           </div>

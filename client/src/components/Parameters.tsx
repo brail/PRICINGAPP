@@ -7,9 +7,6 @@ import {
 import { useNotification } from "../contexts/NotificationContext";
 import CompactErrorHandler from "./CompactErrorHandler";
 import Button from "./Button";
-import Card from "./Card";
-import Input from "./Input";
-import LoadingSpinner from "./LoadingSpinner";
 import {
   DndContext,
   closestCenter,
@@ -308,7 +305,7 @@ const Parameters: React.FC = () => {
     useBusinessErrorHandler();
 
   // Notification system
-  const { showSuccess, showError, showInfo } = useNotification();
+  const { showSuccess } = useNotification();
 
   // Hook per gestire stati di loading professionali
   const { isLoading, loadingMessage, startLoading, stopLoading } =
@@ -816,9 +813,9 @@ const Parameters: React.FC = () => {
       )}
 
       <div className="parameters-header">
-        <h2>Configurazione Prezzi</h2>
+        <h2>Template Prezzi</h2>
         <p className="text-muted">
-          Configura i template di calcolo per la calcolatrice prezzi.
+          Gestisci i template di calcolo per la calcolatrice.
         </p>
       </div>
 
@@ -832,268 +829,30 @@ const Parameters: React.FC = () => {
       ))}
 
       <div className="parameters-grid">
-        {/* Parametri di Calcolo - Temporaneamente nascosto */}
-        {/* <div className="settings-card">
-          <h3>Parametri di Calcolo</h3>
-
-          <div className="form-group">
-            <label className="form-label">Valuta acquisto</label>
-            <select
-              className="form-select"
-              value={params.purchaseCurrency}
-              onChange={(e) =>
-                setParams({ ...params, purchaseCurrency: e.target.value })
-              }
-            >
-              {CURRENCIES.map((currency) => (
-                <option key={currency.code} value={currency.code}>
-                  {currency.code} - {currency.name}
-                </option>
-              ))}
-            </select>
-            <small className="form-help">
-              Valuta utilizzata per il prezzo di acquisto
-            </small>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Valuta vendita</label>
-            <select
-              className="form-select"
-              value={params.sellingCurrency}
-              onChange={(e) =>
-                setParams({ ...params, sellingCurrency: e.target.value })
-              }
-            >
-              {CURRENCIES.map((currency) => (
-                <option key={currency.code} value={currency.code}>
-                  {currency.code} - {currency.name}
-                </option>
-              ))}
-            </select>
-            <small className="form-help">
-              Valuta utilizzata per il prezzo di vendita
-            </small>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">
-              Percentuale Quality Control (%)
-            </label>
-            <input
-              type="number"
-              className="form-input"
-              onWheel={handleWheelPrevent}
-              value={params.qualityControlPercent}
-              onChange={(e) =>
-                setParams({
-                  ...params,
-                  qualityControlPercent: Number(e.target.value),
-                })
-              }
-              onWheel={handleWheelPrevent}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              min="0"
-              max="100"
-              step="0.1"
-            />
-            <small className="form-help">
-              Percentuale di quality control applicata al prezzo di acquisto
-            </small>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">
-              Costo trasporto + assicurazione
-            </label>
-            <input
-              type="number"
-              className="form-input"
-              onWheel={handleWheelPrevent}
-              value={params.transportInsuranceCost}
-              onChange={(e) =>
-                setParams({
-                  ...params,
-                  transportInsuranceCost: Number(e.target.value),
-                })
-              }
-              onWheel={handleWheelPrevent}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              min="0"
-              step="0.01"
-            />
-            <small className="form-help">
-              Costo fisso di trasporto e assicurazione
-            </small>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Dazio (%)</label>
-            <input
-              type="number"
-              className="form-input"
-              onWheel={handleWheelPrevent}
-              value={params.duty}
-              onChange={(e) =>
-                setParams({ ...params, duty: Number(e.target.value) })
-              }
-              min="0"
-              max="100"
-              step="0.1"
-            />
-            <small className="form-help">Percentuale di dazio applicata</small>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Tasso di cambio</label>
-            <input
-              type="number"
-              className="form-input"
-              onWheel={handleWheelPrevent}
-              value={params.exchangeRate}
-              onChange={(e) =>
-                setParams({ ...params, exchangeRate: Number(e.target.value) })
-              }
-              min="0.001"
-              step="0.0001"
-            />
-            <small className="form-help">
-              Tasso di cambio da valuta acquisto a valuta vendita
-            </small>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Costi accessori Italia</label>
-            <input
-              type="number"
-              className="form-input"
-              onWheel={handleWheelPrevent}
-              value={params.italyAccessoryCosts}
-              onChange={(e) =>
-                setParams({
-                  ...params,
-                  italyAccessoryCosts: Number(e.target.value),
-                })
-              }
-              min="0"
-              step="0.01"
-            />
-            <small className="form-help">
-              Costi accessori specifici per l'Italia
-            </small>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Tools</label>
-            <input
-              type="number"
-              className="form-input"
-              onWheel={handleWheelPrevent}
-              value={params.tools}
-              onChange={(e) =>
-                setParams({
-                  ...params,
-                  tools: Number(e.target.value),
-                })
-              }
-              min="0"
-              step="0.01"
-            />
-            <small className="form-help">
-              Costo tools in valuta di acquisto
-            </small>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Moltiplicatore aziendale</label>
-            <input
-              type="number"
-              className="form-input"
-              onWheel={handleWheelPrevent}
-              value={params.companyMultiplier}
-              onChange={(e) =>
-                setParams({
-                  ...params,
-                  companyMultiplier: Number(e.target.value),
-                })
-              }
-              min="0.1"
-              step="0.1"
-            />
-            <small className="form-help">
-              Moltiplicatore per il prezzo aziendale
-            </small>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Moltiplicatore retail</label>
-            <input
-              type="number"
-              className="form-input"
-              onWheel={handleWheelPrevent}
-              value={params.retailMultiplier}
-              onChange={(e) =>
-                setParams({
-                  ...params,
-                  retailMultiplier: Number(e.target.value),
-                })
-              }
-              min="0.1"
-              step="0.1"
-            />
-            <small className="form-help">
-              Moltiplicatore per il prezzo retail finale
-            </small>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Margine ottimale (%)</label>
-            <input
-              type="number"
-              className="form-input"
-              onWheel={handleWheelPrevent}
-              value={params.optimalMargin}
-              onChange={(e) =>
-                setParams({
-                  ...params,
-                  optimalMargin: Number(e.target.value),
-                })
-              }
-              min="0"
-              max="100"
-              step="0.1"
-            />
-            <small className="form-help">Margine aziendale ottimale</small>
-          </div>
-        </div>
-
         {/* Gestione Set di Parametri */}
         <div className="parameters-card">
           <div className="parameters-card-header">
-            <h3>Gestione Template Prezzi</h3>
+            <h3>Template Prezzi</h3>
             <Button
               className="btn btn-primary"
               onClick={() => {
                 if (!showWizard) {
-                  // Chiudi tutti gli altri form prima di aprire il wizard
                   setEditingParameterSet(null);
                   setDuplicatingParameterSet(null);
                 }
                 setShowWizard(!showWizard);
               }}
             >
-              {showWizard ? "Annulla" : "Crea Nuovo Template"}
+              {showWizard ? "Annulla" : "Nuovo Template"}
             </Button>
           </div>
 
           <div className="parameter-sets-management">
             {/* Lista Set di Parametri */}
             <div className="parameter-sets-list">
-              <h4>Template Prezzi Esistenti</h4>
+              <h4>Template Esistenti</h4>
               {parameterSets.length === 0 ? (
-                <p className="text-muted">Nessun template prezzi trovato.</p>
+                <p className="text-muted">Nessun template trovato.</p>
               ) : (
                 <DndContext
                   sensors={sensors}

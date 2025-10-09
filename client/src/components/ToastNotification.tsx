@@ -3,7 +3,7 @@
  * Sistema globale di notifiche toast per feedback rapido
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Snackbar,
   Alert,
@@ -142,4 +142,3 @@ const ToastNotificationComponent: React.FC<ToastNotificationProps> = ({
 };
 
 export default ToastNotificationComponent;
-

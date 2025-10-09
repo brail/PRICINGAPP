@@ -20,9 +20,6 @@ import {
   Typography,
 } from "@mui/material";
 import Button from "../Button";
-import Card from "../Card";
-import Input from "../Input";
-import LoadingSpinner from "../LoadingSpinner";
 import {
   Edit,
   Delete,
@@ -56,7 +53,7 @@ const UserManagement: React.FC = () => {
   const { user: currentUser } = useAuth();
   const { addError, clearErrors, errors, removeError } =
     useBusinessErrorHandler();
-  const { showSuccess, showError } = useNotification();
+  const { showSuccess } = useNotification();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);

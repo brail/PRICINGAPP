@@ -51,7 +51,7 @@ const UserDashboard: React.FC = () => {
     useBusinessErrorHandler();
 
   // Notification system
-  const { showSuccess, showError } = useNotification();
+  const { showSuccess } = useNotification();
 
   const handleEditProfile = () => {
     setEditForm({

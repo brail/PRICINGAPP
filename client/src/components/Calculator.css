@@ -356,7 +356,7 @@
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .price-inputs-section {
     padding: 24px;
   }
@@ -366,28 +366,28 @@
   .calculator {
     padding: 0 12px;
   }
-  
+
   .calculator-header {
     margin-bottom: 20px;
   }
-  
+
   .calculator-header h2 {
     font-size: 22px;
   }
-  
+
   .calculator-main-layout {
     gap: 16px;
   }
-  
+
   .price-inputs-section {
     padding: 20px;
   }
-  
+
   .price-form-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .calculator-grid {
     grid-template-columns: 1fr;
     gap: 16px;
@@ -437,25 +437,25 @@
   .calculator {
     padding: 0 8px;
   }
-  
+
   .calculator-header h2 {
     font-size: 20px;
   }
-  
+
   .price-inputs-section {
     padding: 16px;
     border-radius: 12px;
   }
-  
+
   .price-input-group .form-input {
     font-size: 16px;
     padding: 14px 16px;
   }
-  
+
   .sidebar-card {
     padding: 12px;
   }
-  
+
   .input-card {
     padding: 12px;
   }
@@ -466,20 +466,20 @@
   .calculator-header h2 {
     font-size: 18px;
   }
-  
+
   .price-inputs-section {
     padding: 12px;
   }
-  
+
   .price-input-group .form-input {
     font-size: 16px;
     padding: 12px 14px;
   }
-  
+
   .sidebar-card {
     padding: 10px;
   }
-  
+
   .parameter-set-details {
     padding: 12px;
   }
@@ -810,4 +810,29 @@
   .parameter-value {
     font-size: 13px;
   }
+}
+
+/* Layout compatto per parametri */
+.parameter-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.parameter-item-compact {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.parameter-item-compact .parameter-label {
+  font-weight: 500;
+  color: #666;
+}
+
+.parameter-item-compact .parameter-value {
+  font-weight: 600;
+  color: #333;
 }

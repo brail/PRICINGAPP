@@ -932,29 +932,14 @@ const Calculator: React.FC = memo(() => {
           {/* Dettagli Template Prezzi Caricato - Compatti */}
           {params && (
             <Card variant="outlined" padding="md">
-              <h4>Parametri Attivi</h4>
-              <div className="parameter-grid">
-                <div className="parameter-item">
+              <div className="parameter-summary">
+                <div className="parameter-item-compact">
                   <span className="parameter-label">Valuta:</span>
                   <span className="parameter-value">
                     {params.purchaseCurrency} → {params.sellingCurrency}
                   </span>
                 </div>
-                <div className="parameter-item">
-                  <span className="parameter-label">Cambio:</span>
-                  <span className="parameter-value">{params.exchangeRate}</span>
-                </div>
-                <div className="parameter-item">
-                  <span className="parameter-label">Dazio:</span>
-                  <span className="parameter-value">{params.duty}%</span>
-                </div>
-                <div className="parameter-item">
-                  <span className="parameter-label">Retail:</span>
-                  <span className="parameter-value">
-                    {params.retailMultiplier}x
-                  </span>
-                </div>
-                <div className="parameter-item">
+                <div className="parameter-item-compact">
                   <span className="parameter-label">Target:</span>
                   <span className="parameter-value">
                     {params.optimalMargin}%

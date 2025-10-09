@@ -11,9 +11,6 @@ import {
   Alert,
 } from "@mui/material";
 import Button from "../Button";
-import Card from "../Card";
-import Input from "../Input";
-import LoadingSpinner from "../LoadingSpinner";
 import { Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import { pricingApi } from "../../services/api";
 import {
@@ -40,7 +37,7 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
 }) => {
   const { addError, clearErrors, errors, removeError } =
     useBusinessErrorHandler();
-  const { showSuccess, showError } = useNotification();
+  const { showSuccess } = useNotification();
   const [formData, setFormData] = useState({
     currentPassword: "",
     newPassword: "",
