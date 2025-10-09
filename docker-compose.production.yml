@@ -34,8 +34,6 @@ services:
     container_name: pricing-calculator-frontend
     env_file:
       - ./client/.env.production
-    volumes:
-      - pricing_static:/usr/share/nginx/html/static
     networks:
       - pricing_network
     restart: unless-stopped
