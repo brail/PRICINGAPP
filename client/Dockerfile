@@ -13,7 +13,7 @@ COPY package*.json ./
 # Installa dipendenze
 RUN npm ci --silent
 
-# Copia sorgenti
+# Copia sorgenti (solo dalla directory client)
 COPY . .
 
 # Build dell'applicazione
