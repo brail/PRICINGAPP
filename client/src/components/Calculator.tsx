@@ -18,7 +18,6 @@ import {
 import BatchCalculator from "./BatchCalculator";
 import Button from "./Button";
 import Card from "./Card";
-import Input from "./Input";
 import LoadingSpinner from "./LoadingSpinner";
 import "./Calculator.css";
 
@@ -50,7 +49,7 @@ const Calculator: React.FC = memo(() => {
     useBusinessErrorHandler();
 
   // Notification system
-  const { showSuccess, showError } = useNotification();
+  const { showSuccess } = useNotification();
 
   const [calculation, setCalculation] = useState<
     SellingPriceCalculation | PurchasePriceCalculation | null
@@ -877,6 +876,26 @@ const Calculator: React.FC = memo(() => {
             )}
           </Button>
         </Card>
+
+        {/* Preview in tempo reale - DISABILITATO TEMPORANEAMENTE */}
+        {/* 
+        {params && (
+          <RealtimePreview
+            inputValue={purchasePrice ? Number(purchasePrice) : null}
+            calculationType="purchase"
+            params={params}
+            onCalculate={async (value) => {
+              const result = await pricingApi.calculateSellingPrice(
+                value,
+                params.sellingCurrency
+              );
+              return result;
+            }}
+            enabled={!purchasePriceLocked && !retailPriceLocked}
+            showDetails={false}
+          />
+        )}
+        */}
 
         {/* Sidebar con parametri compatti */}
         <div className="sidebar-section">
