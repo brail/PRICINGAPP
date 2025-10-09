@@ -13,7 +13,7 @@ services:
       - pricing_network
     restart: unless-stopped
     expose:
-      - "5001"  # Solo per nginx, non esposto all'esterno
+      - "5001" # Solo per nginx, non esposto all'esterno
     healthcheck:
       test:
         [
@@ -31,7 +31,7 @@ services:
       context: ./client
       dockerfile: Dockerfile
       args:
-        - REACT_APP_API_URL=http://luke.febos.local/pricingapp/api
+        - REACT_APP_API_URL=http://backend:5001
         - PUBLIC_URL=/pricingapp
     container_name: pricing-calculator-frontend
     env_file:
