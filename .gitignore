@@ -71,7 +71,7 @@ dist
 
 # Gatsby files
 .cache/
-public
+# public (commented out - needed for React public folder)
 
 # Storybook build outputs
 .out
@@ -96,3 +96,14 @@ temp/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Temporary configuration files
+*.tar.gz
+*.backup
+*-report.json
+test_*.md
+env.*
+*.env.local
+*.env.production
+*.env.network
+*.env.example
