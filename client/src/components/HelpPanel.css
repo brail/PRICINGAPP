@@ -160,24 +160,92 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .help-panel-overlay {
+    padding: 8px;
+  }
+
   .help-panel {
     max-width: 100%;
     max-height: 95vh;
-    margin: 8px;
+    margin: 0;
+    border-radius: var(--radius-md);
+  }
+
+  .help-panel-header {
+    padding: 12px 16px;
+  }
+
+  .help-panel-title {
+    font-size: 1.1rem;
   }
 
   .help-panel-content {
     padding: 16px;
   }
 
+  .help-section {
+    margin-bottom: 20px;
+  }
+
+  .help-section-title {
+    font-size: 1.1rem;
+  }
+
   .quick-step {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+    padding: 6px 0;
   }
 
   .quick-step span {
     margin-left: 0;
+    font-size: 0.85rem;
+  }
+
+  .help-accordion .MuiAccordionSummary-root {
+    padding: 10px 12px;
+    min-height: 44px;
+  }
+
+  .help-accordion .MuiAccordionDetails-root {
+    padding: 0 12px 12px 12px;
+  }
+
+  .guide-step {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+
+  .help-contact {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .help-panel-overlay {
+    padding: 4px;
+  }
+
+  .help-panel {
+    max-height: 98vh;
+    border-radius: var(--radius-sm);
+  }
+
+  .help-panel-header {
+    padding: 10px 12px;
+  }
+
+  .help-panel-content {
+    padding: 12px;
+  }
+
+  .help-section-title {
+    font-size: 1rem;
+  }
+
+  .quick-step span {
+    font-size: 0.8rem;
   }
 }
 

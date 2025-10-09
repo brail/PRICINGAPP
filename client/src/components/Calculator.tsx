@@ -980,14 +980,14 @@ const Calculator: React.FC = memo(() => {
                     </span>
                   </div>
                   <div className="result-item">
-                    <span className="result-label">Tools:</span>
+                    <span className="result-label">Stampi:</span>
                     <span className="result-value">
                       {formatCurrency(params.tools, params.purchaseCurrency)}
                     </span>
                   </div>
                   <div className="result-item">
                     <span className="result-label">
-                      Quality Control (
+                      Controllo Qualità (
                       {calculation.params.qualityControlPercent}
                       %):
                     </span>
@@ -1000,7 +1000,7 @@ const Calculator: React.FC = memo(() => {
                   </div>
                   <div className="result-item">
                     <span className="result-label">
-                      Prezzo con Q.C. e Tools:
+                      Prezzo con C.Q. e Stampi:
                     </span>
                     <span className="result-value">
                       {formatCurrency(
@@ -1092,7 +1092,7 @@ const Calculator: React.FC = memo(() => {
                   </div>
                   <div className="result-item highlight">
                     <span className="result-label">
-                      Prezzo retail finale (×
+                      Prezzo vendita al dettaglio finale (×
                       {calculation.params.retailMultiplier}
                       ):
                     </span>
@@ -1120,7 +1120,9 @@ const Calculator: React.FC = memo(() => {
               {mode === "selling" && "purchasePrice" in calculation && (
                 <>
                   <div className="result-item highlight">
-                    <span className="result-label">Prezzo retail:</span>
+                    <span className="result-label">
+                      Prezzo vendita al dettaglio:
+                    </span>
                     <span className="result-value">
                       {formatCurrency(
                         calculation.retailPrice,
@@ -1224,14 +1226,14 @@ const Calculator: React.FC = memo(() => {
                     </span>
                   </div>
                   <div className="result-item">
-                    <span className="result-label">Tools:</span>
+                    <span className="result-label">Stampi:</span>
                     <span className="result-value">
                       {formatCurrency(params.tools, params.purchaseCurrency)}
                     </span>
                   </div>
                   <div className="result-item">
                     <span className="result-label">
-                      Quality Control (
+                      Controllo Qualità (
                       {calculation.params.qualityControlPercent}
                       %):
                     </span>

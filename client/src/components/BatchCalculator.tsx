@@ -948,7 +948,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
                   <th>Valuta Acquisto</th>
                   <th>Prezzo Acquisto</th>
                   <th>Valuta Vendita</th>
-                  <th>Prezzo Vendita</th>
+                  <th>Prezzo Vendita al Dettaglio</th>
                   <th>Margine (%)</th>
                 </tr>
               </thead>
