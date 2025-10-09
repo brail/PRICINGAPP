@@ -4,7 +4,8 @@
  */
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
-import { Box, Typography, Button, Paper, Alert } from "@mui/material";
+import { Box, Typography, Paper, Alert } from "@mui/material";
+import CustomButton from "./CustomButton";
 import { Refresh, BugReport } from "@mui/icons-material";
 
 interface Props {
@@ -114,21 +115,19 @@ class ErrorBoundary extends Component<Props, State> {
             </Alert>
 
             <Box sx={{ display: "flex", gap: 2, justifyContent: "center" }}>
-              <Button
-                variant="contained"
-                startIcon={<Refresh />}
+              <CustomButton
+                variant="primary"
                 onClick={this.handleRetry}
-                sx={{ minWidth: 120 }}
               >
+                <Refresh />
                 Riprova
-              </Button>
-              <Button
-                variant="outlined"
+              </CustomButton>
+              <CustomButton
+                variant="outline"
                 onClick={this.handleReload}
-                sx={{ minWidth: 120 }}
               >
                 Ricarica Pagina
-              </Button>
+              </CustomButton>
             </Box>
 
             {process.env.NODE_ENV === "development" && this.state.errorInfo && (

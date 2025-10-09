@@ -9,13 +9,13 @@ import {
   Card,
   CardContent,
   TextField,
-  Button,
   Typography,
   Alert,
   CircularProgress,
   InputAdornment,
   IconButton,
 } from "@mui/material";
+import CustomButton from "../CustomButton";
 import {
   Visibility,
   VisibilityOff,
@@ -259,33 +259,32 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
               }}
             />
 
-            <Button
+            <CustomButton
               type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
+              variant="primary"
+              size="lg"
               disabled={isLoading}
-              sx={{ mb: 2, py: 1.5 }}
+              className="full-width"
             >
               {isLoading ? (
                 <CircularProgress size={24} color="inherit" />
               ) : (
                 "Registrati"
               )}
-            </Button>
+            </CustomButton>
 
             {onSwitchToLogin && (
               <Box sx={{ textAlign: "center" }}>
                 <Typography variant="body2" color="text.secondary">
                   Hai già un account?{" "}
-                  <Button
-                    variant="text"
+                  <CustomButton
+                    variant="outline"
                     onClick={onSwitchToLogin}
                     disabled={isLoading}
-                    sx={{ textTransform: "none" }}
+                    size="sm"
                   >
                     Accedi
-                  </Button>
+                  </CustomButton>
                 </Typography>
               </Box>
             )}

@@ -1,13 +1,6 @@
 import React from "react";
-import {
-  Box,
-  Button,
-  IconButton,
-  Typography,
-  Chip,
-  Stack,
-  Paper,
-} from "@mui/material";
+import { Box, IconButton, Typography, Chip, Stack, Paper } from "@mui/material";
+import CustomButton from "./CustomButton";
 import { Close as CloseIcon } from "@mui/icons-material";
 
 export interface BusinessError {
@@ -180,45 +173,19 @@ const CompactErrorHandler: React.FC<CompactErrorHandlerProps> = ({
           }}
         >
           {error.actions?.map((action, index) => (
-            <Button
+            <CustomButton
               key={index}
-              size="small"
-              variant="outlined"
+              size="sm"
+              variant="outline"
               onClick={action.action}
-              sx={{
-                fontSize: "0.65rem",
-                padding: "1px 4px",
-                height: "18px",
-                minWidth: "auto",
-                backgroundColor: "rgba(255,255,255,0.9)",
-                border: `1px solid ${colors.border}`,
-                "&:hover": {
-                  backgroundColor: "rgba(255,255,255,1)",
-                },
-              }}
             >
               {action.label}
-            </Button>
+            </CustomButton>
           ))}
           {onRetry && (
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={onRetry}
-              sx={{
-                fontSize: "0.65rem",
-                padding: "1px 4px",
-                height: "18px",
-                minWidth: "auto",
-                backgroundColor: "rgba(255,255,255,0.9)",
-                border: `1px solid ${colors.border}`,
-                "&:hover": {
-                  backgroundColor: "rgba(255,255,255,1)",
-                },
-              }}
-            >
+            <CustomButton size="sm" variant="outline" onClick={onRetry}>
               Riprova
-            </Button>
+            </CustomButton>
           )}
           {onDismiss && (
             <IconButton

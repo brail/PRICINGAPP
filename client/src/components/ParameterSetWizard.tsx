@@ -1,4 +1,5 @@
 import React from "react";
+import CustomButton from "./CustomButton";
 import { useParameterSetWizard } from "../hooks/useParameterSetWizard";
 import WizardStep1 from "./wizard/WizardStep1";
 import WizardStep2 from "./wizard/WizardStep2";
@@ -107,46 +108,46 @@ const ParameterSetWizard: React.FC<ParameterSetWizardProps> = ({
       {/* Footer con navigazione */}
       <div className="wizard-footer">
         <div className="wizard-footer-left">
-          <button
+          <CustomButton
             type="button"
-            className="btn btn-secondary"
+            variant="secondary"
             onClick={handleCancel}
             disabled={saving}
           >
             Annulla
-          </button>
+          </CustomButton>
         </div>
 
         <div className="wizard-footer-right">
           {!isFirstStep && (
-            <button
+            <CustomButton
               type="button"
-              className="btn btn-outline"
+              variant="outline"
               onClick={prevStep}
               disabled={saving}
             >
               Indietro
-            </button>
+            </CustomButton>
           )}
 
           {!isLastStep ? (
-            <button
+            <CustomButton
               type="button"
-              className="btn btn-primary"
+              variant="primary"
               onClick={nextStep}
               disabled={saving}
             >
               Avanti
-            </button>
+            </CustomButton>
           ) : (
-            <button
+            <CustomButton
               type="button"
-              className="btn btn-primary"
+              variant="primary"
               onClick={handleSave}
               disabled={saving}
             >
               {saving ? "Salvando..." : "Crea Set di Parametri"}
-            </button>
+            </CustomButton>
           )}
         </div>
       </div>

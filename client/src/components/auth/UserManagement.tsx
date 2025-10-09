@@ -19,7 +19,7 @@ import {
   CircularProgress,
   Typography,
 } from "@mui/material";
-import Button from "../Button";
+import CustomButton from "../CustomButton";
 import {
   Edit,
   Delete,
@@ -277,22 +277,22 @@ const UserManagement: React.FC = () => {
         <div className="user-management-actions">
           <h3>Lista Utenti</h3>
           <div className="action-buttons">
-            <button
-              className="btn btn-primary"
+            <CustomButton
+              variant="primary"
               onClick={handleCreateUser}
               disabled={loading}
             >
               <PersonAdd className="btn-icon" />
               Crea Utente
-            </button>
-            <button
-              className="btn btn-secondary"
+            </CustomButton>
+            <CustomButton
+              variant="secondary"
               onClick={loadUsers}
               disabled={loading}
             >
               <Refresh className="btn-icon" />
               Aggiorna
-            </button>
+            </CustomButton>
           </div>
         </div>
 
@@ -345,30 +345,33 @@ const UserManagement: React.FC = () => {
                     <td>{formatDate(user.last_login)}</td>
                     <td>
                       <div className="user-actions">
-                        <button
-                          className="action-btn edit"
+                        <CustomButton
+                          variant="outline"
+                          size="sm"
                           onClick={() => handleEditUser(user)}
                           disabled={loading}
                           title="Modifica utente"
                         >
                           <Edit />
-                        </button>
-                        <button
-                          className="action-btn password"
+                        </CustomButton>
+                        <CustomButton
+                          variant="outline"
+                          size="sm"
                           onClick={() => handleChangePassword(user)}
                           disabled={loading}
                           title="Cambia password"
                         >
                           <Lock />
-                        </button>
-                        <button
-                          className="action-btn delete"
+                        </CustomButton>
+                        <CustomButton
+                          variant="danger"
+                          size="sm"
                           onClick={() => handleDeleteUser(user)}
                           disabled={loading || user.id === currentUser?.id}
                           title="Elimina utente"
                         >
                           <Delete />
-                        </button>
+                        </CustomButton>
                       </div>
                     </td>
                   </tr>
@@ -443,12 +446,19 @@ const UserManagement: React.FC = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditDialogOpen(false)} disabled={loading}>
+          <CustomButton
+            onClick={() => setEditDialogOpen(false)}
+            disabled={loading}
+          >
             Annulla
-          </Button>
-          <Button onClick={handleSaveUser} variant="primary" disabled={loading}>
+          </CustomButton>
+          <CustomButton
+            onClick={handleSaveUser}
+            variant="primary"
+            disabled={loading}
+          >
             {loading ? <CircularProgress size={20} /> : "Salva"}
-          </Button>
+          </CustomButton>
         </DialogActions>
       </Dialog>
 
@@ -544,14 +554,16 @@ const UserManagement: React.FC = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCreateDialogOpen(false)}>Annulla</Button>
-          <Button
+          <CustomButton onClick={() => setCreateDialogOpen(false)}>
+            Annulla
+          </CustomButton>
+          <CustomButton
             onClick={handleSaveNewUser}
             variant="primary"
             disabled={loading}
           >
             {loading ? "Creazione..." : "Crea Utente"}
-          </Button>
+          </CustomButton>
         </DialogActions>
       </Dialog>
 
@@ -577,19 +589,19 @@ const UserManagement: React.FC = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button
+          <CustomButton
             onClick={() => setDeleteConfirmDialogOpen(false)}
             disabled={loading}
           >
             Annulla
-          </Button>
-          <Button
+          </CustomButton>
+          <CustomButton
             onClick={confirmDeleteUser}
             variant="primary"
             disabled={loading}
           >
             {loading ? "Eliminazione..." : "Elimina Utente"}
-          </Button>
+          </CustomButton>
         </DialogActions>
       </Dialog>
     </div>

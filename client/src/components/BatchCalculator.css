@@ -262,46 +262,9 @@
   flex-wrap: wrap;
 }
 
-.multi-actions .btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.multi-actions .btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.multi-actions .btn-primary {
-  background: #6c757d;
-  color: white;
-}
-
-.multi-actions .btn-primary:hover:not(:disabled) {
-  background: #5a6268;
-}
-
-.multi-actions .btn-secondary {
-  background: #e9ecef;
-  color: #495057;
-}
-
-.multi-actions .btn-secondary:hover {
-  background: #dee2e6;
-}
-
-.multi-actions .btn-success {
-  background: #28a745;
-  color: white;
-}
-
-.multi-actions .btn-success:hover {
-  background: #218838;
+/* I bottoni ora utilizzano le classi del design system */
+.multi-actions .btn-base {
+  /* Le classi del design system sono già definite in design-system.css */
 }
 
 /* Risultati */
@@ -384,7 +347,7 @@
     flex-direction: column;
   }
 
-  .multi-actions .btn {
+  .multi-actions .btn-base {
     width: 100%;
   }
 

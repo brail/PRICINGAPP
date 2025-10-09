@@ -1,4 +1,5 @@
 import React from "react";
+import CustomButton from "./CustomButton";
 
 interface ModalProps {
   isOpen: boolean;
@@ -78,13 +79,14 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({
     <div className={`modal-header ${className}`}>
       <h3 className="modal-title">{children}</h3>
       {onClose && (
-        <button
-          className="modal-close-btn"
+        <CustomButton
+          variant="outline"
+          size="sm"
           onClick={onClose}
           aria-label="Chiudi"
         >
           ×
-        </button>
+        </CustomButton>
       )}
     </div>
   );

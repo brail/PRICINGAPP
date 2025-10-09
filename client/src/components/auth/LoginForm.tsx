@@ -9,13 +9,13 @@ import {
   Card,
   CardContent,
   TextField,
-  Button,
   Typography,
   Alert,
   CircularProgress,
   InputAdornment,
   IconButton,
 } from "@mui/material";
+import CustomButton from "../CustomButton";
 import { Visibility, VisibilityOff, Person, Lock } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
 import Logo from "../Logo";
@@ -183,20 +183,19 @@ const LoginForm: React.FC<LoginFormProps> = () => {
               }}
             />
 
-            <Button
+            <CustomButton
               type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
+              variant="primary"
+              size="lg"
               disabled={isLoading}
-              sx={{ mb: 2, py: 1.5 }}
+              className="full-width"
             >
               {isLoading ? (
                 <CircularProgress size={24} color="inherit" />
               ) : (
                 "Accedi"
               )}
-            </Button>
+            </CustomButton>
 
             <Typography
               variant="caption"

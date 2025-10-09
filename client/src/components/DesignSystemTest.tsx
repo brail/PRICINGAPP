@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Button from "./Button";
+import CustomButton from "./CustomButton";
 import Card from "./Card";
 import { Form, FormGroup, FormLabel, FormInput, FormTextArea } from "./Form";
 import Input from "./Input";
@@ -61,27 +61,27 @@ const DesignSystemTest: React.FC = () => {
             marginBottom: "16px",
           }}
         >
-          <Button variant="primary" size="sm">
+          <CustomButton variant="primary" size="sm">
             Primary Small
-          </Button>
-          <Button variant="secondary" size="md">
+          </CustomButton>
+          <CustomButton variant="secondary" size="md">
             Secondary Medium
-          </Button>
-          <Button variant="success" size="lg">
+          </CustomButton>
+          <CustomButton variant="success" size="lg">
             Success Large
-          </Button>
-          <Button variant="danger" size="md">
+          </CustomButton>
+          <CustomButton variant="danger" size="md">
             Danger Medium
-          </Button>
-          <Button variant="warning" size="md">
+          </CustomButton>
+          <CustomButton variant="warning" size="md">
             Warning Medium
-          </Button>
-          <Button variant="info" size="md">
+          </CustomButton>
+          <CustomButton variant="info" size="md">
             Info Medium
-          </Button>
-          <Button variant="outline" size="md">
+          </CustomButton>
+          <CustomButton variant="outline" size="md">
             Outline Medium
-          </Button>
+          </CustomButton>
         </div>
       </div>
 
@@ -209,7 +209,7 @@ const DesignSystemTest: React.FC = () => {
                 justifyContent: "flex-end",
               }}
             >
-              <Button
+              <CustomButton
                 type="button"
                 variant="secondary"
                 onClick={() =>
@@ -217,10 +217,10 @@ const DesignSystemTest: React.FC = () => {
                 }
               >
                 Reset
-              </Button>
-              <Button type="submit" variant="primary">
+              </CustomButton>
+              <CustomButton type="submit" variant="primary">
                 Invia
-              </Button>
+              </CustomButton>
             </div>
           </Form>
         </Card>
@@ -240,9 +240,9 @@ const DesignSystemTest: React.FC = () => {
           <LoadingSpinner size="sm" color="primary" />
           <LoadingSpinner size="md" color="secondary" />
           <LoadingSpinner size="lg" color="primary" message="Caricamento..." />
-          <Button variant="primary" onClick={handleShowSpinner}>
+          <CustomButton variant="primary" onClick={handleShowSpinner}>
             Mostra Spinner Fullscreen
-          </Button>
+          </CustomButton>
         </div>
 
         {showSpinner && (
@@ -258,9 +258,9 @@ const DesignSystemTest: React.FC = () => {
       {/* Modal Test */}
       <div style={{ marginBottom: "32px" }}>
         <h2 className="text-h2">Modal Components</h2>
-        <Button variant="primary" onClick={() => setIsModalOpen(true)}>
+        <CustomButton variant="primary" onClick={() => setIsModalOpen(true)}>
           Apri Modal
-        </Button>
+        </CustomButton>
 
         <Modal
           isOpen={isModalOpen}
@@ -290,12 +290,12 @@ const DesignSystemTest: React.FC = () => {
             </Form>
           </ModalBody>
           <ModalFooter>
-            <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
+            <CustomButton variant="secondary" onClick={() => setIsModalOpen(false)}>
               Annulla
-            </Button>
-            <Button variant="primary" onClick={() => setIsModalOpen(false)}>
+            </CustomButton>
+            <CustomButton variant="primary" onClick={() => setIsModalOpen(false)}>
               Conferma
-            </Button>
+            </CustomButton>
           </ModalFooter>
         </Modal>
       </div>

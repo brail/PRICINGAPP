@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
+import CustomButton from "./CustomButton";
 import {
   useBusinessErrorHandler,
   createBusinessError,
@@ -249,20 +250,20 @@ const DuplicateParameterSetForm: React.FC<DuplicateParameterSetFormProps> = ({
       </div>
 
       <div className="duplicate-form-footer">
-        <button
-          className="btn btn-secondary"
+        <CustomButton
+          variant="secondary"
           onClick={onCancel}
           disabled={saving}
         >
           Annulla
-        </button>
-        <button
-          className="btn btn-primary"
+        </CustomButton>
+        <CustomButton
+          variant="primary"
           onClick={handleSave}
           disabled={saving || errors.length > 0}
         >
           {saving ? "Duplicazione..." : "Duplica Set"}
-        </button>
+        </CustomButton>
       </div>
     </div>
   );

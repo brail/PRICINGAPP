@@ -8,7 +8,7 @@ import {
 } from "../hooks/useBusinessErrorHandler";
 import { useNotification } from "../contexts/NotificationContext";
 import CompactErrorHandler from "./CompactErrorHandler";
-import Button from "./Button";
+import CustomButton from "./CustomButton";
 import * as ExcelJS from "exceljs";
 import "./BatchCalculator.css";
 
@@ -807,30 +807,24 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       <div className="multi-mode-selection">
         <label>Modalità:</label>
         <div className="mode-buttons">
-          <button
-            className={`mode-btn ${
-              calculationMode === "purchase" ? "active" : ""
-            }`}
+          <CustomButton
+            variant={calculationMode === "purchase" ? "primary" : "outline"}
             onClick={() => setCalculationMode("purchase")}
           >
             Acquisto → Vendita
-          </button>
-          <button
-            className={`mode-btn ${
-              calculationMode === "selling" ? "active" : ""
-            }`}
+          </CustomButton>
+          <CustomButton
+            variant={calculationMode === "selling" ? "primary" : "outline"}
             onClick={() => setCalculationMode("selling")}
           >
             Vendita → Acquisto
-          </button>
-          <button
-            className={`mode-btn ${
-              calculationMode === "margin" ? "active" : ""
-            }`}
+          </CustomButton>
+          <CustomButton
+            variant={calculationMode === "margin" ? "primary" : "outline"}
             onClick={() => setCalculationMode("margin")}
           >
             Calcolo Margine
-          </button>
+          </CustomButton>
         </div>
       </div>
 
@@ -838,18 +832,18 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       <div className="multi-input-method">
         <label>Input:</label>
         <div className="input-method-buttons">
-          <button
-            className={`method-btn ${inputMethod === "paste" ? "active" : ""}`}
+          <CustomButton
+            variant={inputMethod === "paste" ? "primary" : "outline"}
             onClick={() => setInputMethod("paste")}
           >
             Copia-Incolla
-          </button>
-          <button
-            className={`method-btn ${inputMethod === "upload" ? "active" : ""}`}
+          </CustomButton>
+          <CustomButton
+            variant={inputMethod === "upload" ? "primary" : "outline"}
             onClick={() => setInputMethod("upload")}
           >
             Upload Excel
-          </button>
+          </CustomButton>
         </div>
       </div>
 
@@ -898,12 +892,12 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
               onChange={handleFileUpload}
               style={{ display: "none" }}
             />
-            <button
-              className="upload-btn"
+            <CustomButton
+              variant="primary"
               onClick={() => fileInputRef.current?.click()}
             >
               {uploadedFile ? uploadedFile.name : "Seleziona File"}
-            </button>
+            </CustomButton>
             {uploadedFile && (
               <div className="file-info">
                 <p>File: {uploadedFile.name}</p>
@@ -926,20 +920,20 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
 
       {/* Azioni */}
       <div className="multi-actions">
-        <Button
+        <CustomButton
           variant="primary"
           onClick={handleBatchCalculate}
           disabled={isCalculating || inputData.length === 0}
         >
           {isCalculating ? "Calcolando..." : "Calcola Batch"}
-        </Button>
-        <Button variant="secondary" onClick={handleReset}>
+        </CustomButton>
+        <CustomButton variant="secondary" onClick={handleReset}>
           Pulisci
-        </Button>
+        </CustomButton>
         {results.length > 0 && (
-          <Button variant="success" onClick={handleExportExcel}>
+          <CustomButton variant="success" onClick={handleExportExcel}>
             Esporta Excel
-          </Button>
+          </CustomButton>
         )}
       </div>
 

@@ -6,7 +6,7 @@ import {
 } from "../hooks/useBusinessErrorHandler";
 import { useNotification } from "../contexts/NotificationContext";
 import CompactErrorHandler from "./CompactErrorHandler";
-import Button from "./Button";
+import CustomButton from "./CustomButton";
 import {
   DndContext,
   closestCenter,
@@ -107,7 +107,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
           </div>
           <h5>{set.description}</h5>
           <div className="parameter-set-actions">
-            <Button
+            <CustomButton
               variant="info"
               size="sm"
               onClick={(e) => {
@@ -118,8 +118,8 @@ const SortableItem: React.FC<SortableItemProps> = ({
               title="Duplica questo template prezzi"
             >
               Duplica
-            </Button>
-            <Button
+            </CustomButton>
+            <CustomButton
               variant="primary"
               size="sm"
               onClick={(e) => {
@@ -129,8 +129,8 @@ const SortableItem: React.FC<SortableItemProps> = ({
               disabled={saving}
             >
               Carica
-            </Button>
-            <Button
+            </CustomButton>
+            <CustomButton
               variant="secondary"
               size="sm"
               onClick={(e) => {
@@ -140,8 +140,8 @@ const SortableItem: React.FC<SortableItemProps> = ({
               disabled={saving}
             >
               Modifica
-            </Button>
-            <Button
+            </CustomButton>
+            <CustomButton
               variant="danger"
               size="sm"
               onClick={(e) => {
@@ -151,8 +151,8 @@ const SortableItem: React.FC<SortableItemProps> = ({
               disabled={saving || set.is_default}
             >
               Elimina
-            </Button>
-            <Button
+            </CustomButton>
+            <CustomButton
               variant="warning"
               size="sm"
               onClick={(e) => {
@@ -168,7 +168,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
               data-is-default={set.is_default ? "true" : "false"}
             >
               {set.is_default ? "⭐" : "☆"}
-            </Button>
+            </CustomButton>
           </div>
         </div>
         {expandedCards.has(set.id) && (
@@ -833,8 +833,8 @@ const Parameters: React.FC = () => {
         <div className="parameters-card">
           <div className="parameters-card-header">
             <h3>Template Prezzi</h3>
-            <Button
-              className="btn btn-primary"
+            <CustomButton
+              variant="primary"
               onClick={() => {
                 if (!showWizard) {
                   setEditingParameterSet(null);
@@ -844,7 +844,7 @@ const Parameters: React.FC = () => {
               }}
             >
               {showWizard ? "Annulla" : "Nuovo Template"}
-            </Button>
+            </CustomButton>
           </div>
 
           <div className="parameter-sets-management">
@@ -1137,20 +1137,20 @@ const Parameters: React.FC = () => {
                 </div>
 
                 <div className="form-actions">
-                  <Button
-                    className="btn btn-primary"
+                  <CustomButton
+                    variant="primary"
                     onClick={handleUpdateParameterSet}
                     disabled={saving || validateEditForm().length > 0}
                   >
                     {saving ? "Aggiornamento..." : "Aggiorna Set"}
-                  </Button>
-                  <Button
-                    className="btn btn-secondary"
+                  </CustomButton>
+                  <CustomButton
+                    variant="secondary"
                     onClick={cancelEditingParameterSet}
                     disabled={saving}
                   >
                     Annulla
-                  </Button>
+                  </CustomButton>
                 </div>
               </div>
             )}
@@ -1178,37 +1178,17 @@ const Parameters: React.FC = () => {
               ))}
           </div>
 
-          <Button
-            className="btn btn-outline mt-4"
+          <CustomButton
+            variant="outline"
             // onClick={loadExchangeRates}
             disabled={loading}
           >
             {loading ? <span className="loading"></span> : "Aggiorna Tassi"}
-          </Button>
+          </CustomButton>
         </div> */}
       </div>
 
       {/* Azioni */}
-      {/* Azioni di salvataggio - Temporaneamente nascoste */}
-      {/* <div className="parameters-actions">
-        <Button
-          className="btn btn-secondary"
-          onClick={handleReset}
-          disabled={saving}
-        >
-          Ripristina Default
-        </Button>
-        <Button className="btn" onClick={handleSave} disabled={saving}>
-          {saving ? (
-            <>
-              <span className="loading"></span>
-              Salvataggio...
-            </>
-          ) : (
-            "Salva Impostazioni"
-          )}
-        </Button>
-      </div> */}
 
       {/* Informazioni - Temporaneamente nascosto */}
       {/* <div className="parameters-info">
@@ -1283,20 +1263,20 @@ const Parameters: React.FC = () => {
               </p>
             </div>
             <div className="modal-footer">
-              <Button
-                className="btn btn-secondary"
+              <CustomButton
+                variant="secondary"
                 onClick={cancelDeleteParameterSet}
                 disabled={saving}
               >
                 Annulla
-              </Button>
-              <Button
-                className="btn btn-danger"
+              </CustomButton>
+              <CustomButton
+                variant="danger"
                 onClick={confirmDeleteParameterSet}
                 disabled={saving}
               >
                 {saving ? "Eliminazione..." : "Elimina"}
-              </Button>
+              </CustomButton>
             </div>
           </div>
         </div>

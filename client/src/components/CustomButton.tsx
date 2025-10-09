@@ -12,13 +12,17 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: "sm" | "md" | "lg";
   children: React.ReactNode;
   className?: string;
+  component?: React.ElementType;
+  to?: string;
 }
 
-const Button: React.FC<ButtonProps> = ({
+const CustomButton: React.FC<ButtonProps> = ({
   variant = "primary",
   size = "md",
   children,
   className = "",
+  component: Component = "button",
+  to,
   ...props
 }) => {
   const baseClasses = "btn-base";
@@ -48,11 +52,13 @@ const Button: React.FC<ButtonProps> = ({
     .filter(Boolean)
     .join(" ");
 
-  return (
-    <button className={combinedClasses} {...props}>
-      {children}
-    </button>
-  );
+  const componentProps = {
+    className: combinedClasses,
+    ...(to && { to }),
+    ...props,
+  };
+
+  return <Component {...componentProps}>{children}</Component>;
 };
 
-export default Button;
+export default CustomButton;

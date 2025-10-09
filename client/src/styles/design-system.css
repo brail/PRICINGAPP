@@ -221,11 +221,42 @@
   color: white;
 }
 
+/* Navigation Button Styles */
+.btn-outline.active {
+  background: var(--color-primary);
+  color: white;
+}
+
+/* Navigation specific styles for AppBar */
+.MuiAppBar-root .btn-outline {
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: transparent;
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.MuiAppBar-root .btn-outline:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.MuiAppBar-root .btn-outline.active {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
 /* Button Sizes */
 .btn-sm {
   padding: var(--space-xs) var(--space-sm);
   font-size: var(--font-xs);
   min-width: 80px;
+}
+
+/* Full Width Button */
+.full-width {
+  width: 100%;
 }
 
 .btn-md {

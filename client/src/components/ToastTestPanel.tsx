@@ -4,7 +4,8 @@
  */
 
 import React from "react";
-import { Box, Button, Typography, Paper, Stack, Divider } from "@mui/material";
+import { Box, Typography, Paper, Stack, Divider } from "@mui/material";
+import CustomButton from "./CustomButton";
 import { useNotification } from "../contexts/NotificationContext";
 
 const ToastTestPanel: React.FC = () => {
@@ -96,38 +97,30 @@ const ToastTestPanel: React.FC = () => {
             Test Singoli
           </Typography>
           <Stack direction="row" spacing={2} flexWrap="wrap">
-            <Button
-              variant="contained"
-              color="success"
+            <CustomButton
+              variant="success"
               onClick={handleSuccess}
-              sx={{ mb: 1 }}
             >
               ✅ Success Toast
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
+            </CustomButton>
+            <CustomButton
+              variant="danger"
               onClick={handleError}
-              sx={{ mb: 1 }}
             >
               ❌ Error Toast
-            </Button>
-            <Button
-              variant="contained"
-              color="warning"
+            </CustomButton>
+            <CustomButton
+              variant="warning"
               onClick={handleWarning}
-              sx={{ mb: 1 }}
             >
               ⚠️ Warning Toast
-            </Button>
-            <Button
-              variant="contained"
-              color="info"
+            </CustomButton>
+            <CustomButton
+              variant="info"
               onClick={handleInfo}
-              sx={{ mb: 1 }}
             >
               ℹ️ Info Toast
-            </Button>
+            </CustomButton>
           </Stack>
         </Box>
 
@@ -138,17 +131,15 @@ const ToastTestPanel: React.FC = () => {
             Test Multipli
           </Typography>
           <Stack direction="row" spacing={2}>
-            <Button variant="outlined" onClick={handleMultiple} sx={{ mb: 1 }}>
+            <CustomButton variant="outline" onClick={handleMultiple}>
               🔄 Multiple Toasts
-            </Button>
-            <Button
-              variant="outlined"
-              color="secondary"
+            </CustomButton>
+            <CustomButton
+              variant="secondary"
               onClick={clearAll}
-              sx={{ mb: 1 }}
             >
               🗑️ Clear All
-            </Button>
+            </CustomButton>
           </Stack>
         </Box>
 

@@ -7,10 +7,9 @@ import {
   TextField,
   Box,
   Typography,
-  CircularProgress,
   Alert,
 } from "@mui/material";
-import Button from "../Button";
+import CustomButton from "../CustomButton";
 import { Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import { pricingApi } from "../../services/api";
 import {
@@ -210,12 +209,12 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
               required
               InputProps={{
                 endAdornment: (
-                  <Button
+                  <CustomButton
                     size="sm"
                     onClick={() => togglePasswordVisibility("current")}
                   >
                     {showPasswords.current ? <VisibilityOff /> : <Visibility />}
-                  </Button>
+                  </CustomButton>
                 ),
               }}
             />
@@ -232,12 +231,12 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
             helperText="Minimo 6 caratteri"
             InputProps={{
               endAdornment: (
-                <Button
+                <CustomButton
                   size="sm"
                   onClick={() => togglePasswordVisibility("new")}
                 >
                   {showPasswords.new ? <VisibilityOff /> : <Visibility />}
-                </Button>
+                </CustomButton>
               ),
             }}
           />
@@ -253,12 +252,12 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
             required
             InputProps={{
               endAdornment: (
-                <Button
+                <CustomButton
                   size="sm"
                   onClick={() => togglePasswordVisibility("confirm")}
                 >
                   {showPasswords.confirm ? <VisibilityOff /> : <Visibility />}
-                </Button>
+                </CustomButton>
               ),
             }}
           />
@@ -266,12 +265,12 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={handleClose} disabled={loading}>
+        <CustomButton onClick={handleClose} disabled={loading}>
           Annulla
-        </Button>
-        <Button onClick={handleSubmit} variant="primary" disabled={loading}>
+        </CustomButton>
+        <CustomButton onClick={handleSubmit} variant="primary" disabled={loading}>
           {loading ? "Aggiornamento..." : "Aggiorna Password"}
-        </Button>
+        </CustomButton>
       </DialogActions>
     </Dialog>
   );

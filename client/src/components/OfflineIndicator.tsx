@@ -6,12 +6,12 @@ import React from "react";
 import {
   Box,
   Alert,
-  Button,
   Typography,
   Slide,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
+import CustomButton from "./CustomButton";
 import { WifiOff, Refresh } from "@mui/icons-material";
 import { useOfflineSupport } from "../hooks/useOfflineSupport";
 
@@ -38,14 +38,10 @@ const OfflineIndicator: React.FC = () => {
           severity="warning"
           icon={<WifiOff />}
           action={
-            <Button
-              color="inherit"
-              size="small"
-              startIcon={<Refresh />}
-              onClick={retryConnection}
-            >
+            <CustomButton variant="outline" size="sm" onClick={retryConnection}>
+              <Refresh />
               Riprova
-            </Button>
+            </CustomButton>
           }
           sx={{
             boxShadow: 3,

@@ -13,8 +13,8 @@ import {
   DialogActions,
   Alert,
   CircularProgress,
-  Button,
 } from "@mui/material";
+import CustomButton from "../CustomButton";
 import {
   useBusinessErrorHandler,
   createBusinessError,
@@ -155,22 +155,22 @@ const UserDashboard: React.FC = () => {
             </div>
 
             <div className="profile-actions">
-              <button
-                className="btn btn-outlined"
+              <CustomButton
+                variant="outline"
                 onClick={handleEditProfile}
                 disabled={isLoading}
               >
                 <Edit className="btn-icon" />
                 Modifica Profilo
-              </button>
-              <button
-                className="btn btn-outlined"
+              </CustomButton>
+              <CustomButton
+                variant="outline"
                 onClick={() => setChangePasswordDialogOpen(true)}
                 disabled={isLoading}
               >
                 <Lock className="btn-icon" />
                 Cambia Password
-              </button>
+              </CustomButton>
             </div>
           </div>
 
@@ -256,21 +256,21 @@ const UserDashboard: React.FC = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button
+          <CustomButton
             onClick={() => setEditDialogOpen(false)}
             disabled={saving}
-            startIcon={<Cancel />}
           >
+            <Cancel />
             Annulla
-          </Button>
-          <Button
+          </CustomButton>
+          <CustomButton
             onClick={handleSaveProfile}
-            variant="contained"
+            variant="primary"
             disabled={saving}
-            startIcon={saving ? <CircularProgress size={20} /> : <Save />}
           >
+            {saving ? <CircularProgress size={20} /> : <Save />}
             {saving ? "Salvataggio..." : "Salva"}
-          </Button>
+          </CustomButton>
         </DialogActions>
       </Dialog>
 

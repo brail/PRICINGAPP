@@ -6,12 +6,12 @@ import React from "react";
 import {
   Box,
   Typography,
-  Button,
   Paper,
   Alert,
   CircularProgress,
   Skeleton,
 } from "@mui/material";
+import CustomButton from "./CustomButton";
 import {
   Refresh,
   WifiOff,
@@ -97,14 +97,10 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
       )}
 
       {retry && (
-        <Button
-          variant="contained"
-          startIcon={<Refresh />}
-          onClick={retry}
-          size="small"
-        >
+        <CustomButton variant="primary" onClick={retry} size="sm">
+          <Refresh />
           Riprova
-        </Button>
+        </CustomButton>
       )}
     </Paper>
   );

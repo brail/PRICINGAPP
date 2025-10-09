@@ -1,4 +1,5 @@
 import React from "react";
+import CustomButton from "./CustomButton";
 
 interface AlertProps {
   children: React.ReactNode;
@@ -52,13 +53,14 @@ const Alert: React.FC<AlertProps> = ({
     <div className={alertClasses} role="alert">
       <div className="alert-content">{children}</div>
       {dismissible && onDismiss && (
-        <button
-          className="alert-dismiss-btn"
+        <CustomButton
+          variant="outline"
+          size="sm"
           onClick={onDismiss}
           aria-label="Chiudi"
         >
           ×
-        </button>
+        </CustomButton>
       )}
     </div>
   );

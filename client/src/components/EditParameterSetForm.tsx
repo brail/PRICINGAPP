@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from "react";
+import CustomButton from "./CustomButton";
 import { CURRENCIES } from "../types";
 import "./EditParameterSetForm.css";
 
@@ -490,37 +491,35 @@ const EditParameterSetForm: React.FC<EditParameterSetFormProps> = ({
 
       <div className="edit-form-navigation">
         {sections.map((section) => (
-          <button
+          <CustomButton
             key={section.id}
-            className={`edit-form-nav-btn ${
-              activeSection === section.id ? "active" : ""
-            }`}
+            variant={activeSection === section.id ? "primary" : "outline"}
             onClick={() => setActiveSection(section.id)}
             disabled={saving}
           >
             <span className="nav-icon">{section.icon}</span>
             <span className="nav-title">{section.title}</span>
-          </button>
+          </CustomButton>
         ))}
       </div>
 
       <div className="edit-form-content">{renderActiveSection()}</div>
 
       <div className="edit-form-footer">
-        <button
-          className="btn btn-secondary"
+        <CustomButton
+          variant="secondary"
           onClick={onCancel}
           disabled={saving}
         >
           Annulla
-        </button>
-        <button
-          className="btn btn-primary"
+        </CustomButton>
+        <CustomButton
+          variant="primary"
           onClick={handleSave}
           disabled={saving}
         >
           {saving ? "Salvando..." : "Salva Modifiche"}
-        </button>
+        </CustomButton>
       </div>
     </div>
   );

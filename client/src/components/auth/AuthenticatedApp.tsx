@@ -15,7 +15,6 @@ import {
   AppBar,
   Toolbar,
   Typography,
-  Button,
   Box,
   Menu,
   MenuItem,
@@ -25,9 +24,10 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import CustomButton from "../CustomButton";
 import {
   Calculate,
-  Settings as SettingsIcon,
+  Tune as TuneIcon,
   People,
   Logout,
   AccountCircle,
@@ -144,36 +144,36 @@ const AuthenticatedApp: React.FC = () => {
             </Box>
           ) : (
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Button
-                color="inherit"
+              <CustomButton
+                variant="outline"
                 component={Link}
                 to="/"
-                startIcon={<Calculate />}
                 className={location.pathname === "/" ? "active" : ""}
               >
+                <Calculate />
                 Calcolatrice
-              </Button>
+              </CustomButton>
 
-              <Button
-                color="inherit"
+              <CustomButton
+                variant="outline"
                 component={Link}
                 to="/parameters"
-                startIcon={<SettingsIcon />}
                 className={location.pathname === "/parameters" ? "active" : ""}
               >
+                <TuneIcon />
                 Parametri
-              </Button>
+              </CustomButton>
 
               {user?.role === "admin" && (
-                <Button
-                  color="inherit"
+                <CustomButton
+                  variant="outline"
                   component={Link}
                   to="/users"
-                  startIcon={<People />}
                   className={location.pathname === "/users" ? "active" : ""}
                 >
+                  <People />
                   Utenti
-                </Button>
+                </CustomButton>
               )}
 
               <IconButton
@@ -259,7 +259,7 @@ const AuthenticatedApp: React.FC = () => {
           onClick={handleMobileMenuClose}
           selected={location.pathname === "/parameters"}
         >
-          <SettingsIcon sx={{ mr: 1 }} />
+          <TuneIcon sx={{ mr: 1 }} />
           Parametri
         </MenuItem>
 

@@ -16,7 +16,7 @@ import {
   CURRENCIES,
 } from "../types";
 import BatchCalculator from "./BatchCalculator";
-import Button from "./Button";
+import CustomButton from "./CustomButton";
 import Card from "./Card";
 import LoadingSpinner from "./LoadingSpinner";
 import "./Calculator.css";
@@ -705,9 +705,9 @@ const Calculator: React.FC = memo(() => {
         <Card variant="elevated" padding="lg">
           <div className="input-card-header">
             <h3>Calcolo Prezzi</h3>
-            <Button variant="secondary" onClick={clearAll}>
+            <CustomButton variant="secondary" onClick={clearAll}>
               Pulisci
-            </Button>
+            </CustomButton>
           </div>
 
           <div className="price-form-grid">
@@ -862,7 +862,7 @@ const Calculator: React.FC = memo(() => {
             </div>
           )}
 
-          <Button
+          <CustomButton
             variant="primary"
             onClick={handleCalculate}
             disabled={loading || (!purchasePrice && !retailPrice)}
@@ -874,7 +874,7 @@ const Calculator: React.FC = memo(() => {
             ) : (
               "Calcola"
             )}
-          </Button>
+          </CustomButton>
         </Card>
 
         {/* Preview in tempo reale - DISABILITATO TEMPORANEAMENTE */}
@@ -957,12 +957,12 @@ const Calculator: React.FC = memo(() => {
           <div className="results-header">
             <h3>Dettaglio Calcolo</h3>
             <div className="results-actions">
-              <Button
+              <CustomButton
                 variant="primary"
                 onClick={() => setShowDetails(!showDetails)}
               >
                 {showDetails ? "Nascondi Dettagli" : "Mostra Dettagli"}
-              </Button>
+              </CustomButton>
             </div>
           </div>
 
