@@ -29,7 +29,7 @@ services:
       context: ./client
       dockerfile: Dockerfile
       args:
-        - REACT_APP_API_URL=http://backend:5001
+        - REACT_APP_API_URL=http://luke.febos.local/pricingapp/api
         - PUBLIC_URL=/pricingapp
     container_name: pricing-calculator-frontend
     env_file:
