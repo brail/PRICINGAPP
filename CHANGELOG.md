@@ -1,105 +1,134 @@
-# 📝 Changelog
+# Changelog
 
 Tutte le modifiche significative a questo progetto saranno documentate in questo file.
 
 Il formato è basato su [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e questo progetto aderisce a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.0-dev] - 2025-10-02
+## [Unreleased]
 
-### 🧹 **Pulizia e Ottimizzazione**
+### Added
+- Principio 7 - Flexibility and Efficiency
+- Principio 9 - Help Users Recognize Errors
 
-#### **Aggiunto**
+### Changed
+- Performance optimizations
+- Advanced error handling
 
-- Sistema di logging strutturato con Winston
-- Logging per autenticazione, calcoli e errori
-- Gestione graceful shutdown del server
-- Documentazione completa in `/docs/`
-- Changelog per tracciare le modifiche
+## [0.2.0] - 2024-12-19
 
-#### **Modificato**
+### Added
+- **Help System integrato**
+  - HelpPanel component con modal collassabile
+  - 5 FAQ complete sui calcoli prezzi
+  - 3 guide step-by-step (Primo Calcolo, Crea Template, Calcolo Batch)
+  - Sezione "Inizia Qui" per nuovi utenti
+  - Contatto supporto integrato
+  - Design responsive ottimizzato per mobile
 
-- Aggiornato server da v0.1 a v0.2
-- Sostituiti tutti i `console.log` con logging strutturato
-- Riorganizzata la documentazione
-- Ottimizzato README principale
-- Aggiornato .gitignore per escludere file di log
+- **Design System standardizzato**
+  - CustomButton component (risolve conflitti Material-UI)
+  - Card, Form, Input, Modal, Alert components uniformi
+  - Palette colori e spacing coerenti
+  - Typography e shadows professionali
+  - Mobile-first responsive design
 
-#### **Rimosso**
+- **Sistema di notifiche migliorato**
+  - Toast notifications globali
+  - Progress tracking per operazioni lunghe
+  - Timeout handling per operazioni bloccate
 
-- File backup `UserDashboard.tsx.backup`
-- Dipendenze non utilizzate: `date-fns`, `framer-motion`, `recharts`
-- Console.log residui nel codice
+### Changed
+- **Terminologia standardizzata**
+  - "Tools" → "Stampi" (terminologia italiana)
+  - "Quality Control" → "Controllo Qualità"
+  - "Retail Price" → "Prezzo vendita al dettaglio"
+  - Etichette uniformi tra modalità di calcolo
+  - BatchCalculator terminologia aggiornata
 
-#### **Sicurezza**
+- **Ottimizzazione mobile**
+  - HelpPanel responsive design (768px, 480px breakpoints)
+  - Touch-friendly bottoni e accordion
+  - Font sizes ottimizzati per mobile
+  - Spacing e padding migliorati
+  - Menu mobile pulito e funzionale
 
-- Logging strutturato per audit trail
-- Gestione errori centralizzata
-- File di log esclusi dal version control
+- **Navigazione migliorata**
+  - Icona "Parametri" cambiata da Settings a Tune
+  - Testo navigation in maiuscolo
+  - Help button integrato nella toolbar
 
-### 🔧 **Miglioramenti Tecnici**
+### Removed
+- **Componenti di test rimossi**
+  - ToastTestPanel.tsx eliminato
+  - DesignSystemTest.tsx eliminato
+  - Route /test-toast e /design-system-test rimosse
+  - Menu desktop e mobile puliti
 
-#### **Backend**
+### Fixed
+- **Conflitti Material-UI risolti**
+  - CustomButton component per React Router
+  - Navigation styling per AppBar
+  - BatchCalculator button styles
 
-- Implementato sistema di logging con Winston
-- Logging per tutte le operazioni di autenticazione
-- Logging per calcoli prezzi con parametri
-- Gestione errori strutturata
-- Logs separati per errori e informazioni generali
+- **Error handling migliorato**
+  - BusinessErrorHandler sostituito con CompactErrorHandler
+  - Gestione errori coerente in tutta l'applicazione
+  - Toast notifications per feedback immediato
 
-#### **Frontend**
+### Performance
+- Bundle size ottimizzato (-59B, -519 lines nette)
+- Import inutilizzati rimossi
+- Build production pulita
+- ESLint warnings minimizzati
 
-- Rimosse dipendenze non utilizzate
-- Bundle size ridotto
-- Codice più pulito e ottimizzato
+## [0.1.0] - 2024-12-18
 
-#### **Documentazione**
+### Added
+- **Applicazione base**
+  - Calculator component per calcoli prezzi
+  - Parameters component per gestione template
+  - BatchCalculator per calcoli multipli
+  - UserManagement per gestione utenti (admin)
+  - Autenticazione JWT
+  - Database SQLite3
 
-- Creata directory `/docs/` per documentazione completa
-- README principale semplificato e aggiornato
-- Documentazione dettagliata per sviluppatori
-- Guida troubleshooting completa
+- **Funzionalità core**
+  - Calcolo bidirezionale (acquisto ↔ vendita)
+  - Template prezzi salvabili
+  - Calcolo batch con export Excel
+  - Gestione utenti e ruoli
+  - Responsive design base
 
-### 📊 **Metriche**
-
-#### **Bundle Size**
-
-- Riduzione ~40MB di dipendenze non utilizzate
-- Bundle frontend più leggero
-- Tempo di installazione ridotto
-
-#### **Logging**
-
-- Logs strutturati in JSON
-- Rotazione automatica dei file di log
-- Livelli di log configurabili
-- Audit trail completo per sicurezza
+### Technical
+- React + TypeScript frontend
+- Node.js + Express backend
+- SQLite3 database
+- Docker containerization
+- CI/CD con GitHub Actions
 
 ---
 
-## [0.1.0] - 2024
+## Versioning Strategy
 
-### 🚀 **Release Iniziale**
+Questo progetto utilizza [Semantic Versioning](https://semver.org/):
 
-#### **Aggiunto**
+- **MAJOR** (1.0.0): Breaking changes, API incompatibili
+- **MINOR** (0.1.0): Nuove funzionalità, backward compatible  
+- **PATCH** (0.0.1): Bug fixes, backward compatible
 
-- Calcolo prezzi bidirezionale
-- Sistema di autenticazione base
-- Gestione parametri
-- Supporto multivaluta
-- Interfaccia utente responsive
-- Deploy Docker
-- Documentazione base
+### Branch Strategy
 
----
+- **main**: Branch principale, sempre stabile e deployabile
+- **develop**: Branch di sviluppo per integrazione feature
+- **feature/***: Branch per nuove funzionalità
+- **hotfix/***: Branch per fix urgenti
 
-## 📋 **Legenda**
+### Release Process
 
-- 🧹 **Pulizia e Ottimizzazione**: Miglioramenti al codice e alla struttura
-- 🔧 **Miglioramenti Tecnici**: Modifiche tecniche e architetturali
-- 🚀 **Nuove Funzionalità**: Funzionalità completamente nuove
-- 🐛 **Bug Fix**: Correzioni di bug
-- 🔒 **Sicurezza**: Miglioramenti di sicurezza
-- 📊 **Performance**: Ottimizzazioni di performance
-- 📚 **Documentazione**: Aggiornamenti alla documentazione
-- 🧪 **Testing**: Miglioramenti ai test
+1. Sviluppo su branch feature
+2. Pull Request → develop
+3. Merge develop → main
+4. Tag della versione
+5. GitHub Release automatico
+6. Deploy in produzione
