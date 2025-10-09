@@ -3,12 +3,14 @@
 ## 🌿 **Branch Strategy**
 
 ### **Branch Principali**
+
 - **`main`**: Branch principale, sempre stabile e deployabile
 - **`develop`**: Branch di sviluppo per integrazione feature
 - **`feature/*`**: Branch per nuove funzionalità
 - **`hotfix/*`**: Branch per fix urgenti
 
 ### **Convenzioni Naming**
+
 ```bash
 feature/help-system          # Nuova funzionalità
 feature/design-system        # Sistema di design
@@ -22,6 +24,7 @@ hotfix/critical-bug          # Bug critico
 ## 🚀 **Release Process**
 
 ### **1. Sviluppo Feature**
+
 ```bash
 # 1. Creare branch feature
 git checkout -b feature/new-feature
@@ -37,6 +40,7 @@ git push origin feature/new-feature
 ```
 
 ### **2. Integrazione**
+
 ```bash
 # 1. Merge develop
 git checkout develop
@@ -51,6 +55,7 @@ git push origin develop
 ```
 
 ### **3. Release**
+
 ```bash
 # 1. Merge to main
 git checkout main
@@ -68,11 +73,13 @@ git push origin v0.3.0
 ## 📋 **Versioning Strategy**
 
 ### **Semantic Versioning (SemVer)**
+
 - **MAJOR** (1.0.0): Breaking changes, API incompatibili
 - **MINOR** (0.1.0): Nuove funzionalità, backward compatible
 - **PATCH** (0.0.1): Bug fixes, backward compatible
 
 ### **Criteri Versioning**
+
 ```bash
 # MAJOR - Breaking Changes
 - Cambio API backend
@@ -98,18 +105,21 @@ git push origin v0.3.0
 ## 🔄 **GitHub Workflow**
 
 ### **Pull Request Process**
+
 1. **Creare PR** da feature branch → develop
 2. **Review** obbligatorio
 3. **CI/CD checks** devono passare
 4. **Merge** dopo approvazione
 
 ### **Release Process**
+
 1. **Merge** develop → main
 2. **Tag** versione
 3. **GitHub Release** automatico
 4. **Deploy** in produzione
 
 ### **Hotfix Process**
+
 1. **Creare** hotfix branch da main
 2. **Fix** e commit
 3. **PR** hotfix → main
@@ -121,17 +131,20 @@ git push origin v0.3.0
 ## 📊 **Quality Gates**
 
 ### **Pre-commit**
+
 - **ESLint** checks
 - **Prettier** formatting
 - **TypeScript** compilation
 
 ### **Pre-merge**
+
 - **Unit tests** passano
 - **Build** successful
 - **No linting errors**
 - **Code review** approvato
 
 ### **Pre-release**
+
 - **Integration tests** passano
 - **Performance** benchmarks
 - **Security** scan
@@ -142,6 +155,7 @@ git push origin v0.3.0
 ## 🛠️ **Development Commands**
 
 ### **Setup**
+
 ```bash
 # Install dependencies
 npm install
@@ -157,6 +171,7 @@ npm test
 ```
 
 ### **Git Workflow**
+
 ```bash
 # Create feature branch
 git checkout -b feature/new-feature
@@ -173,6 +188,7 @@ git push origin feature/new-feature
 ```
 
 ### **Release Commands**
+
 ```bash
 # Tag version
 git tag -a v0.3.0 -m "Release v0.3.0"
@@ -188,18 +204,21 @@ git push origin v0.3.0
 ## 📈 **Roadmap Versions**
 
 ### **v0.3.0 - Advanced Features**
+
 - Principio 7 - Flexibility and Efficiency
 - Principio 9 - Help Users Recognize Errors
 - Performance optimizations
 - Advanced error handling
 
 ### **v0.4.0 - Business Features**
+
 - Advanced reporting
 - Export/Import migliorati
 - Analytics dashboard
 - User preferences
 
 ### **v1.0.0 - Production Ready**
+
 - Tutti i principi Nielsen completati
 - Test coverage completo
 - Performance ottimizzata
@@ -211,18 +230,21 @@ git push origin v0.3.0
 ## 🔧 **Tools & Automation**
 
 ### **CI/CD**
+
 - **GitHub Actions** per build e test
 - **Automated testing** su push
 - **Build verification** su PR
 - **Deploy** automatico su tag
 
 ### **Quality Tools**
+
 - **ESLint** per code quality
 - **Prettier** per formatting
 - **TypeScript** per type safety
 - **Jest** per testing
 
 ### **Monitoring**
+
 - **Performance** monitoring
 - **Error** tracking
 - **User** analytics
@@ -233,12 +255,14 @@ git push origin v0.3.0
 ## 📚 **Documentation**
 
 ### **Code Documentation**
+
 - **README.md** - Setup e overview
 - **CHANGELOG.md** - Modifiche per versione
 - **RELEASE_NOTES.md** - Note di rilascio
 - **WORKFLOW.md** - Processo di sviluppo
 
 ### **API Documentation**
+
 - **OpenAPI** specification
 - **Endpoint** documentation
 - **Authentication** guide

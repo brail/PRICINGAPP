@@ -3,6 +3,7 @@ const cors = require("cors");
 const path = require("path");
 const createCalculationRoutes = require("./src/routes/calculations");
 const createParameterRoutes = require("./src/routes/parameters");
+const { router: authRoutes, initUserModel } = require("./src/routes/auth");
 const { requestLogger } = require("./src/middleware/errorHandler");
 const ParameterService = require("./src/services/parameterService");
 const CalculationService = require("./src/services/calculationService");
@@ -19,12 +20,16 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "OK" });
 });
 
+// Initialize User model
+initUserModel();
+
 // Routes
 const parameterService = new ParameterService();
 const calculationService = new CalculationService(parameterService);
 
 app.use("/api", createCalculationRoutes(parameterService, calculationService));
 app.use("/api", createParameterRoutes(parameterService));
+app.use("/", authRoutes);
 
 // 404 handler
 app.use("*", (req, res) => {

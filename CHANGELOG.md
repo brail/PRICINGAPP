@@ -8,17 +8,21 @@ e questo progetto aderisce a [Semantic Versioning](https://semver.org/spec/v2.0.
 ## [Unreleased]
 
 ### Added
+
 - Principio 7 - Flexibility and Efficiency
 - Principio 9 - Help Users Recognize Errors
 
 ### Changed
+
 - Performance optimizations
 - Advanced error handling
 
 ## [0.2.0] - 2024-12-19
 
 ### Added
+
 - **Help System integrato**
+
   - HelpPanel component con modal collassabile
   - 5 FAQ complete sui calcoli prezzi
   - 3 guide step-by-step (Primo Calcolo, Crea Template, Calcolo Batch)
@@ -27,6 +31,7 @@ e questo progetto aderisce a [Semantic Versioning](https://semver.org/spec/v2.0.
   - Design responsive ottimizzato per mobile
 
 - **Design System standardizzato**
+
   - CustomButton component (risolve conflitti Material-UI)
   - Card, Form, Input, Modal, Alert components uniformi
   - Palette colori e spacing coerenti
@@ -39,7 +44,9 @@ e questo progetto aderisce a [Semantic Versioning](https://semver.org/spec/v2.0.
   - Timeout handling per operazioni bloccate
 
 ### Changed
+
 - **Terminologia standardizzata**
+
   - "Tools" → "Stampi" (terminologia italiana)
   - "Quality Control" → "Controllo Qualità"
   - "Retail Price" → "Prezzo vendita al dettaglio"
@@ -47,6 +54,7 @@ e questo progetto aderisce a [Semantic Versioning](https://semver.org/spec/v2.0.
   - BatchCalculator terminologia aggiornata
 
 - **Ottimizzazione mobile**
+
   - HelpPanel responsive design (768px, 480px breakpoints)
   - Touch-friendly bottoni e accordion
   - Font sizes ottimizzati per mobile
@@ -59,6 +67,7 @@ e questo progetto aderisce a [Semantic Versioning](https://semver.org/spec/v2.0.
   - Help button integrato nella toolbar
 
 ### Removed
+
 - **Componenti di test rimossi**
   - ToastTestPanel.tsx eliminato
   - DesignSystemTest.tsx eliminato
@@ -66,7 +75,9 @@ e questo progetto aderisce a [Semantic Versioning](https://semver.org/spec/v2.0.
   - Menu desktop e mobile puliti
 
 ### Fixed
+
 - **Conflitti Material-UI risolti**
+
   - CustomButton component per React Router
   - Navigation styling per AppBar
   - BatchCalculator button styles
@@ -77,6 +88,7 @@ e questo progetto aderisce a [Semantic Versioning](https://semver.org/spec/v2.0.
   - Toast notifications per feedback immediato
 
 ### Performance
+
 - Bundle size ottimizzato (-59B, -519 lines nette)
 - Import inutilizzati rimossi
 - Build production pulita
@@ -85,7 +97,9 @@ e questo progetto aderisce a [Semantic Versioning](https://semver.org/spec/v2.0.
 ## [0.1.0] - 2024-12-18
 
 ### Added
+
 - **Applicazione base**
+
   - Calculator component per calcoli prezzi
   - Parameters component per gestione template
   - BatchCalculator per calcoli multipli
@@ -101,6 +115,7 @@ e questo progetto aderisce a [Semantic Versioning](https://semver.org/spec/v2.0.
   - Responsive design base
 
 ### Technical
+
 - React + TypeScript frontend
 - Node.js + Express backend
 - SQLite3 database
@@ -114,15 +129,15 @@ e questo progetto aderisce a [Semantic Versioning](https://semver.org/spec/v2.0.
 Questo progetto utilizza [Semantic Versioning](https://semver.org/):
 
 - **MAJOR** (1.0.0): Breaking changes, API incompatibili
-- **MINOR** (0.1.0): Nuove funzionalità, backward compatible  
+- **MINOR** (0.1.0): Nuove funzionalità, backward compatible
 - **PATCH** (0.0.1): Bug fixes, backward compatible
 
 ### Branch Strategy
 
 - **main**: Branch principale, sempre stabile e deployabile
 - **develop**: Branch di sviluppo per integrazione feature
-- **feature/***: Branch per nuove funzionalità
-- **hotfix/***: Branch per fix urgenti
+- **feature/\***: Branch per nuove funzionalità
+- **hotfix/\***: Branch per fix urgenti
 
 ### Release Process
 
