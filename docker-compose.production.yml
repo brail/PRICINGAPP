@@ -39,6 +39,8 @@ services:
       args:
         - REACT_APP_API_URL=http://luke.febos.local/pricingapp/api
         - PUBLIC_URL=/pricingapp
+    environment:
+      - PUBLIC_URL=/pricingapp
     container_name: pricing-calculator-frontend
     volumes:
       - pricing_static:/usr/share/nginx/html/static
