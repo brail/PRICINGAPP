@@ -1,121 +1,139 @@
 #!/bin/bash
 
 # ===========================================
-# PRICING CALCULATOR v0.2 - Deploy Production
+# PRICING CALCULATOR v0.2 - DEPLOY PRODUCTION
 # ===========================================
 
-set -e
+set -e  # Exit on any error
 
-echo "🚀 Deploy Pricing Calculator v0.2 in Produzione"
-echo "================================================"
+echo "🚀 Starting Pricing Calculator v0.2 Production Deploy..."
 
-# Configurazione
-SERVER="luke.febos.local"
-APP_NAME="pricing-calculator"
-APP_PATH="/opt/$APP_NAME"
-NGINX_CONFIG="/etc/nginx/sites-available/$APP_NAME"
-
-# Colori per output
+# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Funzione per stampare messaggi colorati
-print_status() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
+# Configuration
+DOMAIN="luke.febos.local"
+API_PORT="5001"
+FRONTEND_PORT="80"
+DATABASE_PATH="/opt/docker/pricingapp_data/database"
+LOGS_PATH="/opt/docker/pricingapp_data/logs"
+STATIC_PATH="/opt/docker/pricingapp_data/static"
 
-print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
-}
+echo -e "${BLUE}📋 Configuration:${NC}"
+echo "  Domain: $DOMAIN"
+echo "  API Port: $API_PORT"
+echo "  Frontend Port: $FRONTEND_PORT"
+echo "  Database Path: $DATABASE_PATH"
+echo "  Logs Path: $LOGS_PATH"
+echo "  Static Path: $STATIC_PATH"
+echo ""
 
-print_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
-}
+# Create production environment files
+echo -e "${YELLOW}📝 Creating production environment files...${NC}"
 
-print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
+# Frontend environment
+cat > client/.env.production << EOF
+REACT_APP_API_URL=http://backend:5001/api
+PUBLIC_URL=/pricingapp
+HOST=0.0.0.0
+EOF
 
-# Verifica connessione SSH
-print_status "Verificando connessione SSH a $SERVER..."
-if ! ssh -o ConnectTimeout=10 -o BatchMode=yes $SERVER "echo 'Connessione SSH OK'" > /dev/null 2>&1; then
-    print_error "Impossibile connettersi a $SERVER via SSH"
-    print_error "Assicurati che:"
-    print_error "1. Il server sia raggiungibile"
-    print_error "2. La chiave SSH sia configurata"
-    print_error "3. Docker sia installato sul server"
-    exit 1
-fi
-print_success "Connessione SSH verificata"
+# Backend environment
+cat > server/.env.production << EOF
+NODE_ENV=production
+PORT=5001
+HOST=0.0.0.0
+DATABASE_PATH=./pricing.db
+FRONTEND_URL=http://$DOMAIN/pricingapp
+ALLOWED_ORIGINS=http://$DOMAIN
+JWT_SECRET=pricing-calculator-jwt-secret-2025-production
+JWT_REFRESH_SECRET=pricing-calculator-refresh-secret-2025-production
+LOG_LEVEL=info
+EOF
 
-# Crea directory sul server
-print_status "Creando directory $APP_PATH sul server..."
-ssh $SERVER "sudo mkdir -p $APP_PATH && sudo chown \$(whoami):\$(whoami) $APP_PATH"
+echo -e "${GREEN}✅ Environment files created${NC}"
 
-# Copia file sul server
-print_status "Copiando file sul server..."
-rsync -avz --delete \
-    --exclude 'node_modules' \
-    --exclude '.git' \
-    --exclude 'client/build' \
-    --exclude 'server/logs' \
-    --exclude '*.log' \
-    ./ $SERVER:$APP_PATH/
+# Create directories for persistent volumes
+echo -e "${YELLOW}📁 Creating persistent volume directories...${NC}"
+sudo mkdir -p $DATABASE_PATH $LOGS_PATH $STATIC_PATH
+sudo chown -R $USER:$USER $DATABASE_PATH $LOGS_PATH $STATIC_PATH
+echo -e "${GREEN}✅ Directories created${NC}"
 
-# Build e deploy sul server
-print_status "Building e deployando applicazione..."
-ssh $SERVER "cd $APP_PATH && \
-    echo '🐳 Building Docker images...' && \
-    docker compose -f docker-compose.production.yml build && \
-    echo '🛑 Fermando container esistenti...' && \
-    docker compose -f docker-compose.production.yml down || true && \
-    echo '🚀 Avviando applicazione...' && \
-    docker compose -f docker-compose.production.yml up -d"
+# Stop existing containers
+echo -e "${YELLOW}🛑 Stopping existing containers...${NC}"
+docker compose -f docker-compose.production.yml down || true
 
-# Configura nginx
-print_status "Configurando nginx..."
-ssh $SERVER "sudo cp $APP_PATH/nginx/nginx-production.conf $NGINX_CONFIG && \
-    sudo ln -sf $NGINX_CONFIG /etc/nginx/sites-enabled/ && \
-    sudo nginx -t && \
-    sudo systemctl reload nginx"
+# Remove old images to force rebuild
+echo -e "${YELLOW}🗑️ Removing old images...${NC}"
+docker rmi pricingapp-frontend pricingapp-backend || true
 
-# Verifica deploy
-print_status "Verificando deploy..."
+# Build and start services
+echo -e "${YELLOW}🔨 Building and starting services...${NC}"
+docker compose -f docker-compose.production.yml build --no-cache
+docker compose -f docker-compose.production.yml up -d
+
+# Wait for services to be ready
+echo -e "${YELLOW}⏳ Waiting for services to be ready...${NC}"
 sleep 10
 
-# Test health check
-if curl -f -s "http://$SERVER/pricingapp/health" > /dev/null; then
-    print_success "Health check OK"
+# Health checks
+echo -e "${YELLOW}🏥 Running health checks...${NC}"
+
+# Check if containers are running
+if docker ps | grep -q "pricing-calculator-nginx"; then
+    echo -e "${GREEN}✅ Nginx container is running${NC}"
 else
-    print_warning "Health check fallito, verificando logs..."
-    ssh $SERVER "cd $APP_PATH && docker compose -f docker-compose.production.yml logs --tail=20"
+    echo -e "${RED}❌ Nginx container is not running${NC}"
+    exit 1
 fi
 
-# Test API
-if curl -f -s "http://$SERVER/pricingapp/api/health" > /dev/null; then
-    print_success "API health check OK"
+if docker ps | grep -q "pricing-calculator-backend"; then
+    echo -e "${GREEN}✅ Backend container is running${NC}"
 else
-    print_warning "API health check fallito"
+    echo -e "${RED}❌ Backend container is not running${NC}"
+    exit 1
 fi
 
-# Mostra status finale
-print_status "Status finale dei container:"
-ssh $SERVER "cd $APP_PATH && docker compose -f docker-compose.production.yml ps"
+if docker ps | grep -q "pricing-calculator-frontend"; then
+    echo -e "${GREEN}✅ Frontend container is running${NC}"
+else
+    echo -e "${RED}❌ Frontend container is not running${NC}"
+    exit 1
+fi
+
+# Test API connectivity
+echo -e "${YELLOW}🔗 Testing API connectivity...${NC}"
+if curl -s http://localhost/pricingapp/ > /dev/null; then
+    echo -e "${GREEN}✅ Frontend is accessible${NC}"
+else
+    echo -e "${RED}❌ Frontend is not accessible${NC}"
+fi
+
+# Test static files
+echo -e "${YELLOW}📄 Testing static files...${NC}"
+if curl -s http://localhost/static/js/main.*.js > /dev/null; then
+    echo -e "${GREEN}✅ Static files are accessible${NC}"
+else
+    echo -e "${YELLOW}⚠️ Static files may not be accessible (this is normal if not built yet)${NC}"
+fi
+
+# Final status
+echo -e "${BLUE}📊 Final Status:${NC}"
+docker compose -f docker-compose.production.yml ps
 
 echo ""
-print_success "🎉 Deploy completato!"
+echo -e "${GREEN}🎉 Deploy completed successfully!${NC}"
+echo -e "${BLUE}🌐 Application URL: http://$DOMAIN/pricingapp/${NC}"
+echo -e "${BLUE}🔑 Default credentials:${NC}"
+echo -e "${BLUE}   Admin: admin / admin123${NC}"
+echo -e "${BLUE}   Demo: demo / demo123${NC}"
 echo ""
-echo "📱 Applicazione disponibile su:"
-echo "   Frontend: http://$SERVER/pricingapp"
-echo "   API:      http://$SERVER/pricingapp/api"
-echo "   Health:   http://$SERVER/pricingapp/health"
+echo -e "${YELLOW}📝 To view logs:${NC}"
+echo -e "${YELLOW}   docker compose -f docker-compose.production.yml logs -f${NC}"
 echo ""
-echo "📊 Comandi utili:"
-echo "   Logs:     ssh $SERVER 'cd $APP_PATH && docker compose -f docker-compose.production.yml logs -f'"
-echo "   Status:   ssh $SERVER 'cd $APP_PATH && docker compose -f docker-compose.production.yml ps'"
-echo "   Restart:  ssh $SERVER 'cd $APP_PATH && docker compose -f docker-compose.production.yml restart'"
-echo "   Stop:     ssh $SERVER 'cd $APP_PATH && docker compose -f docker-compose.production.yml down'"
-echo ""
+echo -e "${YELLOW}🛑 To stop:${NC}"
+echo -e "${YELLOW}   docker compose -f docker-compose.production.yml down${NC}"
