@@ -12,7 +12,8 @@ services:
     networks:
       - pricing_network
     restart: unless-stopped
-    # Nessun port esposto - solo interno
+    expose:
+      - "5001"  # Solo per nginx, non esposto all'esterno
     healthcheck:
       test:
         [
