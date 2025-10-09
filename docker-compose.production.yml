@@ -12,6 +12,7 @@ services:
     networks:
       - pricing_network
     restart: unless-stopped
+    # Nessun port esposto - solo interno
     healthcheck:
       test:
         [
@@ -37,6 +38,7 @@ services:
     networks:
       - pricing_network
     restart: unless-stopped
+    # Nessun port esposto - solo interno
     healthcheck:
       test:
         [
