@@ -32,6 +32,7 @@ import {
   Logout,
   AccountCircle,
   Menu as MenuIcon,
+  Help as HelpIcon,
 } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
 import Calculator from "../Calculator";
@@ -41,6 +42,7 @@ import UserManagement from "./UserManagement";
 import Logo from "../Logo";
 import ToastTestPanel from "../ToastTestPanel";
 import DesignSystemTest from "../DesignSystemTest";
+import HelpPanel from "../HelpPanel";
 
 const AuthenticatedApp: React.FC = () => {
   const { user, logout } = useAuth();
@@ -52,6 +54,7 @@ const AuthenticatedApp: React.FC = () => {
   const [mobileMenuAnchor, setMobileMenuAnchor] = useState<null | HTMLElement>(
     null
   );
+  const [helpPanelOpen, setHelpPanelOpen] = useState(false);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -175,6 +178,15 @@ const AuthenticatedApp: React.FC = () => {
                   Utenti
                 </CustomButton>
               )}
+
+              <IconButton
+                color="inherit"
+                onClick={() => setHelpPanelOpen(true)}
+                sx={{ mr: 1 }}
+                title="Aiuto e Supporto"
+              >
+                <HelpIcon />
+              </IconButton>
 
               <IconButton
                 color="inherit"
@@ -314,6 +326,12 @@ const AuthenticatedApp: React.FC = () => {
           )}
         </Routes>
       </Box>
+
+      {/* Help Panel */}
+      <HelpPanel
+        isOpen={helpPanelOpen}
+        onClose={() => setHelpPanelOpen(false)}
+      />
     </Box>
   );
 };
