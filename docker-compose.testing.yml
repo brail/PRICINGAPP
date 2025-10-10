@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  # OpenLDAP Server per testing
+  openldap:
+    image: osixia/openldap:latest
+    container_name: pricing-ldap-test
+    environment:
+      LDAP_ORGANISATION: "Pricing Calculator Test"
+      LDAP_DOMAIN: "pricing.test"
+      LDAP_ADMIN_PASSWORD: "admin123"
+      LDAP_CONFIG_PASSWORD: "config123"
+      LDAP_READONLY_USER: "false"
+      LDAP_RFC2307BIS_SCHEMA: "false"
+      LDAP_BACKEND: "mdb"
+      LDAP_TLS: "false"
+      LDAP_REPLICATION: "false"
+      KEEPALIVED: "false"
+    ports:
+      - "389:389"
+      - "636:636"
+    volumes:
+      - ldap_data:/var/lib/ldap
+      - ldap_config:/etc/ldap/slapd.d
+      - ./ldap/ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom
+    networks:
+      - pricing_network
+    healthcheck:
+      test: ["CMD", "ldapsearch", "-x", "-H", "ldap://localhost", "-b", "dc=pricing,dc=test", "-D", "cn=admin,dc=pricing,dc=test", "-w", "admin123"]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # phpLDAPadmin per gestione utenti
+  phpldapadmin:
+    image: osixia/phpldapadmin:latest
+    container_name: pricing-ldap-admin
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: "openldap"
+      PHPLDAPADMIN_HTTPS: "false"
+    ports:
+      - "8080:80"
+    depends_on:
+      - openldap
+    networks:
+      - pricing_network
+    restart: unless-stopped
+
+  # Backend con configurazione LDAP
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: pricing-backend-test
+    environment:
+      - NODE_ENV=development
+      - PORT=5001
+      - HOST=0.0.0.0
+      - DATABASE_PATH=./pricing.db
+      - FRONTEND_URL=http://localhost:3000
+      - ALLOWED_ORIGINS=http://localhost:3000
+      - JWT_SECRET=pricing-calculator-jwt-secret-2025-test
+      - JWT_REFRESH_SECRET=pricing-calculator-refresh-secret-2025-test
+      - LOG_LEVEL=debug
+      # LDAP Configuration
+      - ENABLE_LDAP_AUTH=true
+      - LDAP_URL=ldap://openldap:389
+      - LDAP_BIND_DN=cn=admin,dc=pricing,dc=test
+      - LDAP_BIND_CREDENTIALS=admin123
+      - LDAP_SEARCH_BASE=dc=pricing,dc=test
+      - LDAP_SEARCH_FILTER=(uid={{username}})
+      # Google OAuth (disabilitato per testing)
+      - ENABLE_GOOGLE_AUTH=false
+      - ENABLE_LOCAL_AUTH=true
+    ports:
+      - "5001:5001"
+    volumes:
+      - pricing_data_test:/app/data
+      - pricing_logs_test:/app/logs
+    depends_on:
+      openldap:
+        condition: service_healthy
+    networks:
+      - pricing_network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5001/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Frontend
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: pricing-frontend-test
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - pricing_network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      timeout: 10s
+      interval: 30s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+networks:
+  pricing_network:
+    driver: bridge
+
+volumes:
+  ldap_data:
+    driver: local
+  ldap_config:
+    driver: local
+  pricing_data_test:
+    driver: local
+  pricing_logs_test:
+    driver: local

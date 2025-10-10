@@ -10,7 +10,7 @@ jest.mock('../../services/api');
 
 // Wrapper per Router
 const RouterWrapper = ({ children }: { children: React.ReactNode }) => (
-  <BrowserRouter>{children}</BrowserWrapper>
+  <BrowserRouter>{children}</BrowserRouter>
 );
 
 describe('Parameters Component', () => {
