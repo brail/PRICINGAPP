@@ -314,7 +314,7 @@ export const pricingApi = {
     setId: number;
     description: string;
   }> => {
-    const response = await api.post(`/api/active-parameters/load/${setId}`);
+    const response = await api.post(`/active-parameters/load/${setId}`);
     return response.data;
   },
 
@@ -347,7 +347,7 @@ export const pricingApi = {
   loadParameterSet: async (
     id: number
   ): Promise<{ message: string; params: CalculationParams }> => {
-    const response = await api.post(`/api/parameter-sets/${id}/load`);
+    const response = await api.post(`/parameter-sets/${id}/load`);
     return response.data;
   },
 
@@ -359,19 +359,19 @@ export const pricingApi = {
 
   // Aggiorna un set di parametri
   updateParameterSet: async (id: number, params: any): Promise<any> => {
-    const response = await api.put(`/api/parameter-sets/${id}`, params);
+    const response = await api.put(`/parameter-sets/${id}`, params);
     return response.data;
   },
 
   // Elimina un set di parametri
   deleteParameterSet: async (id: number): Promise<{ message: string }> => {
-    const response = await api.delete(`/api/parameter-sets/${id}`);
+    const response = await api.delete(`/parameter-sets/${id}`);
     return response.data;
   },
 
   // Imposta un set di parametri come default
   setDefaultParameterSet: async (id: number): Promise<any> => {
-    const response = await api.post(`/api/parameter-sets/${id}/set-default`);
+    const response = await api.post(`/parameter-sets/${id}/set-default`);
     return response.data;
   },
 
@@ -446,13 +446,13 @@ export const pricingApi = {
 
   // Aggiorna utente (solo admin)
   updateUser: async (userId: number, userData: any) => {
-    const response = await api.put(`/api/auth/users/${userId}`, userData);
+    const response = await api.put(`/auth/users/${userId}`, userData);
     return response.data;
   },
 
   // Elimina utente (solo admin)
   deleteUser: async (userId: number) => {
-    const response = await api.delete(`/api/auth/users/${userId}`);
+    const response = await api.delete(`/auth/users/${userId}`);
     return response.data;
   },
 
@@ -476,7 +476,7 @@ export const pricingApi = {
     newPassword: string,
     confirmPassword: string
   ) => {
-    const response = await api.put(`/api/auth/users/${userId}/password`, {
+    const response = await api.put(`/auth/users/${userId}/password`, {
       newPassword,
       confirmPassword,
     });

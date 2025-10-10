@@ -195,7 +195,7 @@ const UserManagement: React.FC = () => {
     try {
       setLoading(true);
       clearErrors();
-      await pricingApi.put(`/api/auth/users/${editingUser.id}`, editForm);
+      await pricingApi.put(`/auth/users/${editingUser.id}`, editForm);
       await loadUsers();
       setEditDialogOpen(false);
       setEditingUser(null);
@@ -226,7 +226,7 @@ const UserManagement: React.FC = () => {
     try {
       setLoading(true);
       clearErrors();
-      await pricingApi.delete(`/api/auth/users/${userToDelete.id}`);
+      await pricingApi.delete(`/auth/users/${userToDelete.id}`);
       await loadUsers();
       setDeleteConfirmDialogOpen(false);
       setUserToDelete(null);
