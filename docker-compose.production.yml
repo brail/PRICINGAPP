@@ -13,7 +13,7 @@ services:
       - pricing_network
     restart: unless-stopped
     ports:
-      - "5001:5001"  # Esposto come in locale
+      - "5001:5001" # Esposto come in locale
     healthcheck:
       test:
         [
@@ -37,7 +37,7 @@ services:
     env_file:
       - ./client/.env.production
     ports:
-      - "3000:80"  # Esposto come in locale
+      - "3000:80" # Esposto come in locale
     networks:
       - pricing_network
     restart: unless-stopped

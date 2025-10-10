@@ -91,12 +91,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             // Token non valido, prova con refresh token
             if (refreshToken) {
               try {
-                const refreshResponse = await pricingApi.post(
-                  "/auth/refresh",
-                  {
-                    refreshToken,
-                  }
-                );
+                const refreshResponse = await pricingApi.post("/auth/refresh", {
+                  refreshToken,
+                });
 
                 const newToken = refreshResponse.data.accessToken;
                 localStorage.setItem("token", newToken);
