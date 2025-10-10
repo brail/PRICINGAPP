@@ -3,13 +3,15 @@
 ## 📋 **VARIABILI D'AMBIENTE CRITICHE**
 
 ### **Frontend (.env.production)**
+
 ```bash
-REACT_APP_API_URL=http://backend:5001/api  # ⚠️ CRITICO: backend:5001, non localhost!
+REACT_APP_API_URL=http://luke.febos.local/pricingapp/api  # ⚠️ CRITICO: URL pubblico per browser!
 PUBLIC_URL=/pricingapp                      # ⚠️ CRITICO: per i file statici
 HOST=0.0.0.0                               # Per accesso da rete
 ```
 
 ### **Backend (.env.production)**
+
 ```bash
 NODE_ENV=production
 PORT=5001
@@ -25,11 +27,13 @@ LOG_LEVEL=info
 ## 🚨 **ERRORI COMUNI E SOLUZIONI**
 
 ### **1. CORS Errors**
+
 **Sintomo**: `Access to XMLHttpRequest at 'http://localhost:5001/api' has been blocked by CORS policy`
 
 **Causa**: Frontend chiama `localhost:5001` invece di `backend:5001`
 
 **Soluzione**:
+
 ```bash
 # Verifica che REACT_APP_API_URL sia corretto
 docker exec pricing-calculator-frontend env | grep REACT_APP_API_URL
@@ -40,11 +44,13 @@ docker compose -f docker-compose.production.yml build --no-cache frontend
 ```
 
 ### **2. File Statici 404**
+
 **Sintomo**: `GET http://luke.febos.local/static/js/main.xxx.js 404 (Not Found)`
 
 **Causa**: Nginx non trova i file statici
 
 **Soluzione**:
+
 ```bash
 # Verifica che i file siano presenti nel container frontend
 docker exec pricing-calculator-frontend ls -la /usr/share/nginx/html/static/
@@ -54,11 +60,13 @@ docker compose -f docker-compose.production.yml build --no-cache frontend
 ```
 
 ### **3. Database Read-Only**
+
 **Sintomo**: `SQLITE_READONLY: attempt to write a readonly database`
 
 **Causa**: Permessi directory database
 
 **Soluzione**:
+
 ```bash
 # Verifica permessi
 ls -la /opt/docker/pricingapp_data/database/
@@ -70,6 +78,7 @@ sudo chown -R $USER:$USER /opt/docker/pricingapp_data/
 ## 🔍 **VERIFICA CONFIGURAZIONE**
 
 ### **Test Comunicazione Container**
+
 ```bash
 # Test API dal container frontend
 docker exec pricing-calculator-frontend curl http://backend:5001/api/health
@@ -79,6 +88,7 @@ curl http://luke.febos.local/static/js/main.*.js
 ```
 
 ### **Verifica Variabili d'Ambiente**
+
 ```bash
 # Frontend
 docker exec pricing-calculator-frontend env | grep REACT_APP
@@ -98,6 +108,7 @@ Browser → Nginx (porta 80) → Frontend Container
 ```
 
 **Flusso Corretto**:
+
 1. Browser → `http://luke.febos.local/pricingapp/`
 2. Nginx → Frontend Container
 3. Frontend → `http://backend:5001/api/` (comunicazione interna)
@@ -135,4 +146,5 @@ docker compose -f docker-compose.production.yml ps
 ```
 
 ---
+
 **Nota**: Questa configurazione è stata testata e funzionante per Pricing Calculator v0.2.0

@@ -16,7 +16,12 @@ RUN npm ci --silent
 # Copia sorgenti (solo dalla directory client)
 COPY . .
 
-# Build dell'applicazione
+# Build dell'applicazione con build args
+ARG REACT_APP_API_URL
+ARG PUBLIC_URL
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+ENV PUBLIC_URL=$PUBLIC_URL
+
 # Force rebuild with correct API URL
 RUN echo "Building with REACT_APP_API_URL=$REACT_APP_API_URL" && \
     npm run build

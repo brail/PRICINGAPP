@@ -37,7 +37,7 @@ echo -e "${YELLOW}📝 Creating production environment files...${NC}"
 
 # Frontend environment
 cat > client/.env.production << EOF
-REACT_APP_API_URL=http://backend:5001/api
+REACT_APP_API_URL=http://$DOMAIN/pricingapp/api
 PUBLIC_URL=/pricingapp
 HOST=0.0.0.0
 EOF
