@@ -106,4 +106,15 @@ env.*
 *.env.local
 *.env.production
 *.env.network
-*.env.example
+
+# Database files
+server/data/*.db
+server/data/*.db-*
+server/pricing.db
+*.db.backup-*
+
+# Test files
+test-*.js
+*-test-*.js
+setup-*.sh
+ldap-test-*.ldif
