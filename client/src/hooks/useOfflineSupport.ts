@@ -26,7 +26,7 @@ export const useOfflineSupport = (): UseOfflineSupportReturn => {
 
   const retryConnection = useCallback(() => {
     // Prova a fare una richiesta di test per verificare la connessione
-    fetch("/api/health", {
+    fetch("/health", {
       method: "HEAD",
       cache: "no-cache",
       mode: "no-cors",

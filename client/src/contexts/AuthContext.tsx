@@ -75,7 +75,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (token && userStr) {
           // Verifica se il token è ancora valido
           try {
-            const response = await pricingApi.get("/api/auth/me", {
+            const response = await pricingApi.get("/auth/me", {
               headers: { Authorization: `Bearer ${token}` },
             });
 
@@ -92,7 +92,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             if (refreshToken) {
               try {
                 const refreshResponse = await pricingApi.post(
-                  "/api/auth/refresh",
+                  "/auth/refresh",
                   {
                     refreshToken,
                   }
@@ -140,7 +140,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-      const response = await pricingApi.post("/api/auth/login", {
+      const response = await pricingApi.post("/auth/login", {
         username,
         password,
       });
@@ -182,7 +182,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-      const response = await pricingApi.post("/api/auth/register", {
+      const response = await pricingApi.post("/auth/register", {
         username,
         email,
         password,
@@ -240,7 +240,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error("Nessun refresh token disponibile");
       }
 
-      const response = await pricingApi.post("/api/auth/refresh", {
+      const response = await pricingApi.post("/auth/refresh", {
         refreshToken,
       });
 
@@ -260,7 +260,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Funzione per aggiornare i dati utente
   const updateUser = async (userData: Partial<User>) => {
     try {
-      await pricingApi.put("/api/auth/me", userData);
+      await pricingApi.put("/auth/me", userData);
 
       const updatedUser = { ...authState.user, ...userData };
       localStorage.setItem("user", JSON.stringify(updatedUser));

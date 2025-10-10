@@ -83,7 +83,7 @@ const UserManagement: React.FC = () => {
     try {
       setLoading(true);
       clearErrors();
-      const response = await pricingApi.get("/api/auth/users");
+      const response = await pricingApi.get("/auth/users");
       setUsers(response.data.users);
     } catch (err: any) {
       addError(
@@ -166,7 +166,7 @@ const UserManagement: React.FC = () => {
     try {
       setLoading(true);
       clearErrors();
-      await pricingApi.post("/api/auth/register", {
+      await pricingApi.post("/auth/register", {
         username: createForm.username,
         email: createForm.email,
         password: createForm.password,
