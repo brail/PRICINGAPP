@@ -7,15 +7,141 @@ e questo progetto aderisce a [Semantic Versioning](https://semver.org/spec/v2.0.
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-01-27
+
 ### Added
 
-- Principio 7 - Flexibility and Efficiency
-- Principio 9 - Help Users Recognize Errors
+- **Sistema di Autenticazione Multi-Provider**
+
+  - Supporto per Active Directory/LDAP con JIT provisioning
+  - Integrazione Google OAuth2 per autenticazione social
+  - Autenticazione locale limitata ai soli amministratori
+  - Passport.js per gestione strategie di autenticazione
+  - Mapping automatico ruoli da gruppi AD a ruoli applicazione
+
+- **Just-in-Time (JIT) Provisioning**
+
+  - Creazione automatica utenti al primo login con provider esterni
+  - Sincronizzazione metadati da LDAP/Google
+  - Gestione conflitti email esistenti
+  - Audit trail completo per provisioning
+
+- **UI Multi-Provider**
+
+  - ProviderButton component per bottoni autenticazione
+  - LoginForm aggiornato con selezione provider dinamica
+  - AuthCallback component per gestione OAuth redirect
+  - Design responsive per tutti i provider
+
+- **Infrastruttura Testing**
+
+  - Docker Compose per ambiente LDAP di test
+  - Container OpenLDAP con utenti pre-configurati
+  - phpLDAPadmin per gestione utenti test
+  - Script di seeding automatico
+
+- **Documentazione Completa**
+
+  - Guida setup Google Cloud Console OAuth2
+  - Documentazione architettura auth providers
+  - Troubleshooting guide per problemi comuni
+  - Esempi configurazione per tutti i provider
 
 ### Changed
 
-- Performance optimizations
-- Advanced error handling
+- **Database Schema**
+
+  - Aggiunte colonne `auth_provider`, `provider_user_id`, `provider_metadata`
+  - Password ora opzionale per utenti esterni
+  - Migration automatica per utenti esistenti
+
+- **Sicurezza Rafforzata**
+
+  - Solo admin possono usare autenticazione locale
+  - Rate limiting su endpoint autenticazione
+  - Audit logging per tutti i tentativi di login
+  - Validazione provider abilitati
+
+- **API Estese**
+
+  - `GET /api/auth/providers` - Lista provider disponibili
+  - `POST /api/auth/ldap` - Endpoint autenticazione LDAP
+  - `GET /api/auth/google` - Redirect Google OAuth
+  - `GET /api/auth/google/callback` - Callback OAuth
+
+### Technical
+
+- **Backend Dependencies**
+
+  - `passport@^0.7.0` - Framework autenticazione
+  - `passport-local@^1.0.0` - Strategy locale
+  - `passport-ldapauth@^3.0.1` - Strategy LDAP
+  - `passport-google-oauth20@^2.0.0` - Strategy Google
+  - `express-session@^1.18.0` - Session management
+
+- **Architettura**
+
+  - Strategy Pattern per provider intercambiabili
+  - Service Layer per logica business autenticazione
+  - Middleware modulare per validazione provider
+  - Context React esteso per multi-provider
+
+### Breaking Changes
+
+- **Autenticazione Locale**
+
+  - Solo utenti admin possono usare login con password
+  - Utenti esistenti mantengono accesso locale
+  - Nuovi utenti devono usare provider esterni
+
+- **Database Migration**
+
+  - Richiesta migrazione schema per nuove colonne
+  - Backup automatico prima della migrazione
+  - Rollback supportato per emergenze
+
+### Migration Guide
+
+Per aggiornare da v0.2.0 a v0.3.0:
+
+1. **Backup Database**
+   ```bash
+   cp server/data/pricing.db server/data/pricing.db.backup
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   cd server && npm install
+   ```
+
+3. **Configure Environment**
+   ```env
+   ENABLE_LOCAL_AUTH=true
+   ENABLE_LDAP_AUTH=false
+   ENABLE_GOOGLE_AUTH=false
+   ```
+
+4. **Run Migration**
+   ```bash
+   node -e "require('./src/migrations/003_add_auth_providers').up(require('./database').db)"
+   ```
+
+5. **Test Authentication**
+   ```bash
+   curl http://localhost:5001/api/auth/providers
+   ```
+
+### Performance
+
+- **Ottimizzazioni LDAP**
+  - Connection pooling per connessioni LDAP
+  - Caching metadati provider
+  - Lazy loading provider
+
+- **Bundle Size**
+  - +45KB per dipendenze Passport
+  - +12KB per componenti UI multi-provider
+  - Tree shaking per import ottimizzati
 
 ## [0.2.0] - 2024-12-19
 
