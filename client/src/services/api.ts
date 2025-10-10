@@ -185,7 +185,7 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem("refreshToken");
         if (refreshToken) {
-          const response = await api.post("/api/auth/refresh", {
+          const response = await api.post("/auth/refresh", {
             refreshToken,
           });
 
@@ -231,7 +231,7 @@ export const pricingApi = {
 
   // Ottieni parametri attuali
   getParams: async (): Promise<CalculationParams> => {
-    const response = await api.get("/api/params");
+    const response = await api.get("/params");
     return response.data;
   },
 
@@ -239,7 +239,7 @@ export const pricingApi = {
   updateParams: async (
     params: Partial<CalculationParams>
   ): Promise<CalculationParams> => {
-    const response = await api.put("/api/params", params);
+    const response = await api.put("/params", params);
     return response.data;
   },
 
@@ -249,7 +249,7 @@ export const pricingApi = {
     currency: string
   ): Promise<SellingPriceCalculation> => {
     return retryRequest(async () => {
-      const response = await api.post("/api/calculate-selling", {
+      const response = await api.post("/calculate-selling", {
         purchasePrice,
         currency,
       });
@@ -263,7 +263,7 @@ export const pricingApi = {
     currency: string
   ): Promise<PurchasePriceCalculation> => {
     return retryRequest(async () => {
-      const response = await api.post("/api/calculate-purchase", {
+      const response = await api.post("/calculate-purchase", {
         retailPrice,
         currency,
       });
@@ -285,7 +285,7 @@ export const pricingApi = {
     sellingCurrency: string;
     params: CalculationParams;
   }> => {
-    const response = await api.post("/api/calculate-margin", {
+    const response = await api.post("/calculate-margin", {
       purchasePrice,
       retailPrice,
     });
@@ -301,7 +301,7 @@ export const pricingApi = {
     description: string;
     source: "saved" | "default" | "first_available";
   }> => {
-    const response = await api.get("/api/active-parameters");
+    const response = await api.get("/active-parameters");
     return response.data;
   },
 
@@ -320,26 +320,26 @@ export const pricingApi = {
 
   // Ottieni tassi di cambio
   getExchangeRates: async (): Promise<ExchangeRates> => {
-    const response = await api.get("/api/exchange-rates");
+    const response = await api.get("/exchange-rates");
     return response.data;
   },
 
   // Health check
   healthCheck: async (): Promise<{ status: string; timestamp: string }> => {
-    const response = await api.get("/api/health");
+    const response = await api.get("/health");
     return response.data;
   },
 
   // API per i set di parametri
   // Ottieni tutti i set di parametri
   getParameterSets: async (): Promise<any[]> => {
-    const response = await api.get("/api/parameter-sets");
+    const response = await api.get("/parameter-sets");
     return response.data;
   },
 
   // Ottieni un set di parametri per ID
   getParameterSetById: async (id: number): Promise<any> => {
-    const response = await api.get(`/api/parameter-sets/${id}`);
+    const response = await api.get(`/parameter-sets/${id}`);
     return response.data;
   },
 
@@ -353,7 +353,7 @@ export const pricingApi = {
 
   // Crea un nuovo set di parametri
   createParameterSet: async (params: any): Promise<any> => {
-    const response = await api.post("/api/parameter-sets", params);
+    const response = await api.post("/parameter-sets", params);
     return response.data;
   },
 
@@ -379,7 +379,7 @@ export const pricingApi = {
   updateParameterSetsOrder: async (
     parameterSets: any[]
   ): Promise<{ message: string }> => {
-    const response = await api.put("/api/parameter-sets/order", {
+    const response = await api.put("/parameter-sets/order", {
       parameterSets,
     });
     return response.data;
@@ -391,7 +391,7 @@ export const pricingApi = {
 
   // Login utente
   login: async (username: string, password: string) => {
-    const response = await api.post("/api/auth/login", {
+    const response = await api.post("/auth/login", {
       username,
       password,
     });
@@ -405,7 +405,7 @@ export const pricingApi = {
     password: string,
     confirmPassword: string
   ) => {
-    const response = await api.post("/api/auth/register", {
+    const response = await api.post("/auth/register", {
       username,
       email,
       password,
@@ -416,31 +416,31 @@ export const pricingApi = {
 
   // Logout utente
   logout: async () => {
-    const response = await api.post("/api/auth/logout");
+    const response = await api.post("/auth/logout");
     return response.data;
   },
 
   // Ottieni informazioni utente corrente
   getCurrentUser: async () => {
-    const response = await api.get("/api/auth/me");
+    const response = await api.get("/auth/me");
     return response.data;
   },
 
   // Aggiorna profilo utente
   updateProfile: async (userData: any) => {
-    const response = await api.put("/api/auth/me", userData);
+    const response = await api.put("/auth/me", userData);
     return response.data;
   },
 
   // Refresh token
   refreshToken: async (refreshToken: string) => {
-    const response = await api.post("/api/auth/refresh", { refreshToken });
+    const response = await api.post("/auth/refresh", { refreshToken });
     return response.data;
   },
 
   // Ottieni tutti gli utenti (solo admin)
   getUsers: async () => {
-    const response = await api.get("/api/auth/users");
+    const response = await api.get("/auth/users");
     return response.data;
   },
 
@@ -462,7 +462,7 @@ export const pricingApi = {
     newPassword: string,
     confirmPassword: string
   ) => {
-    const response = await api.put("/api/auth/me/password", {
+    const response = await api.put("/auth/me/password", {
       currentPassword,
       newPassword,
       confirmPassword,
