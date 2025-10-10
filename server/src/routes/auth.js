@@ -7,6 +7,8 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
+const AuthService = require("../services/authService");
+const { passport, initializeUserModel } = require("../config/passport");
 const {
   authenticateToken,
   requireAdmin,
@@ -16,23 +18,28 @@ const {
 } = require("../middleware/auth");
 const { logger } = require("../../utils/logger");
 
-// Inizializza il modello User
+// Inizializza il modello User e AuthService
 let userModel;
+let authService;
 
-const initUserModel = (db) => {
+const initServices = (db) => {
   userModel = new User(db);
+  authService = new AuthService(userModel);
 };
 
-// Middleware per inizializzare il modello User
+// Middleware per inizializzare i servizi
 router.use((req, res, next) => {
-  if (!userModel) {
+  if (!userModel || !authService) {
     const db = req.app.locals.db;
-    initUserModel(db);
+    initServices(db);
   }
   next();
 });
 
-// POST /api/auth/login
+// Middleware per inizializzare Passport
+router.use(initializeUserModel(req.app.locals.db));
+
+// POST /api/auth/login (Local auth per admin)
 router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -43,12 +50,14 @@ router.post("/login", async (req, res) => {
         .json({ error: "Username e password sono richiesti" });
     }
 
-    // Trova l'utente
-    const user = await userModel.findByUsername(username);
-    if (!user) {
+    // Verifica che l'utente possa usare local auth
+    const validation = await authService.validateAdminLocalAuth(username);
+    if (!validation.valid) {
       logger.info(username, false, req.ip);
-      return res.status(401).json({ error: "Credenziali non valide" });
+      return res.status(401).json({ error: "Autenticazione locale disponibile solo per amministratori" });
     }
+
+    const user = validation.user;
 
     // Verifica la password
     const isValidPassword = await userModel.verifyPassword(
@@ -69,6 +78,12 @@ router.post("/login", async (req, res) => {
 
     // Log del login riuscito
     logger.info(username, true, req.ip);
+    authService.logAuthEvent('login_success', {
+      username,
+      provider: 'local',
+      role: user.role,
+      ip: req.ip
+    });
 
     // Rimuovi password dalla risposta
     const { password: _, ...userWithoutPassword } = user;
@@ -81,6 +96,131 @@ router.post("/login", async (req, res) => {
     });
   } catch (error) {
     logger.error(error, { context: "login", username: req.body.username });
+    authService.logAuthEvent('login_failed', {
+      username: req.body.username,
+      provider: 'local',
+      error: error.message,
+      ip: req.ip
+    });
+    res.status(500).json({ error: "Errore interno del server" });
+  }
+});
+
+// POST /api/auth/ldap (LDAP authentication)
+router.post("/ldap", async (req, res, next) => {
+  if (process.env.ENABLE_LDAP_AUTH !== 'true') {
+    return res.status(501).json({ error: "Autenticazione LDAP non abilitata" });
+  }
+
+  passport.authenticate('ldap', { session: false }, (err, user, info) => {
+    if (err) {
+      authService.logAuthEvent('provider_error', {
+        provider: 'ldap',
+        error: err.message,
+        ip: req.ip
+      });
+      return res.status(500).json({ error: "Errore del server di autenticazione" });
+    }
+
+    if (!user) {
+      authService.logAuthEvent('login_failed', {
+        provider: 'ldap',
+        reason: info?.message || 'Authentication failed',
+        ip: req.ip
+      });
+      return res.status(401).json({ error: info?.message || "Credenziali non valide" });
+    }
+
+    // Genera token
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    authService.logAuthEvent('login_success', {
+      username: user.username,
+      provider: 'ldap',
+      role: user.role,
+      ip: req.ip
+    });
+
+    // Rimuovi password dalla risposta
+    const { password: _, ...userWithoutPassword } = user;
+
+    res.json({
+      message: "Login LDAP effettuato con successo",
+      user: userWithoutPassword,
+      accessToken,
+      refreshToken,
+    });
+  })(req, res, next);
+});
+
+// GET /api/auth/google (Google OAuth redirect)
+router.get("/google", (req, res, next) => {
+  if (process.env.ENABLE_GOOGLE_AUTH !== 'true') {
+    return res.status(501).json({ error: "Autenticazione Google non abilitata" });
+  }
+
+  passport.authenticate('google', {
+    scope: ['profile', 'email']
+  })(req, res, next);
+});
+
+// GET /api/auth/google/callback (Google OAuth callback)
+router.get("/google/callback", (req, res, next) => {
+  passport.authenticate('google', { session: false }, (err, user, info) => {
+    if (err) {
+      authService.logAuthEvent('provider_error', {
+        provider: 'google',
+        error: err.message,
+        ip: req.ip
+      });
+      return res.redirect(`${process.env.FRONTEND_URL}/login?error=oauth_error`);
+    }
+
+    if (!user) {
+      authService.logAuthEvent('login_failed', {
+        provider: 'google',
+        reason: info?.message || 'Authentication failed',
+        ip: req.ip
+      });
+      return res.redirect(`${process.env.FRONTEND_URL}/login?error=oauth_failed`);
+    }
+
+    // Genera token
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    authService.logAuthEvent('login_success', {
+      username: user.username,
+      provider: 'google',
+      role: user.role,
+      ip: req.ip
+    });
+
+    // Redirect al frontend con i token
+    const tokens = encodeURIComponent(JSON.stringify({
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        auth_provider: user.auth_provider
+      }
+    }));
+
+    res.redirect(`${process.env.FRONTEND_URL}/auth/callback?tokens=${tokens}`);
+  })(req, res, next);
+});
+
+// GET /api/auth/providers (Lista provider disponibili)
+router.get("/providers", (req, res) => {
+  try {
+    const providers = authService.getAvailableProviders();
+    res.json({ providers });
+  } catch (error) {
+    logger.error(error, { context: "getProviders" });
     res.status(500).json({ error: "Errore interno del server" });
   }
 });

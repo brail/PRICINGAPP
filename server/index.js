@@ -1,12 +1,12 @@
 /**
  * ===========================================
- * PRICING CALCULATOR v0.2 - Server (Refactored)
+ * PRICING CALCULATOR v0.3.0 - Server (Multi-Provider Auth)
  * ===========================================
  *
  * Express.js server per l'applicazione Pricing Calculator
- * Architettura modulare con controllers, services e middleware separati
+ * Architettura modulare con supporto multi-provider per autenticazione
  *
- * @version 0.2.0-dev
+ * @version 0.3.0
  * @author Pricing Calculator Team
  * @since 2024
  */
@@ -14,6 +14,7 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const session = require("express-session");
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 // Importa il sistema di logging
@@ -26,6 +27,12 @@ const { initDatabase, seedDatabase } = require("./database");
 const { router: authRoutes, initUserModel } = require("./routes/auth");
 const createCalculationRoutes = require("./src/routes/calculations");
 const createParameterRoutes = require("./src/routes/parameters");
+
+// Importa Passport
+const {
+  passport,
+  initializeUserModel: initPassportUserModel,
+} = require("./src/config/passport");
 
 // Importa middleware
 const {
@@ -71,6 +78,20 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
+// Session per Passport (necessario per OAuth)
+app.use(
+  session({
+    secret: process.env.JWT_SECRET || "pricing-calculator-secret-key-2024",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false }, // In production, set to true se usi HTTPS
+  })
+);
+
+// Inizializza Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 // Logging delle richieste
 app.use(requestLogger);
 
@@ -90,18 +111,18 @@ const calculationService = new CalculationService(parameterService);
 // ===========================================
 
 // Route di autenticazione
-app.use("/api/auth", authRoutes);
+app.use("/auth", authRoutes);
 
 // Route per calcoli
 const calculationRoutes = createCalculationRoutes(
   parameterService,
   calculationService
 );
-app.use("/api", calculationRoutes);
+app.use("/", calculationRoutes);
 
 // Route per parametri
 const parameterRoutes = createParameterRoutes(parameterService);
-app.use("/api", parameterRoutes);
+app.use("/", parameterRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {
@@ -149,9 +170,16 @@ const startServer = async () => {
     await initDatabase();
     console.log("✅ Database inizializzato con successo");
 
+    // Imposta il database in app.locals per le routes
+    app.locals.db = require("./database").db;
+
     // Inizializza il modello User
     initUserModel(require("./database").db);
     console.log("✅ Modello User inizializzato");
+
+    // Inizializza Passport User Model
+    initPassportUserModel(require("./database").db);
+    console.log("✅ Passport User Model inizializzato");
 
     // Seeding del database
     await seedDatabase();

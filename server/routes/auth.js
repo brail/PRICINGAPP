@@ -1,12 +1,14 @@
 /**
- * Authentication Routes per Pricing Calculator v0.2
- * Gestisce login, registrazione e gestione utenti
+ * Authentication Routes per Pricing Calculator v0.3.0
+ * Gestisce login multi-provider, registrazione e gestione utenti
  */
 
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
+const AuthService = require("../src/services/authService");
+const { passport, initializeUserModel } = require("../src/config/passport");
 const {
   authenticateToken,
   requireAdmin,
@@ -16,26 +18,33 @@ const {
 } = require("../middleware/auth");
 const { loggers } = require("../utils/logger");
 
-// Inizializza il modello User
+// Inizializza il modello User e AuthService
 let userModel;
+let authService;
 
-const initUserModel = (db) => {
+const initServices = (db) => {
   userModel = new User(db);
+  authService = new AuthService(userModel);
 };
 
-// Middleware per inizializzare il modello User
+// Middleware per inizializzare i servizi
 router.use((req, res, next) => {
-  if (!userModel) {
+  if (!userModel || !authService) {
     const db = req.app.locals.db;
-    initUserModel(db);
+    initServices(db);
+    console.log("✅ Auth services initialized");
   }
   next();
 });
 
-// POST /api/auth/login
+// Middleware semplificato - rimuovo l'inizializzazione Passport problematica
+
+// POST /api/auth/login - VERSIONE SEMPLIFICATA PER DEBUG
 router.post("/login", async (req, res) => {
   try {
+    console.log("Login endpoint called");
     const { username, password } = req.body;
+    console.log("Username:", username);
 
     if (!username || !password) {
       return res
@@ -43,12 +52,15 @@ router.post("/login", async (req, res) => {
         .json({ error: "Username e password sono richiesti" });
     }
 
-    // Trova l'utente
-    const user = await userModel.findByUsername(username);
-    if (!user) {
-      loggers.auth.login(username, false, req.ip);
-      return res.status(401).json({ error: "Credenziali non valide" });
+    // Verifica che l'utente possa usare local auth
+    const validation = await authService.validateAdminLocalAuth(username);
+    if (!validation.valid) {
+      return res.status(401).json({
+        error: "Autenticazione locale disponibile solo per amministratori",
+      });
     }
+
+    const user = validation.user;
 
     // Verifica la password
     const isValidPassword = await userModel.verifyPassword(
@@ -56,7 +68,6 @@ router.post("/login", async (req, res) => {
       user.password
     );
     if (!isValidPassword) {
-      loggers.auth.login(username, false, req.ip);
       return res.status(401).json({ error: "Credenziali non valide" });
     }
 
@@ -66,9 +77,6 @@ router.post("/login", async (req, res) => {
     // Genera token
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
-
-    // Log del login riuscito
-    loggers.auth.login(username, true, req.ip);
 
     // Rimuovi password dalla risposta
     const { password: _, ...userWithoutPassword } = user;
@@ -80,7 +88,176 @@ router.post("/login", async (req, res) => {
       refreshToken,
     });
   } catch (error) {
-    loggers.error(error, { context: "login", username: req.body.username });
+    console.error("Login error:", error);
+    res.status(500).json({ error: "Errore interno del server" });
+  }
+});
+
+// POST /api/auth/ldap (LDAP authentication)
+router.post("/ldap", async (req, res, next) => {
+  if (process.env.ENABLE_LDAP_AUTH !== "true") {
+    return res.status(501).json({ error: "Autenticazione LDAP non abilitata" });
+  }
+
+  // Usa direttamente il servizio LDAP invece di Passport
+  try {
+    console.log("🔍 LDAP endpoint called, userModel:", !!userModel);
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res
+        .status(400)
+        .json({ error: "Username e password sono richiesti" });
+    }
+
+    // Importa il servizio LDAP
+    const LdapService = require("../src/services/ldapService");
+    const ldapService = new LdapService();
+
+    // Autentica utente tramite LDAP
+    const ldapUserData = await ldapService.authenticateUser(username, password);
+
+    // Estrai informazioni utente da LDAP
+    const ldapUser = {
+      provider: "ldap",
+      providerUserId: ldapUserData.username,
+      username: ldapUserData.username,
+      email: ldapUserData.email,
+      displayName: ldapUserData.displayName,
+      groups: ldapUserData.groups,
+      metadata: {
+        ldapGroups: ldapUserData.groups,
+        displayName: ldapUserData.displayName,
+        givenName: ldapUserData.givenName,
+        surname: ldapUserData.surname,
+        userPrincipalName: ldapUserData.userPrincipalName,
+        lastLdapSync: new Date().toISOString(),
+      },
+    };
+
+    // Determina ruolo basato sui gruppi AD
+    const role = ldapService.determineUserRole(ldapUser.groups);
+
+    // JIT Provisioning - crea istanza User direttamente
+    const User = require("../src/models/User");
+    const userModelInstance = new User(req.app.locals.db);
+
+    const localUser = await userModelInstance.findOrCreateFromProvider({
+      provider: "ldap",
+      providerUserId: ldapUser.providerUserId,
+      username: ldapUser.username,
+      email: ldapUser.email,
+      role,
+      metadata: ldapUser.metadata,
+    });
+
+    // Genera token
+    const accessToken = generateAccessToken(localUser);
+    const refreshToken = generateRefreshToken(localUser);
+
+    // Rimuovi password dalla risposta
+    const { password: _, ...userWithoutPassword } = localUser;
+
+    authService.logAuthEvent("login_success", {
+      username: localUser.username,
+      provider: "ldap",
+      role: localUser.role,
+      ip: req.ip,
+    });
+
+    res.json({
+      message: "Login LDAP effettuato con successo",
+      user: userWithoutPassword,
+      accessToken,
+      refreshToken,
+    });
+  } catch (error) {
+    authService.logAuthEvent("provider_error", {
+      provider: "ldap",
+      error: error.message,
+      ip: req.ip,
+    });
+    return res
+      .status(401)
+      .json({ error: error.message || "Credenziali non valide" });
+  }
+});
+
+// GET /api/auth/google (Google OAuth redirect)
+router.get("/google", (req, res, next) => {
+  if (process.env.ENABLE_GOOGLE_AUTH !== "true") {
+    return res
+      .status(501)
+      .json({ error: "Autenticazione Google non abilitata" });
+  }
+
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+  })(req, res, next);
+});
+
+// GET /api/auth/google/callback (Google OAuth callback)
+router.get("/google/callback", (req, res, next) => {
+  passport.authenticate("google", { session: false }, (err, user, info) => {
+    if (err) {
+      authService.logAuthEvent("provider_error", {
+        provider: "google",
+        error: err.message,
+        ip: req.ip,
+      });
+      return res.redirect(
+        `${process.env.FRONTEND_URL}/login?error=oauth_error`
+      );
+    }
+
+    if (!user) {
+      authService.logAuthEvent("login_failed", {
+        provider: "google",
+        reason: info?.message || "Authentication failed",
+        ip: req.ip,
+      });
+      return res.redirect(
+        `${process.env.FRONTEND_URL}/login?error=oauth_failed`
+      );
+    }
+
+    // Genera token
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    authService.logAuthEvent("login_success", {
+      username: user.username,
+      provider: "google",
+      role: user.role,
+      ip: req.ip,
+    });
+
+    // Redirect al frontend con i token
+    const tokens = encodeURIComponent(
+      JSON.stringify({
+        accessToken,
+        refreshToken,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          auth_provider: user.auth_provider,
+        },
+      })
+    );
+
+    res.redirect(`${process.env.FRONTEND_URL}/auth/callback?tokens=${tokens}`);
+  })(req, res, next);
+});
+
+// GET /api/auth/providers (Lista provider disponibili)
+router.get("/providers", (req, res) => {
+  try {
+    const providers = authService.getAvailableProviders();
+    res.json({ providers });
+  } catch (error) {
+    loggers.error(error, { context: "getProviders" });
     res.status(500).json({ error: "Errore interno del server" });
   }
 });
@@ -390,4 +567,4 @@ router.put(
   }
 );
 
-module.exports = { router, initUserModel };
+module.exports = { router, initUserModel: initServices };
