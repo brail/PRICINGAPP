@@ -35,6 +35,9 @@ RUN apk add --no-cache dumb-init
 # Copia build dell'applicazione
 COPY --from=builder /app/build /usr/share/nginx/html
 
+# Copia configurazione Nginx per SPA
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Crea directory necessarie con permessi corretti
 RUN mkdir -p /var/log/nginx /var/cache/nginx/client_temp /var/cache/nginx/proxy_temp /var/cache/nginx/fastcgi_temp /var/cache/nginx/uwsgi_temp /var/cache/nginx/scgi_temp /tmp && \
     chmod 755 /tmp && \
