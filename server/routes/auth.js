@@ -80,7 +80,7 @@ router.post("/login", async (req, res) => {
       refreshToken,
     });
   } catch (error) {
-    loggers.error(error, { context: "login", username });
+    loggers.error(error, { context: "login", username: req.body.username });
     res.status(500).json({ error: "Errore interno del server" });
   }
 });
