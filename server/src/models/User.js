@@ -18,12 +18,15 @@ class User {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
         email TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
+        password TEXT,
         role TEXT DEFAULT 'user' CHECK(role IN ('admin', 'user', 'demo')),
         is_active BOOLEAN DEFAULT 1,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         last_login DATETIME,
-        preferences TEXT DEFAULT '{}'
+        preferences TEXT DEFAULT '{}',
+        auth_provider TEXT DEFAULT 'local',
+        provider_user_id TEXT,
+        provider_metadata TEXT
       )
     `;
 
@@ -40,22 +43,54 @@ class User {
 
   // Crea un nuovo utente
   async create(userData) {
-    const { username, email, password, role = "user" } = userData;
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const {
+      username,
+      email,
+      password,
+      role = "user",
+      authProvider = "local",
+      providerUserId = null,
+      providerMetadata = null,
+    } = userData;
+
+    let hashedPassword = null;
+    if (password) {
+      hashedPassword = await bcrypt.hash(password, 10);
+    }
 
     const sql = `
-      INSERT INTO users (username, email, password, role)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO users (username, email, password, role, auth_provider, provider_user_id, provider_metadata)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
     return new Promise((resolve, reject) => {
-      this.db.run(sql, [username, email, hashedPassword, role], function (err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve({ id: this.lastID, username, email, role });
+      this.db.run(
+        sql,
+        [
+          username,
+          email,
+          hashedPassword,
+          role,
+          authProvider,
+          providerUserId,
+          providerMetadata,
+        ],
+        function (err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve({
+              id: this.lastID,
+              username,
+              email,
+              role,
+              authProvider,
+              providerUserId,
+              providerMetadata,
+            });
+          }
         }
-      });
+      );
     });
   }
 
@@ -80,6 +115,96 @@ class User {
 
     return new Promise((resolve, reject) => {
       this.db.get(sql, [id], (err, row) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(row);
+        }
+      });
+    });
+  }
+
+  // Trova utente per provider e provider_user_id
+  async findByProviderUserId(provider, providerUserId) {
+    const sql =
+      "SELECT * FROM users WHERE auth_provider = ? AND provider_user_id = ? AND is_active = 1";
+
+    return new Promise((resolve, reject) => {
+      this.db.get(sql, [provider, providerUserId], (err, row) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(row);
+        }
+      });
+    });
+  }
+
+  // Trova o crea utente da provider (JIT Provisioning)
+  async findOrCreateFromProvider(providerData) {
+    const {
+      provider,
+      providerUserId,
+      username,
+      email,
+      role = "user",
+      metadata = null,
+    } = providerData;
+
+    try {
+      // Cerca utente esistente
+      let user = await this.findByProviderUserId(provider, providerUserId);
+
+      if (user) {
+        // Aggiorna ultimo login e metadati se necessario
+        await this.updateLastLogin(user.id);
+        if (metadata) {
+          await this.update(user.id, {
+            provider_metadata: JSON.stringify(metadata),
+          });
+        }
+        return user;
+      }
+
+      // Cerca per email se esiste già un utente con questa email
+      const existingUser = await this.findByEmail(email);
+      if (existingUser) {
+        // Aggiorna utente esistente con provider info
+        await this.update(existingUser.id, {
+          auth_provider: provider,
+          provider_user_id: providerUserId,
+          provider_metadata: metadata ? JSON.stringify(metadata) : null,
+        });
+        return await this.findById(existingUser.id);
+      }
+
+      // Crea nuovo utente
+      const newUser = await this.create({
+        username,
+        email,
+        role,
+        authProvider: provider,
+        providerUserId,
+        providerMetadata: metadata ? JSON.stringify(metadata) : null,
+      });
+
+      return await this.findById(newUser.id);
+    } catch (error) {
+      logger.error(error, {
+        context: "findOrCreateFromProvider",
+        provider,
+        providerUserId,
+      });
+      throw error;
+    }
+  }
+
+  // Trova utente per email
+  async findByEmail(email) {
+    const sql = "SELECT * FROM users WHERE email = ? AND is_active = 1";
+
+    return new Promise((resolve, reject) => {
+      this.db.get(sql, [email], (err, row) => {
         if (err) {
           reject(err);
         } else {
@@ -149,6 +274,18 @@ class User {
     if (userData.password) {
       fields.push("password = ?");
       values.push(userData.password);
+    }
+    if (userData.auth_provider) {
+      fields.push("auth_provider = ?");
+      values.push(userData.auth_provider);
+    }
+    if (userData.provider_user_id) {
+      fields.push("provider_user_id = ?");
+      values.push(userData.provider_user_id);
+    }
+    if (userData.provider_metadata) {
+      fields.push("provider_metadata = ?");
+      values.push(userData.provider_metadata);
     }
 
     if (fields.length === 0) {

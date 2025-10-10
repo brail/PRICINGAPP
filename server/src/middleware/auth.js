@@ -38,6 +38,15 @@ const requireAdmin = (req, res, next) => {
   }
 };
 
+// Middleware per verificare che l'utente usi autenticazione locale (solo per admin)
+const requireLocalAdmin = (req, res, next) => {
+  if (req.user && req.user.role === "admin" && req.user.auth_provider === "local") {
+    next();
+  } else {
+    res.status(403).json({ error: "Accesso negato. Richiesta autenticazione locale per amministratori." });
+  }
+};
+
 // Genera token di accesso
 const generateAccessToken = (user) => {
   return jwt.sign(
@@ -80,6 +89,7 @@ const verifyRefreshToken = (token) => {
 module.exports = {
   authenticateToken,
   requireAdmin,
+  requireLocalAdmin,
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
