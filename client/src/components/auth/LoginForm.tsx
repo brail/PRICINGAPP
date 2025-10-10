@@ -1,9 +1,9 @@
 /**
- * Pricing Calculator v0.2 - Login Form Component
- * Form di login con Material-UI
+ * Pricing Calculator v0.3.0 - Login Form Component
+ * Form di login multi-provider con Material-UI
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -14,16 +14,29 @@ import {
   CircularProgress,
   InputAdornment,
   IconButton,
+  Divider,
+  Paper,
 } from "@mui/material";
 import CustomButton from "../CustomButton";
+import ProviderButton from "./ProviderButton";
 import { Visibility, VisibilityOff, Person, Lock } from "@mui/icons-material";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth, AuthProvider } from "../../contexts/AuthContext";
 import Logo from "../Logo";
 
 interface LoginFormProps {}
 
 const LoginForm: React.FC<LoginFormProps> = () => {
-  const { login, isLoading, error, clearError } = useAuth();
+  const {
+    login,
+    loginWithLDAP,
+    loginWithGoogle,
+    handleOAuthCallback,
+    isLoading,
+    error,
+    clearError,
+    getAvailableProviders,
+  } = useAuth();
+
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -32,6 +45,51 @@ const LoginForm: React.FC<LoginFormProps> = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
+  const [availableProviders, setAvailableProviders] = useState<AuthProvider[]>(
+    []
+  );
+  const [selectedProvider, setSelectedProvider] = useState<string>("");
+
+  // Carica provider disponibili all'avvio
+  useEffect(() => {
+    const loadProviders = async () => {
+      try {
+        const providers = await getAvailableProviders();
+        setAvailableProviders(providers);
+        // Non selezionare automaticamente un provider
+      } catch (error) {
+        console.error("Errore nel caricamento dei provider:", error);
+      }
+    };
+
+    loadProviders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Rimuovo getAvailableProviders dalle dipendenze per evitare loop infinito
+
+  // Gestione callback OAuth
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tokens = urlParams.get("tokens");
+    const error = urlParams.get("error");
+
+    if (tokens) {
+      // Gestisci callback OAuth
+      handleOAuthCallback(tokens);
+      // Pulisci URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (error) {
+      // Gestisci errori OAuth
+      const errorMessages: Record<string, string> = {
+        oauth_error: "Errore durante l'autenticazione OAuth",
+        oauth_failed: "Autenticazione OAuth fallita",
+      };
+      setValidationErrors({
+        general: errorMessages[error] || "Errore di autenticazione",
+      });
+      // Pulisci URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   const handleInputChange =
     (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,10 +132,27 @@ const LoginForm: React.FC<LoginFormProps> = () => {
     }
 
     try {
-      await login(formData.username, formData.password);
+      switch (selectedProvider) {
+        case "local":
+          await login(formData.username, formData.password);
+          break;
+        case "ldap":
+          await loginWithLDAP(formData.username, formData.password);
+          break;
+        default:
+          throw new Error("Provider non supportato");
+      }
     } catch (error) {
       // L'errore è gestito dal context
       console.error("Errore nel login:", error);
+    }
+  };
+
+  const handleProviderClick = (providerId: string) => {
+    if (providerId === "google") {
+      loginWithGoogle();
+    } else {
+      setSelectedProvider(providerId);
     }
   };
 
@@ -134,82 +209,124 @@ const LoginForm: React.FC<LoginFormProps> = () => {
             </Alert>
           )}
 
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Username"
-              value={formData.username}
-              onChange={handleInputChange("username")}
-              error={!!validationErrors.username}
-              helperText={validationErrors.username}
-              disabled={isLoading}
-              sx={{ mb: 2 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Person color="action" />
-                  </InputAdornment>
-                ),
-              }}
-            />
+          {validationErrors.general && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {validationErrors.general}
+            </Alert>
+          )}
 
-            <TextField
-              fullWidth
-              label="Password"
-              type={showPassword ? "text" : "password"}
-              value={formData.password}
-              onChange={handleInputChange("password")}
-              error={!!validationErrors.password}
-              helperText={validationErrors.password}
-              disabled={isLoading}
-              sx={{ mb: 3 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Lock color="action" />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={handleTogglePasswordVisibility}
-                      edge="end"
-                      disabled={isLoading}
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
+          {/* Provider Selection */}
+          {availableProviders.length > 0 && (
+            <Box sx={{ mb: 3 }}>
+              {availableProviders.map((provider) => (
+                <ProviderButton
+                  key={provider.id}
+                  provider={provider}
+                  onClick={() => handleProviderClick(provider.id)}
+                  disabled={isLoading}
+                />
+              ))}
+            </Box>
+          )}
 
-            <CustomButton
-              type="submit"
-              variant="primary"
-              size="lg"
-              disabled={isLoading}
-              className="full-width"
-            >
-              {isLoading ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                "Accedi"
-              )}
-            </CustomButton>
+          {/* Divider */}
+          {selectedProvider &&
+            availableProviders.find((p) => p.id === selectedProvider)
+              ?.requiresPassword && (
+              <Box sx={{ display: "flex", alignItems: "center", my: 2 }}>
+                <Divider sx={{ flexGrow: 1 }} />
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ px: 2 }}
+                >
+                  oppure
+                </Typography>
+                <Divider sx={{ flexGrow: 1 }} />
+              </Box>
+            )}
 
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{
-                display: "block",
-                textAlign: "center",
-                fontSize: "0.75rem",
-                opacity: 0.7,
-              }}
-            >
-              v0.2.0
-            </Typography>
-          </form>
+          {/* Form per provider che richiedono password */}
+          {selectedProvider &&
+            availableProviders.find((p) => p.id === selectedProvider)
+              ?.requiresPassword && (
+              <form onSubmit={handleSubmit}>
+                <TextField
+                  fullWidth
+                  label="Username"
+                  value={formData.username}
+                  onChange={handleInputChange("username")}
+                  error={!!validationErrors.username}
+                  helperText={validationErrors.username}
+                  disabled={isLoading}
+                  sx={{ mb: 2 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Person color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                <TextField
+                  fullWidth
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={handleInputChange("password")}
+                  error={!!validationErrors.password}
+                  helperText={validationErrors.password}
+                  disabled={isLoading}
+                  sx={{ mb: 3 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Lock color="action" />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleTogglePasswordVisibility}
+                          edge="end"
+                          disabled={isLoading}
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                <CustomButton
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  disabled={isLoading}
+                  className="full-width"
+                >
+                  {isLoading ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    "Accedi"
+                  )}
+                </CustomButton>
+
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{
+                    display: "block",
+                    textAlign: "center",
+                    fontSize: "0.75rem",
+                    opacity: 0.7,
+                  }}
+                >
+                  v0.3.0
+                </Typography>
+              </form>
+            )}
         </CardContent>
       </Card>
     </Box>

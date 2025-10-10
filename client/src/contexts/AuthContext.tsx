@@ -17,10 +17,22 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  role: "admin" | "user";
+  role: "admin" | "user" | "demo";
   created_at?: string;
   last_login?: string;
   preferences?: Record<string, any>;
+  auth_provider?: "local" | "ldap" | "google";
+  provider_user_id?: string;
+  provider_metadata?: Record<string, any>;
+}
+
+export interface AuthProvider {
+  id: string;
+  name: string;
+  description: string;
+  enabled: boolean;
+  icon: string;
+  requiresPassword: boolean;
 }
 
 export interface AuthState {
@@ -34,6 +46,9 @@ export interface AuthState {
 
 export interface AuthContextType extends AuthState {
   login: (username: string, password: string) => Promise<void>;
+  loginWithLDAP: (username: string, password: string) => Promise<void>;
+  loginWithGoogle: () => void;
+  handleOAuthCallback: (tokens: string) => void;
   register: (
     username: string,
     email: string,
@@ -44,6 +59,7 @@ export interface AuthContextType extends AuthState {
   refreshAuth: () => Promise<void>;
   updateUser: (userData: Partial<User>) => Promise<void>;
   clearError: () => void;
+  getAvailableProviders: () => Promise<AuthProvider[]>;
 }
 
 // Context
@@ -63,6 +79,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading: true,
     error: null,
   });
+
+  const [availableProviders, setAvailableProviders] = useState<AuthProvider[]>(
+    []
+  );
 
   // Carica lo stato di autenticazione dal localStorage all'avvio
   useEffect(() => {
@@ -132,7 +152,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loadAuthState();
   }, []);
 
-  // Funzione di login
+  // Funzione di login locale (admin)
   const login = async (username: string, password: string) => {
     try {
       setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
@@ -166,6 +186,79 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         error: errorMessage,
       }));
       throw new Error(errorMessage);
+    }
+  };
+
+  // Funzione di login LDAP
+  const loginWithLDAP = async (username: string, password: string) => {
+    try {
+      setAuthState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+      const response = await pricingApi.post("/auth/ldap", {
+        username,
+        password,
+      });
+
+      const { user, accessToken, refreshToken } = response.data;
+
+      // Salva nel localStorage
+      localStorage.setItem("token", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      setAuthState({
+        user,
+        token: accessToken,
+        refreshToken,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      });
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.error || "Errore durante il login LDAP";
+      setAuthState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: errorMessage,
+      }));
+      throw new Error(errorMessage);
+    }
+  };
+
+  // Funzione di login Google (redirect)
+  const loginWithGoogle = () => {
+    window.location.href = `${
+      process.env.REACT_APP_API_URL || "http://localhost:5001"
+    }/auth/google`;
+  };
+
+  // Gestione callback OAuth
+  const handleOAuthCallback = (tokens: string) => {
+    try {
+      const tokenData = JSON.parse(decodeURIComponent(tokens));
+      const { user, accessToken, refreshToken } = tokenData;
+
+      // Salva nel localStorage
+      localStorage.setItem("token", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      setAuthState({
+        user,
+        token: accessToken,
+        refreshToken,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      });
+    } catch (error) {
+      console.error("Errore nel parsing dei token OAuth:", error);
+      setAuthState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: "Errore durante l'autenticazione OAuth",
+      }));
     }
   };
 
@@ -282,14 +375,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setAuthState((prev) => ({ ...prev, error: null }));
   };
 
+  // Funzione per ottenere provider disponibili
+  const getAvailableProviders = async (): Promise<AuthProvider[]> => {
+    try {
+      const response = await pricingApi.get("/auth/providers");
+      const providers = response.data.providers;
+      // Non modifichiamo lo stato globale qui per evitare loop infiniti
+      return providers;
+    } catch (error) {
+      console.error("Errore nel caricamento dei provider:", error);
+      return [];
+    }
+  };
+
   const value: AuthContextType = {
     ...authState,
     login,
+    loginWithLDAP,
+    loginWithGoogle,
+    handleOAuthCallback,
     register,
     logout,
     refreshAuth,
     updateUser,
     clearError,
+    getAvailableProviders,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
