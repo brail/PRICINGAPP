@@ -17,7 +17,9 @@ RUN npm ci --silent
 COPY . .
 
 # Build dell'applicazione
-RUN npm run build
+# Force rebuild with correct API URL
+RUN echo "Building with REACT_APP_API_URL=$REACT_APP_API_URL" && \
+    npm run build
 
 # Stage di produzione
 FROM nginx:alpine
