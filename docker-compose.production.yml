@@ -12,8 +12,8 @@ services:
     networks:
       - pricing_network
     restart: unless-stopped
-    expose:
-      - "5001" # Solo per nginx, non esposto all'esterno
+    ports:
+      - "5001:5001"  # Esposto come in locale
     healthcheck:
       test:
         [
@@ -31,15 +31,16 @@ services:
       context: ./client
       dockerfile: Dockerfile
       args:
-        - REACT_APP_API_URL=http://luke.febos.local/pricingapp/api
+        - REACT_APP_API_URL=http://luke.febos.local:5001
         - PUBLIC_URL=/pricingapp
     container_name: pricing-calculator-frontend
     env_file:
       - ./client/.env.production
+    ports:
+      - "3000:80"  # Esposto come in locale
     networks:
       - pricing_network
     restart: unless-stopped
-    # Nessun port esposto - solo interno
     healthcheck:
       test:
         [
@@ -54,32 +55,7 @@ services:
       timeout: 10s
       retries: 3
 
-  nginx:
-    image: nginx:alpine
-    container_name: pricing-calculator-nginx
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/nginx-production.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - backend
-      - frontend
-    networks:
-      - pricing_network
-    restart: unless-stopped
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--no-verbose",
-          "--tries=1",
-          "--spider",
-          "http://localhost/pricingapp/health",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+# Nginx rimosso - usiamo architettura semplice come in locale
 
 volumes:
   pricing_data:
