@@ -95,12 +95,7 @@ volumes:
       type: none
       o: bind
       device: /opt/docker/pricingapp_data/logs
-  pricing_static:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /opt/docker/pricingapp_data/static
+# Volume pricing_static rimosso - i file statici sono nel container
 
 networks:
   pricing_network:
