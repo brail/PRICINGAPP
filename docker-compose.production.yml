@@ -31,7 +31,7 @@ services:
       context: ./client
       dockerfile: Dockerfile
       args:
-        - REACT_APP_API_URL=http://luke.febos.local:5001
+        - REACT_APP_API_URL=http://luke.febos.local/pricingapp/api
         - PUBLIC_URL=/pricingapp
     container_name: pricing-calculator-frontend
     env_file:
@@ -55,7 +55,32 @@ services:
       timeout: 10s
       retries: 3
 
-# Nginx rimosso - usiamo architettura semplice come in locale
+  nginx:
+    image: nginx:alpine
+    container_name: pricing-calculator-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx-production.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - pricing_network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   pricing_data:
