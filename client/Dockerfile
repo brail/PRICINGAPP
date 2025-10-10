@@ -1,5 +1,5 @@
 # Multi-stage build per frontend React
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 
 # Installa dipendenze di build
 RUN apk add --no-cache python3 make g++
