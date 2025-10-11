@@ -73,6 +73,38 @@ docker-compose logs -f
 
 ---
 
+## 🔐 **Credenziali di Default**
+
+### **Utente Amministratore**
+
+Al primo avvio dell'applicazione, viene creato automaticamente un utente amministratore con le seguenti credenziali:
+
+| Campo | Valore |
+|-------|--------|
+| **Username** | `admin` |
+| **Password** | `PricingApp2025!!` |
+| **Email** | `admin@pricing.com` |
+| **Nome** | `Admin` |
+| **Cognome** | `Default` |
+| **Ruolo** | `admin` |
+| **Provider** | `local` |
+
+### **Sicurezza**
+
+> ⚠️ **IMPORTANTE**: 
+> - Cambia immediatamente la password di default dopo il primo accesso
+> - L'utente admin ha accesso completo a tutte le funzionalità del sistema
+> - È possibile creare altri utenti amministratori dalla sezione "Gestione Utenti"
+
+### **Accesso Iniziale**
+
+1. Avvia l'applicazione con `npm run dev`
+2. Vai su `http://localhost:3000`
+3. Usa le credenziali sopra indicate per effettuare il login
+4. Cambia la password dalla sezione "Profilo"
+
+---
+
 ## ⚙️ **Configurazione**
 
 ### **Variabili d'Ambiente**

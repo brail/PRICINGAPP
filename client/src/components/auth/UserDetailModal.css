@@ -1,0 +1,182 @@
+.user-detail-modal .modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.user-detail-modal .modal-header .MuiChip-root {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.user-detail-modal .modal-header .MuiChip-root:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.user-detail-modal .modal-content {
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.user-detail-modal .modal-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.user-detail-modal .section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.user-detail-modal .info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.user-detail-modal .info-item.full-width {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 768px) {
+  .user-detail-modal .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.user-detail-modal .section-title {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-detail-modal .section-title::before {
+  content: "";
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 2px;
+}
+
+.user-detail-modal .info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.user-detail-modal .info-item:last-child {
+  border-bottom: none;
+}
+
+.user-detail-modal .info-icon {
+  color: #667eea;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.user-detail-modal .bio-text {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.user-detail-modal .provider-info {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.user-detail-modal .sync-notice {
+  margin-top: 12px;
+  padding: 12px;
+  background: #e3f2fd;
+  border-radius: 6px;
+  border-left: 4px solid #2196f3;
+}
+
+.user-detail-modal .modal-actions {
+  padding: 16px 24px;
+  background: #f8f9fa;
+  border-top: 1px solid #e0e0e0;
+  gap: 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .user-detail-modal .modal-content {
+    padding: 16px;
+  }
+
+  .user-detail-modal .modal-header {
+    padding: 16px;
+  }
+
+  .user-detail-modal .modal-actions {
+    padding: 12px 16px;
+    flex-direction: column;
+  }
+
+  .user-detail-modal .modal-actions .MuiButton-root {
+    width: 100%;
+  }
+}
+
+/* Animazioni */
+.user-detail-modal .MuiDialog-paper {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Stili per i chip */
+.user-detail-modal .MuiChip-root {
+  font-size: 0.75rem;
+  height: 24px;
+}
+
+.user-detail-modal .MuiChip-icon {
+  font-size: 16px;
+}
+
+/* Stili per gli avatar */
+.user-detail-modal .MuiAvatar-root {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Stili per i divider */
+.user-detail-modal .MuiDivider-root {
+  background: linear-gradient(90deg, transparent, #e0e0e0, transparent);
+  height: 1px;
+}
+
+/* Hover effects */
+.user-detail-modal .info-item:hover {
+  background: #f8f9fa;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 0 -12px;
+  transition: all 0.2s ease;
+}

@@ -209,20 +209,21 @@ class User {
         return;
       }
 
-      // Crea utente admin
-      await this.create({
+      // Crea utente admin locale con profilo completo
+      const adminUser = await this.create({
         username: "admin",
         email: "admin@pricing.com",
-        password: "admin123",
+        password: "PricingApp2025!!",
         role: "admin",
+        auth_provider: "local"
       });
 
-      // Crea utente demo
-      await this.create({
-        username: "demo",
-        email: "demo@pricing.com",
-        password: "demo123",
-        role: "demo",
+      // Aggiorna il profilo dell'admin con nome e cognome
+      await this.updateProfile(adminUser.id, {
+        first_name: "Admin",
+        last_name: "Default",
+        timezone: "Europe/Rome",
+        locale: "it"
       });
 
       loggers.system.startup();

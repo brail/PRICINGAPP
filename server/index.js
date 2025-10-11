@@ -1,12 +1,13 @@
 /**
  * ===========================================
- * PRICING CALCULATOR v0.3.0 - Server (Multi-Provider Auth)
+ * PRICING CALCULATOR v0.3.1 - Server (Enhanced Profiles)
  * ===========================================
  *
  * Express.js server per l'applicazione Pricing Calculator
  * Architettura modulare con supporto multi-provider per autenticazione
+ * e gestione profili utente arricchiti
  *
- * @version 0.3.0
+ * @version 0.3.1
  * @author Pricing Calculator Team
  * @since 2024
  */
@@ -27,6 +28,7 @@ const { initDatabase, seedDatabase } = require("./database");
 const { router: authRoutes, initUserModel } = require("./routes/auth");
 const createCalculationRoutes = require("./src/routes/calculations");
 const createParameterRoutes = require("./src/routes/parameters");
+const createProfileRoutes = require("./src/routes/profile");
 
 // Importa Passport
 const {
@@ -140,16 +142,6 @@ app.get("/api/test-connection", (req, res) => {
 });
 
 // ===========================================
-// GESTIONE ERRORI
-// ===========================================
-
-// Route non trovata
-app.use(notFoundHandler);
-
-// Gestione errori centralizzata
-app.use(errorHandler);
-
-// ===========================================
 // INIZIALIZZAZIONE E AVVIO SERVER
 // ===========================================
 
@@ -160,7 +152,7 @@ app.use(errorHandler);
  */
 const startServer = async () => {
   try {
-    console.log("🚀 Avvio Pricing Calculator v0.2 (Refactored)...");
+    console.log("🚀 Avvio Pricing Calculator v0.3.1 (Enhanced Profiles)...");
     console.log(`📊 Ambiente: ${NODE_ENV}`);
     console.log(`🌐 Host: ${HOST}`);
     console.log(`🔌 Porta: ${PORT}`);
@@ -186,15 +178,35 @@ const startServer = async () => {
     console.log("✅ Seeding del database completato");
 
     // Seeding utenti di default
-    const User = require("./models/User");
+    const User = require("./src/models/User");
     const userModel = new User(require("./database").db);
     await userModel.initTable();
     await userModel.seedDefaultUsers();
     logger.info("Seeding utenti completato");
 
+    // Rendi userModel disponibile alle routes
+    app.locals.userModel = userModel;
+
+    // Inizializza profile routes
+    const profileRoutes = createProfileRoutes(userModel);
+    app.use("/", profileRoutes);
+    console.log("✅ Profile routes inizializzate");
+
     // Carica i parametri dal database
     await parameterService.loadParametersFromDatabase();
     logger.info("Parametri caricati dal database");
+
+    // ===========================================
+    // GESTIONE ERRORI (dopo tutte le route)
+    // ===========================================
+
+    // Route non trovata
+    app.use(notFoundHandler);
+
+    // Gestione errori centralizzata
+    app.use(errorHandler);
+
+    console.log("✅ Middleware di gestione errori inizializzato");
 
     // Log di avvio sistema
     loggers.system.startup();

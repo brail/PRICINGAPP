@@ -18,8 +18,13 @@ import {
   Alert,
   CircularProgress,
   Typography,
+  IconButton,
+  Menu,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import CustomButton from "../CustomButton";
+import UserDetailModal from "./UserDetailModal";
 import {
   Edit,
   Delete,
@@ -27,6 +32,8 @@ import {
   Lock,
   PersonAdd,
   Warning,
+  MoreVert,
+  Person,
 } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
 import { pricingApi } from "../../services/api";
@@ -47,6 +54,17 @@ interface User {
   is_active: boolean;
   created_at: string;
   last_login: string | null;
+  auth_provider?: "local" | "ldap" | "google";
+  provider_user_id?: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  avatar_url?: string;
+  timezone?: string;
+  locale?: string;
+  bio?: string;
+  profile_updated_at?: string;
+  email_verified_at?: string;
 }
 
 const UserManagement: React.FC = () => {
@@ -62,12 +80,26 @@ const UserManagement: React.FC = () => {
     useState(false);
   const [deleteConfirmDialogOpen, setDeleteConfirmDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedUserForDetail, setSelectedUserForDetail] =
+    useState<User | null>(null);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [actionMenuAnchor, setActionMenuAnchor] = useState<null | HTMLElement>(
+    null
+  );
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [editForm, setEditForm] = useState({
     username: "",
     email: "",
     role: "user" as "admin" | "user",
     is_active: true,
+    first_name: "",
+    last_name: "",
+    phone: "",
+    avatar_url: "",
+    timezone: "Europe/Rome",
+    locale: "it",
+    bio: "",
   });
   const [createForm, setCreateForm] = useState({
     username: "",
@@ -76,10 +108,17 @@ const UserManagement: React.FC = () => {
     confirmPassword: "",
     role: "user" as "admin" | "user",
     is_active: true,
+    first_name: "",
+    last_name: "",
+    phone: "",
+    avatar_url: "",
+    timezone: "Europe/Rome",
+    locale: "it",
+    bio: "",
   });
 
   // Carica la lista utenti
-  const loadUsers = async () => {
+  const loadUsers = React.useCallback(async () => {
     try {
       setLoading(true);
       clearErrors();
@@ -94,13 +133,27 @@ const UserManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // Funzioni stabili, nessuna dipendenza necessaria
 
   useEffect(() => {
     if (currentUser?.role === "admin") {
       loadUsers();
     }
-  }, [currentUser]);
+  }, [currentUser?.role, loadUsers]); // Includiamo loadUsers nelle dipendenze
+
+  // Gestione menu azioni
+  const handleActionMenuOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    user: User
+  ) => {
+    setActionMenuAnchor(event.currentTarget);
+    setSelectedUser(user);
+  };
+
+  const handleActionMenuClose = () => {
+    setActionMenuAnchor(null);
+    setSelectedUser(null);
+  };
 
   // Gestione modifica utente
   const handleEditUser = (user: User) => {
@@ -110,14 +163,23 @@ const UserManagement: React.FC = () => {
       email: user.email,
       role: user.role,
       is_active: user.is_active,
+      first_name: user.first_name || "",
+      last_name: user.last_name || "",
+      phone: user.phone || "",
+      avatar_url: user.avatar_url || "",
+      timezone: user.timezone || "Europe/Rome",
+      locale: user.locale || "it",
+      bio: user.bio || "",
     });
     setEditDialogOpen(true);
+    handleActionMenuClose();
   };
 
   // Gestione cambio password
   const handleChangePassword = (user: User) => {
     setEditingUser(user);
     setChangePasswordDialogOpen(true);
+    handleActionMenuClose();
   };
 
   // Gestione creazione utente
@@ -129,59 +191,38 @@ const UserManagement: React.FC = () => {
       confirmPassword: "",
       role: "user",
       is_active: true,
+      first_name: "",
+      last_name: "",
+      phone: "",
+      avatar_url: "",
+      timezone: "Europe/Rome",
+      locale: "it",
+      bio: "",
     });
     setCreateDialogOpen(true);
     clearErrors();
   };
 
-  const handleSaveNewUser = async () => {
-    // Validazione
-    if (!createForm.username || !createForm.email || !createForm.password) {
-      addError(
-        createBusinessError.validation(
-          "Tutti i campi sono obbligatori per creare un nuovo utente."
-        )
-      );
-      return;
-    }
-
+  // Submit creazione utente
+  const handleCreateUserSubmit = async () => {
     if (createForm.password !== createForm.confirmPassword) {
-      addError(
-        createBusinessError.validation(
-          "Le password inserite non coincidono. Verifica e riprova."
-        )
-      );
-      return;
-    }
-
-    if (createForm.password.length < 6) {
-      addError(
-        createBusinessError.validation(
-          "La password deve essere di almeno 6 caratteri per motivi di sicurezza."
-        )
-      );
+      addError(createBusinessError.validation("Le password non coincidono"));
       return;
     }
 
     try {
       setLoading(true);
       clearErrors();
-      await pricingApi.post("/auth/register", {
-        username: createForm.username,
-        email: createForm.email,
-        password: createForm.password,
-        role: createForm.role,
-      });
-      await loadUsers();
+
+      const { confirmPassword, ...userData } = createForm;
+      await pricingApi.post("/auth/users", userData);
+
       setCreateDialogOpen(false);
-      showSuccess(
-        "Utente creato",
-        `L'utente ${createForm.username} è stato creato con successo.`
-      );
+      loadUsers();
     } catch (err: any) {
       addError(
         createBusinessError.network(
-          "Impossibile creare il nuovo utente. Verifica i dati inseriti e riprova."
+          "Impossibile creare l'utente. Verifica i dati e riprova."
         )
       );
     } finally {
@@ -189,24 +230,22 @@ const UserManagement: React.FC = () => {
     }
   };
 
+  // Submit modifica utente
   const handleSaveUser = async () => {
     if (!editingUser) return;
 
     try {
       setLoading(true);
       clearErrors();
+
       await pricingApi.put(`/auth/users/${editingUser.id}`, editForm);
-      await loadUsers();
+
       setEditDialogOpen(false);
-      setEditingUser(null);
-      showSuccess(
-        "Utente aggiornato",
-        `Le informazioni dell'utente ${editForm.username} sono state aggiornate con successo.`
-      );
+      loadUsers();
     } catch (err: any) {
       addError(
         createBusinessError.network(
-          "Impossibile aggiornare le informazioni dell'utente. Verifica i dati e riprova."
+          "Impossibile aggiornare l'utente. Verifica i dati e riprova."
         )
       );
     } finally {
@@ -218,6 +257,20 @@ const UserManagement: React.FC = () => {
   const handleDeleteUser = (user: User) => {
     setUserToDelete(user);
     setDeleteConfirmDialogOpen(true);
+    handleActionMenuClose();
+  };
+
+  // Gestione visualizzazione dettagli utente
+  const handleViewUserDetails = (user: User) => {
+    setSelectedUserForDetail(user);
+    setDetailModalOpen(true);
+    handleActionMenuClose();
+  };
+
+  // Gestione chiusura modal dettagli
+  const handleCloseDetailModal = () => {
+    setDetailModalOpen(false);
+    setSelectedUserForDetail(null);
   };
 
   const confirmDeleteUser = async () => {
@@ -283,7 +336,7 @@ const UserManagement: React.FC = () => {
               disabled={loading}
             >
               <PersonAdd className="btn-icon" />
-              Crea Utente
+              Crea Utente Locale
             </CustomButton>
             <CustomButton
               variant="secondary"
@@ -300,11 +353,10 @@ const UserManagement: React.FC = () => {
           <table className="users-table">
             <thead>
               <tr>
-                <th>Username</th>
-                <th>Email</th>
+                <th>Utente</th>
+                <th>Provider</th>
                 <th>Ruolo</th>
                 <th>Stato</th>
-                <th>Creato</th>
                 <th>Ultimo Login</th>
                 <th>Azioni</th>
               </tr>
@@ -312,24 +364,48 @@ const UserManagement: React.FC = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="loading-container">
+                  <td colSpan={6} className="loading-container">
                     <CircularProgress />
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="empty-state">
+                  <td colSpan={6} className="empty-state">
                     Nessun utente trovato
                   </td>
                 </tr>
               ) : (
                 users.map((user) => (
                   <tr key={user.id}>
-                    <td>{user.username}</td>
-                    <td>{user.email}</td>
+                    <td>
+                      <div className="user-info">
+                        <div className="user-name">
+                          {user.first_name && user.last_name
+                            ? `${user.first_name} ${user.last_name}`
+                            : user.username}
+                        </div>
+                        <div className="user-details">
+                          <span className="username">@{user.username}</span>
+                          <span className="email">{user.email}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span
+                        className={`user-chip provider-${
+                          user.auth_provider || "local"
+                        }`}
+                      >
+                        {user.auth_provider === "ldap"
+                          ? "🏢 AD"
+                          : user.auth_provider === "google"
+                          ? "🌐 Google"
+                          : "🔐 Locale"}
+                      </span>
+                    </td>
                     <td>
                       <span className={`user-chip ${user.role}`}>
-                        {user.role}
+                        {user.role === "admin" ? "👑 Admin" : "👤 User"}
                       </span>
                     </td>
                     <td>
@@ -338,41 +414,19 @@ const UserManagement: React.FC = () => {
                           user.is_active ? "active" : "inactive"
                         }`}
                       >
-                        {user.is_active ? "Attivo" : "Disattivato"}
+                        {user.is_active ? "✅ Attivo" : "❌ Disattivato"}
                       </span>
                     </td>
-                    <td>{formatDate(user.created_at)}</td>
                     <td>{formatDate(user.last_login)}</td>
                     <td>
-                      <div className="user-actions">
-                        <CustomButton
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditUser(user)}
-                          disabled={loading}
-                          title="Modifica utente"
-                        >
-                          <Edit />
-                        </CustomButton>
-                        <CustomButton
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleChangePassword(user)}
-                          disabled={loading}
-                          title="Cambia password"
-                        >
-                          <Lock />
-                        </CustomButton>
-                        <CustomButton
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleDeleteUser(user)}
-                          disabled={loading || user.id === currentUser?.id}
-                          title="Elimina utente"
-                        >
-                          <Delete />
-                        </CustomButton>
-                      </div>
+                      <IconButton
+                        onClick={(e) => handleActionMenuOpen(e, user)}
+                        disabled={loading}
+                        size="small"
+                        title="Azioni utente"
+                      >
+                        <MoreVert />
+                      </IconButton>
                     </td>
                   </tr>
                 ))
@@ -382,16 +436,86 @@ const UserManagement: React.FC = () => {
         </div>
       </div>
 
+      {/* Menu dropdown azioni */}
+      <Menu
+        anchorEl={actionMenuAnchor}
+        open={Boolean(actionMenuAnchor)}
+        onClose={handleActionMenuClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <MenuItem
+          onClick={() => selectedUser && handleViewUserDetails(selectedUser)}
+        >
+          <ListItemIcon>
+            <Person fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Visualizza Dettagli</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => selectedUser && handleEditUser(selectedUser)}>
+          <ListItemIcon>
+            <Edit fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Modifica Utente</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={() => selectedUser && handleChangePassword(selectedUser)}
+        >
+          <ListItemIcon>
+            <Lock fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Cambia Password</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={() => selectedUser && handleDeleteUser(selectedUser)}
+          disabled={selectedUser?.id === currentUser?.id}
+          sx={{ color: "error.main" }}
+        >
+          <ListItemIcon>
+            <Delete fontSize="small" color="error" />
+          </ListItemIcon>
+          <ListItemText>Elimina Utente</ListItemText>
+        </MenuItem>
+      </Menu>
+
       {/* Dialog per modifica utente */}
       <Dialog
         open={editDialogOpen}
         onClose={() => setEditDialogOpen(false)}
-        maxWidth="sm"
+        maxWidth="md"
         fullWidth
       >
         <DialogTitle>Modifica Utente</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2 }}>
+            {/* Informazioni Base */}
+            <Typography variant="h6" sx={{ mb: 2, color: "#667eea" }}>
+              Informazioni Base
+            </Typography>
+
+            {/* Alert per utenti esterni */}
+            {editingUser?.auth_provider &&
+              editingUser.auth_provider !== "local" && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  <Typography variant="body2">
+                    <strong>Utente Sincronizzato</strong>
+                    <br />
+                    Username, email, nome e cognome sono sincronizzati
+                    automaticamente da{" "}
+                    {editingUser.auth_provider === "ldap"
+                      ? "Active Directory"
+                      : "Google"}{" "}
+                    e non possono essere modificati.
+                  </Typography>
+                </Alert>
+              )}
+
             <TextField
               fullWidth
               label="Username"
@@ -399,8 +523,19 @@ const UserManagement: React.FC = () => {
               onChange={(e) =>
                 setEditForm((prev) => ({ ...prev, username: e.target.value }))
               }
+              disabled={
+                editingUser?.auth_provider &&
+                editingUser.auth_provider !== "local"
+              }
               sx={{ mb: 2 }}
+              helperText={
+                editingUser?.auth_provider &&
+                editingUser.auth_provider !== "local"
+                  ? "Username sincronizzato dal provider esterno"
+                  : ""
+              }
             />
+
             <TextField
               fullWidth
               label="Email"
@@ -409,40 +544,194 @@ const UserManagement: React.FC = () => {
               onChange={(e) =>
                 setEditForm((prev) => ({ ...prev, email: e.target.value }))
               }
+              disabled={
+                editingUser?.auth_provider &&
+                editingUser.auth_provider !== "local"
+              }
+              sx={{ mb: 2 }}
+              helperText={
+                editingUser?.auth_provider &&
+                editingUser.auth_provider !== "local"
+                  ? "Email sincronizzata dal provider esterno"
+                  : ""
+              }
+            />
+
+            {/* Informazioni Profilo */}
+            <Typography variant="h6" sx={{ mb: 2, mt: 3, color: "#667eea" }}>
+              Profilo
+            </Typography>
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 2,
+                mb: 2,
+              }}
+            >
+              <TextField
+                fullWidth
+                label="Nome"
+                value={editForm.first_name}
+                onChange={(e) =>
+                  setEditForm((prev) => ({
+                    ...prev,
+                    first_name: e.target.value,
+                  }))
+                }
+                disabled={
+                  editingUser?.auth_provider &&
+                  editingUser.auth_provider !== "local"
+                }
+                helperText={
+                  editingUser?.auth_provider &&
+                  editingUser.auth_provider !== "local"
+                    ? "Nome sincronizzato dal provider esterno"
+                    : ""
+                }
+              />
+              <TextField
+                fullWidth
+                label="Cognome"
+                value={editForm.last_name}
+                onChange={(e) =>
+                  setEditForm((prev) => ({
+                    ...prev,
+                    last_name: e.target.value,
+                  }))
+                }
+                disabled={
+                  editingUser?.auth_provider &&
+                  editingUser.auth_provider !== "local"
+                }
+                helperText={
+                  editingUser?.auth_provider &&
+                  editingUser.auth_provider !== "local"
+                    ? "Cognome sincronizzato dal provider esterno"
+                    : ""
+                }
+              />
+            </Box>
+
+            <TextField
+              fullWidth
+              label="Telefono"
+              value={editForm.phone}
+              onChange={(e) =>
+                setEditForm((prev) => ({ ...prev, phone: e.target.value }))
+              }
               sx={{ mb: 2 }}
             />
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel>Ruolo</InputLabel>
-              <Select
-                value={editForm.role}
+
+            <TextField
+              fullWidth
+              label="Avatar URL"
+              value={editForm.avatar_url}
+              onChange={(e) =>
+                setEditForm((prev) => ({ ...prev, avatar_url: e.target.value }))
+              }
+              sx={{ mb: 2 }}
+            />
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 2,
+                mb: 2,
+              }}
+            >
+              <TextField
+                fullWidth
+                label="Fuso Orario"
+                value={editForm.timezone}
                 onChange={(e) =>
-                  setEditForm((prev) => ({
-                    ...prev,
-                    role: e.target.value as any,
-                  }))
+                  setEditForm((prev) => ({ ...prev, timezone: e.target.value }))
                 }
-                label="Ruolo"
-              >
-                <MenuItem value="user">User</MenuItem>
-                <MenuItem value="admin">Admin</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel>Stato</InputLabel>
-              <Select
-                value={editForm.is_active ? "true" : "false"}
-                onChange={(e) =>
-                  setEditForm((prev) => ({
-                    ...prev,
-                    is_active: e.target.value === "true",
-                  }))
-                }
-                label="Stato"
-              >
-                <MenuItem value="true">Attivo</MenuItem>
-                <MenuItem value="false">Disattivato</MenuItem>
-              </Select>
-            </FormControl>
+              />
+              <FormControl fullWidth>
+                <InputLabel>Lingua</InputLabel>
+                <Select
+                  value={editForm.locale}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({ ...prev, locale: e.target.value }))
+                  }
+                  label="Lingua"
+                >
+                  <MenuItem value="it">Italiano</MenuItem>
+                  <MenuItem value="en">English</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+
+            <TextField
+              fullWidth
+              label="Biografia"
+              multiline
+              rows={3}
+              value={editForm.bio}
+              onChange={(e) =>
+                setEditForm((prev) => ({ ...prev, bio: e.target.value }))
+              }
+              sx={{ mb: 2 }}
+            />
+
+            {/* Informazioni Sistema */}
+            <Typography variant="h6" sx={{ mb: 2, mt: 3, color: "#667eea" }}>
+              Sistema
+            </Typography>
+
+            <Box
+              sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}
+            >
+              <FormControl fullWidth>
+                <InputLabel>Ruolo</InputLabel>
+                <Select
+                  value={editForm.role}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      role: e.target.value as any,
+                    }))
+                  }
+                  label="Ruolo"
+                >
+                  <MenuItem value="user">User</MenuItem>
+                  <MenuItem value="admin">Admin</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel>Stato</InputLabel>
+                <Select
+                  value={editForm.is_active ? "true" : "false"}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      is_active: e.target.value === "true",
+                    }))
+                  }
+                  label="Stato"
+                >
+                  <MenuItem value="true">Attivo</MenuItem>
+                  <MenuItem value="false">Disattivato</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+
+            {/* Avviso Provider */}
+            {editingUser?.auth_provider &&
+              editingUser.auth_provider !== "local" && (
+                <Alert severity="info" sx={{ mt: 2 }}>
+                  <Typography variant="body2">
+                    <strong>
+                      Provider {editingUser.auth_provider.toUpperCase()}:
+                    </strong>
+                    Nome, cognome ed email sono sincronizzati automaticamente e
+                    non possono essere modificati.
+                  </Typography>
+                </Alert>
+              )}
           </Box>
         </DialogContent>
         <DialogActions>
@@ -483,12 +772,28 @@ const UserManagement: React.FC = () => {
       <Dialog
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
-        maxWidth="sm"
+        maxWidth="md"
         fullWidth
       >
-        <DialogTitle>Crea Nuovo Utente</DialogTitle>
+        <DialogTitle>Crea Nuovo Utente Locale</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 1 }}>
+            {/* Informazioni Base */}
+            <Typography variant="h6" sx={{ mb: 2, color: "#667eea" }}>
+              Informazioni Base
+            </Typography>
+
+            {/* Alert informativo per creazione utenti locali */}
+            <Alert severity="info" sx={{ mb: 2 }}>
+              <Typography variant="body2">
+                <strong>Creazione Utente Locale</strong>
+                <br />
+                Gli utenti creati dall'app sono sempre <strong>locali</strong> e
+                gestiti internamente. Gli utenti esterni (LDAP/Google) vengono
+                creati automaticamente al primo login.
+              </Typography>
+            </Alert>
+
             <TextField
               fullWidth
               label="Username"
@@ -496,7 +801,7 @@ const UserManagement: React.FC = () => {
               onChange={(e) =>
                 setCreateForm({ ...createForm, username: e.target.value })
               }
-              margin="normal"
+              sx={{ mb: 2 }}
               required
             />
             <TextField
@@ -507,7 +812,7 @@ const UserManagement: React.FC = () => {
               onChange={(e) =>
                 setCreateForm({ ...createForm, email: e.target.value })
               }
-              margin="normal"
+              sx={{ mb: 2 }}
               required
             />
             <TextField
@@ -518,7 +823,7 @@ const UserManagement: React.FC = () => {
               onChange={(e) =>
                 setCreateForm({ ...createForm, password: e.target.value })
               }
-              margin="normal"
+              sx={{ mb: 2 }}
               required
             />
             <TextField
@@ -532,10 +837,110 @@ const UserManagement: React.FC = () => {
                   confirmPassword: e.target.value,
                 })
               }
-              margin="normal"
+              sx={{ mb: 2 }}
               required
             />
-            <FormControl fullWidth margin="normal">
+
+            {/* Informazioni Profilo */}
+            <Typography variant="h6" sx={{ mb: 2, mt: 3, color: "#667eea" }}>
+              Profilo
+            </Typography>
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 2,
+                mb: 2,
+              }}
+            >
+              <TextField
+                fullWidth
+                label="Nome"
+                value={createForm.first_name}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, first_name: e.target.value })
+                }
+              />
+              <TextField
+                fullWidth
+                label="Cognome"
+                value={createForm.last_name}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, last_name: e.target.value })
+                }
+              />
+            </Box>
+
+            <TextField
+              fullWidth
+              label="Telefono"
+              value={createForm.phone}
+              onChange={(e) =>
+                setCreateForm({ ...createForm, phone: e.target.value })
+              }
+              sx={{ mb: 2 }}
+            />
+
+            <TextField
+              fullWidth
+              label="Avatar URL"
+              value={createForm.avatar_url}
+              onChange={(e) =>
+                setCreateForm({ ...createForm, avatar_url: e.target.value })
+              }
+              sx={{ mb: 2 }}
+            />
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 2,
+                mb: 2,
+              }}
+            >
+              <TextField
+                fullWidth
+                label="Fuso Orario"
+                value={createForm.timezone}
+                onChange={(e) =>
+                  setCreateForm({ ...createForm, timezone: e.target.value })
+                }
+              />
+              <FormControl fullWidth>
+                <InputLabel>Lingua</InputLabel>
+                <Select
+                  value={createForm.locale}
+                  onChange={(e) =>
+                    setCreateForm({ ...createForm, locale: e.target.value })
+                  }
+                  label="Lingua"
+                >
+                  <MenuItem value="it">Italiano</MenuItem>
+                  <MenuItem value="en">English</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+
+            <TextField
+              fullWidth
+              label="Biografia"
+              multiline
+              rows={3}
+              value={createForm.bio}
+              onChange={(e) =>
+                setCreateForm({ ...createForm, bio: e.target.value })
+              }
+              sx={{ mb: 2 }}
+            />
+
+            {/* Informazioni Sistema */}
+            <Typography variant="h6" sx={{ mb: 2, mt: 3, color: "#667eea" }}>
+              Sistema
+            </Typography>
+
+            <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel>Ruolo</InputLabel>
               <Select
                 value={createForm.role}
@@ -558,11 +963,11 @@ const UserManagement: React.FC = () => {
             Annulla
           </CustomButton>
           <CustomButton
-            onClick={handleSaveNewUser}
+            onClick={handleCreateUserSubmit}
             variant="primary"
             disabled={loading}
           >
-            {loading ? "Creazione..." : "Crea Utente"}
+            {loading ? "Creazione..." : "Crea Utente Locale"}
           </CustomButton>
         </DialogActions>
       </Dialog>
@@ -604,6 +1009,15 @@ const UserManagement: React.FC = () => {
           </CustomButton>
         </DialogActions>
       </Dialog>
+
+      {/* Modal Dettagli Utente */}
+      <UserDetailModal
+        open={detailModalOpen}
+        onClose={handleCloseDetailModal}
+        user={selectedUserForDetail}
+        onEdit={handleEditUser}
+        currentUserId={currentUser?.id}
+      />
     </div>
   );
 };

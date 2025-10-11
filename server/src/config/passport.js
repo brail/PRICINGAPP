@@ -147,6 +147,7 @@ if (process.env.ENABLE_LDAP_AUTH === "true") {
               ldapGroups: ldapUserData.groups,
               displayName: ldapUserData.displayName,
               givenName: ldapUserData.givenName,
+              sn: ldapUserData.surname, // Usa 'sn' per compatibilità con il modello User
               surname: ldapUserData.surname,
               userPrincipalName: ldapUserData.userPrincipalName,
               lastLdapSync: new Date().toISOString(),

@@ -39,11 +39,13 @@ import Calculator from "../Calculator";
 import Parameters from "../Parameters";
 import UserDashboard from "./UserDashboard";
 import UserManagement from "./UserManagement";
+import { ProfilePage } from "../profile";
+import EmailVerification from "./EmailVerification";
 import Logo from "../Logo";
 import HelpPanel from "../HelpPanel";
 
 const AuthenticatedApp: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUserProfile } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -53,6 +55,13 @@ const AuthenticatedApp: React.FC = () => {
     null
   );
   const [helpPanelOpen, setHelpPanelOpen] = useState(false);
+
+  // Aggiorna il profilo utente quando il componente si carica
+  React.useEffect(() => {
+    if (user && (!user.first_name || !user.last_name)) {
+      refreshUserProfile();
+    }
+  }, [user, refreshUserProfile]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -78,7 +87,7 @@ const AuthenticatedApp: React.FC = () => {
   };
 
   const handleProfile = () => {
-    navigate("/dashboard");
+    navigate("/profile");
     handleMenuClose();
     handleMobileMenuClose();
   };
@@ -218,10 +227,12 @@ const AuthenticatedApp: React.FC = () => {
         <MenuItem disabled>
           <Box>
             <Typography variant="body2" color="text.secondary">
-              {user?.username}
+              {user?.first_name && user?.last_name
+                ? `${user.first_name} ${user.last_name}`
+                : user?.username}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {user?.role?.toUpperCase()}
+              @{user?.username} • {user?.role?.toUpperCase()}
             </Typography>
           </Box>
         </MenuItem>
@@ -273,6 +284,16 @@ const AuthenticatedApp: React.FC = () => {
           Parametri
         </MenuItem>
 
+        <MenuItem
+          component={Link}
+          to="/profile"
+          onClick={handleMobileMenuClose}
+          selected={location.pathname === "/profile"}
+        >
+          <AccountCircle sx={{ mr: 1 }} />
+          Profilo
+        </MenuItem>
+
         {user?.role === "admin" && (
           <MenuItem
             component={Link}
@@ -297,6 +318,8 @@ const AuthenticatedApp: React.FC = () => {
           <Route path="/" element={<Calculator />} />
           <Route path="/parameters" element={<Parameters />} />
           <Route path="/dashboard" element={<UserDashboard />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/verify-email" element={<EmailVerification />} />
           {user?.role === "admin" && (
             <Route path="/users" element={<UserManagement />} />
           )}

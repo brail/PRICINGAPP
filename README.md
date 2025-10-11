@@ -74,6 +74,18 @@ npm run dev
 - Backend: `http://localhost:5001`
 - Health Check: `http://localhost:5001/api/health`
 
+### **🔐 Credenziali di Default**
+
+Al primo avvio, viene creato automaticamente un utente amministratore:
+
+- **Username**: `admin`
+- **Password**: `PricingApp2025!!`
+- **Email**: `admin@pricing.com`
+- **Nome**: `Admin Default`
+- **Ruolo**: `admin`
+
+> ⚠️ **Importante**: Cambia la password di default dopo il primo accesso per motivi di sicurezza.
+
 ### **Deploy Docker**
 
 ```bash

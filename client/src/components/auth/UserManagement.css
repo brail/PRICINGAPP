@@ -82,6 +82,35 @@
   align-items: center;
 }
 
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.user-details .username {
+  font-size: 0.8rem;
+  color: #666;
+  font-style: italic;
+}
+
+.user-details .email {
+  font-size: 0.8rem;
+  color: #888;
+}
+
 .action-btn {
   padding: 6px;
   border: none;
@@ -160,6 +189,21 @@
 .user-chip.inactive {
   background: #f8d7da;
   color: #721c24;
+}
+
+.user-chip.provider-local {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.user-chip.provider-ldap {
+  background: #d4edda;
+  color: #155724;
+}
+
+.user-chip.provider-google {
+  background: #fff3cd;
+  color: #856404;
 }
 
 .loading-container {

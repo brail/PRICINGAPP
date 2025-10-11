@@ -7,16 +7,19 @@
 ### Major Features
 
 - **Multi-Provider Authentication System**
+
   - Support for Local Admin authentication
   - Active Directory/LDAP integration with custom service
   - Google OAuth2 ready (configuration required)
 
 - **Just-in-Time (JIT) User Provisioning**
+
   - Automatic user creation from external providers
   - Email-based account linking
   - Provider metadata synchronization
 
 - **Enhanced Security**
+
   - AES-256-CBC encryption for LDAP credentials
   - Service account pattern for LDAP bind
   - JWT-based session management
@@ -33,11 +36,13 @@
 ### Authentication Model Changes
 
 1. **Local Authentication Restricted**
+
    - Local username/password login now only available to administrators
    - Existing non-admin users must use external providers
    - Emergency admin access preserved
 
 2. **Database Schema Migration Required**
+
    - New columns: `auth_provider`, `provider_user_id`, `provider_metadata`
    - Password column now nullable
    - Run migrations 003 and 004 before starting
@@ -99,6 +104,7 @@ LDAP_BIND_PASSWORD_ENCRYPTED={"encrypted":"...","iv":"..."}
 ```
 
 **For LDAP credentials encryption:**
+
 ```bash
 cd server
 node scripts/encrypt-ldap-credentials.js
@@ -143,11 +149,13 @@ curl -X POST http://localhost:5001/auth/login \
 ### Step 6: Configure External Providers (Optional)
 
 #### For Google OAuth:
+
 1. Follow `docs/GOOGLE_OAUTH_SETUP.md`
 2. Update environment variables
 3. Set `ENABLE_GOOGLE_AUTH=true`
 
 #### For LDAP:
+
 1. Review `docs/LDAP_SECURITY.md`
 2. Create service account in AD
 3. Encrypt credentials
@@ -209,7 +217,7 @@ Thanks to all contributors and testers who helped make this release possible!
 ---
 
 **For support or questions:**
+
 - Create an issue on GitHub
 - Check documentation in `docs/` folder
 - Review existing closed issues for common problems
-

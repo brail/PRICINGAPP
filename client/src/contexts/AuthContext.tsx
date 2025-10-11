@@ -24,6 +24,8 @@ export interface User {
   auth_provider?: "local" | "ldap" | "google";
   provider_user_id?: string;
   provider_metadata?: Record<string, any>;
+  first_name?: string;
+  last_name?: string;
 }
 
 export interface AuthProvider {
@@ -60,6 +62,7 @@ export interface AuthContextType extends AuthState {
   updateUser: (userData: Partial<User>) => Promise<void>;
   clearError: () => void;
   getAvailableProviders: () => Promise<AuthProvider[]>;
+  refreshUserProfile: () => Promise<User | null>;
 }
 
 // Context
@@ -388,6 +391,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Funzione per aggiornare i dati dell'utente dal profilo
+  const refreshUserProfile = async () => {
+    if (!authState.isAuthenticated) return;
+
+    try {
+      const response = await pricingApi.get("/profile");
+      const updatedUser = response.data.profile;
+
+      // Aggiorna lo stato locale
+      setAuthState((prev) => ({
+        ...prev,
+        user: { ...prev.user, ...updatedUser },
+      }));
+
+      // Aggiorna il localStorage
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ ...authState.user, ...updatedUser })
+      );
+
+      return updatedUser;
+    } catch (error) {
+      console.error("Errore nell'aggiornamento del profilo:", error);
+      return null;
+    }
+  };
+
   const value: AuthContextType = {
     ...authState,
     login,
@@ -400,6 +430,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     updateUser,
     clearError,
     getAvailableProviders,
+    refreshUserProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,0 +1,159 @@
+/* EmailVerification.css */
+
+.email-verification-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 20px;
+}
+
+.verification-card {
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  padding: 40px 30px;
+}
+
+.verification-card.success {
+  border-left: 5px solid #27ae60;
+  background: linear-gradient(135deg, #f8fff8 0%, #e8f8f5 100%);
+}
+
+.verification-card.error {
+  border-left: 5px solid #e74c3c;
+  background: linear-gradient(135deg, #fff8f8 0%, #fdeaea 100%);
+}
+
+.verification-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.verification-content h2 {
+  margin: 0;
+  font-size: 2rem;
+  color: #2c3e50;
+}
+
+.verification-content p {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+.success-icon,
+.error-icon {
+  font-size: 4rem;
+  margin-bottom: 10px;
+}
+
+.error-message {
+  color: #e74c3c !important;
+  font-weight: 500;
+  background: rgba(231, 76, 60, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+.redirect-info {
+  color: #7f8c8d !important;
+  font-style: italic;
+  font-size: 0.95rem !important;
+}
+
+.error-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+  min-width: 120px;
+}
+
+.btn-primary {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2980b9;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: #95a5a6;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #7f8c8d;
+  transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .email-verification-container {
+    padding: 15px;
+  }
+
+  .verification-card {
+    padding: 30px 20px;
+  }
+
+  .verification-content h2 {
+    font-size: 1.6rem;
+  }
+
+  .verification-content p {
+    font-size: 1rem;
+  }
+
+  .success-icon,
+  .error-icon {
+    font-size: 3rem;
+  }
+
+  .error-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .verification-content h2 {
+    font-size: 1.4rem;
+  }
+
+  .verification-content p {
+    font-size: 0.95rem;
+  }
+
+  .success-icon,
+  .error-icon {
+    font-size: 2.5rem;
+  }
+}
