@@ -90,24 +90,50 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Carica lo stato di autenticazione dal localStorage all'avvio
   useEffect(() => {
     const loadAuthState = async () => {
+      // PRIMA COSA: controlla se ci sono token, se no esci immediatamente
+      const token = localStorage.getItem("token");
+      const userStr = localStorage.getItem("user");
+
+      // Se non ci sono token, imposta subito isLoading: false e esci IMMEDIATAMENTE
+      if (!token || !userStr) {
+        console.log(
+          "[AuthContext] Nessun token trovato, mostra login immediatamente"
+        );
+        setAuthState((prev) => ({ ...prev, isLoading: false }));
+        return;
+      }
+
+      // Solo se ci sono token, procedi con la verifica
       let timeoutId: NodeJS.Timeout | undefined;
 
-      try {
-        const token = localStorage.getItem("token");
-        const refreshToken = localStorage.getItem("refreshToken");
-        const userStr = localStorage.getItem("user");
+      // Fallback assoluto: dopo 8 secondi, forza isLoading: false
+      const absoluteTimeout = setTimeout(() => {
+        console.warn(
+          "[AuthContext] Timeout assoluto raggiunto, forza isLoading: false"
+        );
+        setAuthState((prev) => {
+          if (prev.isLoading) {
+            return { ...prev, isLoading: false };
+          }
+          return prev;
+        });
+      }, 8000);
 
-        // Se non ci sono token, imposta subito isLoading: false senza timeout
-        if (!token || !userStr) {
-          setAuthState((prev) => ({ ...prev, isLoading: false }));
-          return;
-        }
+      try {
+        const refreshToken = localStorage.getItem("refreshToken");
+
+        console.log("[AuthContext] Token trovato, verifica validità...", {
+          hasToken: !!token,
+          hasRefreshToken: !!refreshToken,
+          hasUser: !!userStr,
+        });
 
         // Timeout di sicurezza solo se ci sono token da verificare
-        const SAFETY_TIMEOUT = 15000; // 15 secondi
+        const SAFETY_TIMEOUT = 10000; // Ridotto a 10 secondi
         timeoutId = setTimeout(() => {
+          clearTimeout(absoluteTimeout);
           console.warn(
-            "Timeout durante il caricamento dello stato di autenticazione. Pulizia dati..."
+            "[AuthContext] Timeout durante il caricamento dello stato di autenticazione. Pulizia dati..."
           );
           localStorage.removeItem("token");
           localStorage.removeItem("refreshToken");
@@ -117,14 +143,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         // Verifica se il token è ancora valido con timeout esplicito
         try {
+          console.log("[AuthContext] Verifica token...");
           // Crea una promise con timeout per evitare attese infinite
           const checkTokenPromise = pricingApi.get("/auth/me", {
             headers: { Authorization: `Bearer ${token}` },
-            timeout: 8000, // 8 secondi per la verifica del token
+            timeout: 5000, // Ridotto a 5 secondi per risposta più rapida
           });
 
           const response = await checkTokenPromise;
-          clearTimeout(timeoutId);
+          if (timeoutId) clearTimeout(timeoutId);
+          clearTimeout(absoluteTimeout);
+          console.log("[AuthContext] Token valido, autenticazione riuscita");
 
           setAuthState({
             user: response.data.user,
@@ -135,7 +164,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             error: null,
           });
         } catch (error: any) {
-          clearTimeout(timeoutId);
+          if (timeoutId) clearTimeout(timeoutId);
+          clearTimeout(absoluteTimeout);
+          console.log(
+            "[AuthContext] Errore verifica token:",
+            error.message || error
+          );
 
           // Se è un errore di timeout o di rete, pulisci immediatamente
           if (
@@ -179,6 +213,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               );
 
               const refreshResponse = await refreshPromise;
+              clearTimeout(absoluteTimeout);
 
               const newToken = refreshResponse.data.accessToken;
               localStorage.setItem("token", newToken);
@@ -193,6 +228,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               });
             } catch (refreshError: any) {
               // Refresh fallito o timeout, logout
+              clearTimeout(absoluteTimeout);
               console.warn("Refresh token fallito o scaduto. Pulizia dati...");
               localStorage.removeItem("token");
               localStorage.removeItem("refreshToken");
@@ -201,6 +237,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             }
           } else {
             // Nessun refresh token, logout
+            clearTimeout(absoluteTimeout);
             localStorage.removeItem("token");
             localStorage.removeItem("user");
             setAuthState((prev) => ({ ...prev, isLoading: false }));
@@ -208,10 +245,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       } catch (error) {
         // timeoutId potrebbe non essere definito se l'errore avviene prima della sua definizione
-        if (typeof timeoutId !== "undefined") {
+        if (timeoutId) {
           clearTimeout(timeoutId);
         }
-        console.error("Errore nel caricamento stato autenticazione:", error);
+        clearTimeout(absoluteTimeout);
+        console.error(
+          "[AuthContext] Errore generico nel caricamento stato autenticazione:",
+          error
+        );
         // In caso di errore generico, pulisci i dati per sicurezza
         localStorage.removeItem("token");
         localStorage.removeItem("refreshToken");
