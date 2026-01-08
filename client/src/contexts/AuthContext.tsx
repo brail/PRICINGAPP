@@ -90,17 +90,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Carica lo stato di autenticazione dal localStorage all'avvio
   useEffect(() => {
     const loadAuthState = async () => {
+      // Timeout di sicurezza per evitare che l'app rimanga bloccata
+      const SAFETY_TIMEOUT = 15000; // 15 secondi
+      const timeoutId = setTimeout(() => {
+        console.warn(
+          "Timeout durante il caricamento dello stato di autenticazione. Pulizia dati..."
+        );
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        setAuthState((prev) => ({ ...prev, isLoading: false }));
+      }, SAFETY_TIMEOUT);
+
       try {
         const token = localStorage.getItem("token");
         const refreshToken = localStorage.getItem("refreshToken");
         const userStr = localStorage.getItem("user");
 
         if (token && userStr) {
-          // Verifica se il token è ancora valido
+          // Verifica se il token è ancora valido con timeout esplicito
           try {
-            const response = await pricingApi.get("/auth/me", {
+            // Crea una promise con timeout per evitare attese infinite
+            const checkTokenPromise = pricingApi.get("/auth/me", {
               headers: { Authorization: `Bearer ${token}` },
+              timeout: 8000, // 8 secondi per la verifica del token
             });
+
+            const response = await checkTokenPromise;
+            clearTimeout(timeoutId);
 
             setAuthState({
               user: response.data.user,
@@ -110,13 +127,51 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               isLoading: false,
               error: null,
             });
-          } catch (error) {
-            // Token non valido, prova con refresh token
-            if (refreshToken) {
+          } catch (error: any) {
+            clearTimeout(timeoutId);
+
+            // Se è un errore di timeout o di rete, pulisci immediatamente
+            if (
+              error.code === "ECONNABORTED" ||
+              error.message?.includes("timeout") ||
+              !error.response
+            ) {
+              console.warn(
+                "Timeout o errore di rete durante verifica token. Pulizia dati..."
+              );
+              localStorage.removeItem("token");
+              localStorage.removeItem("refreshToken");
+              localStorage.removeItem("user");
+              setAuthState((prev) => ({ ...prev, isLoading: false }));
+              return;
+            }
+
+            // Se il token è scaduto (401 con codice TOKEN_EXPIRED), prova subito il refresh
+            const isTokenExpired =
+              error.response?.status === 401 &&
+              (error.response?.data?.code === "TOKEN_EXPIRED" ||
+                error.response?.data?.error?.includes("scaduto"));
+
+            // Token non valido o scaduto, prova con refresh token
+            if (
+              refreshToken &&
+              (isTokenExpired ||
+                error.response?.status === 401 ||
+                error.response?.status === 403)
+            ) {
               try {
-                const refreshResponse = await pricingApi.post("/auth/refresh", {
-                  refreshToken,
-                });
+                // Timeout anche per il refresh
+                const refreshPromise = pricingApi.post(
+                  "/auth/refresh",
+                  {
+                    refreshToken,
+                  },
+                  {
+                    timeout: 8000,
+                  }
+                );
+
+                const refreshResponse = await refreshPromise;
 
                 const newToken = refreshResponse.data.accessToken;
                 localStorage.setItem("token", newToken);
@@ -129,8 +184,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                   isLoading: false,
                   error: null,
                 });
-              } catch (refreshError) {
-                // Refresh fallito, logout
+              } catch (refreshError: any) {
+                // Refresh fallito o timeout, logout
+                console.warn(
+                  "Refresh token fallito o scaduto. Pulizia dati..."
+                );
                 localStorage.removeItem("token");
                 localStorage.removeItem("refreshToken");
                 localStorage.removeItem("user");
@@ -144,10 +202,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             }
           }
         } else {
+          clearTimeout(timeoutId);
           setAuthState((prev) => ({ ...prev, isLoading: false }));
         }
       } catch (error) {
+        clearTimeout(timeoutId);
         console.error("Errore nel caricamento stato autenticazione:", error);
+        // In caso di errore generico, pulisci i dati per sicurezza
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
         setAuthState((prev) => ({ ...prev, isLoading: false }));
       }
     };

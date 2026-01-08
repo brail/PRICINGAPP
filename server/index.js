@@ -86,7 +86,14 @@ app.use(
     secret: process.env.JWT_SECRET || "pricing-calculator-secret-key-2024",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }, // In production, set to true se usi HTTPS
+    cookie: { 
+      secure: false, // In production, set to true se usi HTTPS
+      maxAge: 24 * 60 * 60 * 1000, // 24 ore - evita cookie scaduti che causano blocchi
+      httpOnly: true, // Previene accesso JavaScript ai cookie
+      sameSite: 'lax' // Protezione CSRF
+    },
+    // Pulisci automaticamente le sessioni scadute
+    rolling: true, // Rinnova il cookie ad ogni richiesta
   })
 );
 

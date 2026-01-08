@@ -179,14 +179,29 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Gestione timeout e errori di rete
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout') || !error.response) {
+      // Se è la richiesta iniziale di verifica token, non fare retry
+      if (originalRequest.url?.includes('/auth/me') && !originalRequest._retry) {
+        console.warn("Timeout durante verifica token. Logout automatico...");
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        return Promise.reject(handleApiError(error));
+      }
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
         const refreshToken = localStorage.getItem("refreshToken");
         if (refreshToken) {
+          // Timeout esplicito per il refresh
           const response = await api.post("/auth/refresh", {
             refreshToken,
+          }, {
+            timeout: 8000,
           });
 
           const newToken = response.data.accessToken;
@@ -196,12 +211,16 @@ api.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
           return api(originalRequest);
         }
-      } catch (refreshError) {
-        // Refresh fallito, logout
+      } catch (refreshError: any) {
+        // Refresh fallito o timeout, logout
+        console.warn("Refresh token fallito. Logout automatico...");
         localStorage.removeItem("token");
         localStorage.removeItem("refreshToken");
         localStorage.removeItem("user");
-        window.location.href = "/login";
+        // Evita redirect infiniti se siamo già sulla pagina di login
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = "/login";
+        }
       }
     }
 

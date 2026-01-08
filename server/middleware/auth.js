@@ -22,7 +22,17 @@ const authenticateToken = (req, res, next) => {
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) {
-      return res.status(403).json({ error: "Token non valido" });
+      // Distingui tra token scaduto e token non valido
+      if (err.name === 'TokenExpiredError') {
+        return res.status(401).json({ 
+          error: "Token scaduto",
+          code: "TOKEN_EXPIRED"
+        });
+      }
+      return res.status(403).json({ 
+        error: "Token non valido",
+        code: "TOKEN_INVALID"
+      });
     }
     req.user = user;
     next();
